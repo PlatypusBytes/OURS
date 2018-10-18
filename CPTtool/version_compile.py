@@ -48,10 +48,10 @@ def read_revision():
 
 
 def compile_code():
-    os.system("RMDIR /S /Q .\dist")
-    os.system("RMDIR /S /Q .\build")
-    os.system("..\Python37\Scripts\pyinstaller.exe --onefile main.spec")
-    os.remove("./version.txt")
+    os.system(r"RMDIR /S /Q .\dist")
+    os.system(r"RMDIR /S /Q .\build")
+    os.system(r"..\Python37\Scripts\pyinstaller.exe --onefile main.spec")
+    os.remove(r"./version.txt")
 
 
 if __name__ == '__main__':

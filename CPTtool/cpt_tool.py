@@ -24,7 +24,7 @@ def read_key(file_name):
     return key
 
 
-def read_cpt(folder_path, key_cpt, output_folder, gamma_max=22, pwp_level=0):
+def read_cpt(folder_path, key_cpt, output_folder, D_min, gamma_max=22, pwp_level=0):
     """
     Read CPT
 
@@ -35,6 +35,7 @@ def read_cpt(folder_path, key_cpt, output_folder, gamma_max=22, pwp_level=0):
     :param folder_path: Folder where the cpt files are located
     :param key_cpt: File with the key for the CPT interpretation
     :param output_folder: Folder to save the files
+    :param D_min: Minimum layers thickness
     :param gamma_max: (optional) maximum value specific weight soil
     :param pwp_level: (optional) pore water level in NAP
 
@@ -50,7 +51,7 @@ def read_cpt(folder_path, key_cpt, output_folder, gamma_max=22, pwp_level=0):
     jsn = {}
     i = 1
     for f in cpts:
-        print("analysis started: " + f)
+        # print("analysis started: " + f)
         test1 = read_gef.CPT()
         test1.read_gef(os.path.join(folder_path, f), key_cpt)
         test1.lithology_calc(gamma_max, pwp_level)
@@ -59,7 +60,7 @@ def read_cpt(folder_path, key_cpt, output_folder, gamma_max=22, pwp_level=0):
         test1.qc1n_calc()
         test1.IC_calc()
         test1.vs_calc()
-        test1.add_json(jsn, i)
+        test1.add_json(D_min, jsn, i)
         # test1.write_csv(output_folder)
         # test1.plot_cpt(output_folder)
         # test1.plot_lithology(output_folder)
@@ -75,7 +76,8 @@ if __name__ == "__main__":
     parser.add_argument('-k', '--key', help='location of the key file', required=True)
     parser.add_argument('-c', '--cpt', help='location of the cpt folder', required=True)
     parser.add_argument('-o', '--output', help='location of the output folder', required=True)
+    parser.add_argument('-t', '--thickness', help='minimum thickness', required=True)
     args = parser.parse_args()
 
     key = read_key(args.key)
-    read_cpt(args.cpt, key, args.output)
+    read_cpt(args.cpt, key, args.output, args.thickness)

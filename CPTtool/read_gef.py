@@ -474,6 +474,12 @@ class CPT:
         """
         import os
         import json
+
+        # if output does no exist -> create
+        if not os.path.isdir(output_f):
+            os.makedirs(output_f)
+
+        # write file
         with open(os.path.join(output_f, "results.json"), "w") as fo:
             json.dump(jsn, fo, indent=4)
         return
