@@ -413,9 +413,11 @@ class CPT:
         .. rubric:: References
         .. [3] Darendeli, M.B. *Development of a New Family of Normalized Modulus Reduction and material damping curves.* PhD thesis, 2001, pg: 221.
         """
+        import numpy as np
 
         # ToDo - define damping
-
+        # assign size to damping
+        self.damping = np.zeros(len(self.lithology))
         return
 
     def poisson_calc(self):
@@ -435,9 +437,9 @@ class CPT:
         for i, lit in enumerate(self.lithology):
             # if soft layer
             if lit == "1" or lit == "2" or lit == "3":
-                self.poisson[i] == 0.5
+                self.poisson[i] = 0.5
             else:
-                self.poisson[i] == 0.2
+                self.poisson[i] = 0.2
         return
 
     def qt_calc(self, litho):
@@ -581,7 +583,7 @@ class CPT:
             json.dump(jsn, fo, indent=4)
         return
 
-    def plot_cpt(self, output_f, nb_plots=4):
+    def plot_cpt(self, output_f, nb_plots=6):
         """
         Plot CPT values.
 
@@ -600,10 +602,10 @@ class CPT:
             os.makedirs(output_f)
 
         # data
-        x_data = [self.tip, self.friction_nbr, self.IC, self.G0]
+        x_data = [self.tip, self.friction_nbr, self.rho, self.G0, self.poisson, self.damping]
         y_data = self.NAP
-        l_name = ["Tip resistance", "Friction number", "IC", "Shear modulus"]
-        x_label = ["Tip resistance [kPa]", "Friction number [-]", "IC [-]", "Shear modulus [kPa]"]
+        l_name = ["Tip resistance", "Friction number", "Density", "Shear modulus", "Poisson ratio", "Damping"]
+        x_label = ["Tip resistance [kPa]", "Friction number [-]", r"Density [kg/m$^{3}$]", "Shear modulus [kPa]", "Poisson ratio [-]", "Damping [%]"]
         y_label = "Depth NAP [m]"
 
         # set the color list
@@ -615,7 +617,6 @@ class CPT:
         # plot for each y_value
         for i in range(nb_plots):
             plt.subplot(1, nb_plots, i + 1)
-
             plt.plot(x_data[i], y_data, label=l_name[i])
 
             # plt.title(title)
