@@ -1,7 +1,16 @@
 class Robertson:
     r"""
     Robertson soil classification.
+
+    Classification of soils according to Robertson chart.
+
+    .. _element:
+    .. figure:: ./_static/robertson.png
+        :width: 350px
+        :align: center
+        :figclass: align-center
     """
+
     def __init__(self):
         self.soil_type_1 = []
         self.soil_type_2 = []

@@ -16,20 +16,25 @@ class CPT:
         self.friction_nbr = []
         self.name = []
         self.gamma = []
+        self.rho = []
         self.total_stress = []
         self.effective_stress = []
         self.qt = []
         self.Qtn = []
         self.Fr = []
         self.IC = []
-        self.qc1n = []
         self.n = []
         self.vs = []
         self.G0 = []
-        self.a = []
+        self.poisson = []
+        self.damping = []
         self.water = []
         self.lithology = []
         self.litho_points = []
+        # self.lithology_simple = []
+        self.lithology_json = []
+        self.depth_json = []
+        self.indx_json = []
 
         # fixed values
         self.g = 9.81
@@ -118,7 +123,8 @@ class CPT:
         self.name = os.path.split(gef_file)[-1].upper().split(".GEF")[0]
         self.coord = data[idx_coord].split(',')[1:3]
 
-        self.depth = np.array([-i for j, i in enumerate(depth_tmp) if j not in idx_remove])
+        self.depth = np.array([np.abs(i) for j, i in enumerate(depth_tmp) if j not in idx_remove])
+        self.depth -= self.depth[0]
         self.NAP = np.array([-i + NAP for j, i in enumerate(depth_tmp) if j not in idx_remove])
         self.tip = np.array([i for j, i in enumerate(tip_tmp) if j not in idx_remove])
         self.friction = np.array([i for j, i in enumerate(friction_tmp) if j not in idx_remove])
@@ -186,10 +192,21 @@ class CPT:
                 if iter == iter_max:
                     print("Classification reach maximum number of iterations: " + str(iter_max))
                     break
-
         # assign to variables
         self.lithology = litho
         self.litho_points = points
+
+        # # compute simplified lithology
+        # # group the following zones
+        # # Zones 1 & 2 & 3 -> A
+        # # Zones 4 & 5 & 6 -> B
+        # # Zones 7 & 8 & 9 -> C
+        # litho = ["A" if x=="1" or x == "2" or x == "3" else x for x in litho]
+        # litho = ["B" if x=="4" or x == "5" or x == "6" else x for x in litho]
+        # litho = ["C" if x=="7" or x == "8" or x == "9" else x for x in litho]
+        #
+        # self.lithology_simple = litho
+
         return
 
     def gamma_calc(self, gamma_limit):
@@ -218,6 +235,20 @@ class CPT:
         aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
         aux[np.abs(aux) == np.inf] = gamma_limit / 9.81
         self.gamma = aux * 9.81
+        return
+
+    def rho_calc(self):
+        r"""
+        Computes density of soil.
+
+        The formula for density is:
+
+        .. math::
+
+            \rho = \frac{\gamma}{g}
+        """
+
+        self.rho = self.gamma * 1000. / self.g
         return
 
     def stress_calc(self, z_pwp):
@@ -309,25 +340,25 @@ class CPT:
 
         return
 
-    def qc1n_calc(self):
-        r"""
-        Normalisation of qc into qc1n
-
-        Normalisation of qc into qc1n following Boulanger and Idriss [2]_.
-
-        .. math::
-
-            q_{c1N} = C_{N} \cdot \frac{q_{c}}{Pa}
-
-        .. rubric:: References
-        .. [2] Boulanger, R.W. and Idriss, I.M. *CPT and SPT based liquefaction triggering procedures.* UC Davis, 2014, pg: 6.
-        """
-        import numpy as np
-
-        # normalise qc
-        qc100 = self.tip * np.min([np.ones(len(self.tip)) * 1.7, (self.Pa / self.effective_stress)**self.n], axis=0)
-        self.qc1n = qc100 / self.Pa
-        return
+    # def qc1n_calc(self):
+    #     r"""
+    #     Normalisation of qc into qc1n
+    #
+    #     Normalisation of qc into qc1n following Boulanger and Idriss [2]_.
+    #
+    #     .. math::
+    #
+    #         q_{c1N} = C_{N} \cdot \frac{q_{c}}{Pa}
+    #
+    #     .. rubric:: References
+    #     .. [2] Boulanger, R.W. and Idriss, I.M. *CPT and SPT based liquefaction triggering procedures.* UC Davis, 2014, pg: 6.
+    #     """
+    #     import numpy as np
+    #
+    #     # normalise qc
+    #     qc100 = self.tip * np.min([np.ones(len(self.tip)) * 1.7, (self.Pa / self.effective_stress)**self.n], axis=0)
+    #     self.qc1n = qc100 / self.Pa
+    #     return
 
     def IC_calc(self):
         r"""
@@ -366,9 +397,48 @@ class CPT:
         # vs: following Robertson and Cabal (2015)
         alpha_vs = 10 ** (0.55 * self.IC + 1.68)
         self.vs = (alpha_vs * self.Qtn)**0.5
-        self.G0 = self.gamma / self.g * self.vs**2
+        self.G0 = self.rho * self.vs**2
         return
 
+    def damp_calc(self):
+        r"""
+        Damping calculation.
+
+        Damping is assumed as the minimum damping following Darendeli [3]_.
+
+        .. math::
+
+            D_{min} = \left(0.8005 + 0.0129 \cdot PI \cdot OCR^{-0.1069} \right) \cdot \sigma_{v0}'^{-0.2889} \cdot \left[ 1 + -0.0057 \ln \left( freq \right) \right]
+
+        .. rubric:: References
+        .. [3] Darendeli, M.B. *Development of a New Family of Normalized Modulus Reduction and material damping curves.* PhD thesis, 2001, pg: 221.
+        """
+
+        # ToDo - define damping
+
+        return
+
+    def poisson_calc(self):
+        r"""
+        Poisson ratio. Following [2]_.
+
+        Poisson assumed 0.5 for soft layers and 0.2 for sandy layers.
+
+        .. rubric:: References
+        .. [2] Mayne, P. *Cone Penetration Testing. A Synthesis of Highway Practice.* Transportation Research Board, 2007, pg: 31.
+        """
+        import numpy as np
+
+        # assign size to poisson
+        self.poisson = np.zeros(len(self.lithology))
+
+        for i, lit in enumerate(self.lithology):
+            # if soft layer
+            if lit == "1" or lit == "2" or lit == "3":
+                self.poisson[i] == 0.5
+            else:
+                self.poisson[i] == 0.2
+        return
 
     def qt_calc(self, litho):
         r"""
@@ -405,27 +475,44 @@ class CPT:
 
         return
 
-    def add_json(self, min_thick, jsn, id):
+    def merge_thickness(self, min_layer_thick):
         """
-        Add to json file the results
-        ToDo: define layers (minimum thickness)
+        Reorganises the lithology based on the minimum layer thickness.
 
         Parameters
         ----------
-        :param min_thick: Minimum layer thickness
+        :param min_layer_thick: Minimum layer thickness
+        """
+        import numpy as np
+
+        z_ini = self.depth
+        label = self.lithology
+
+        a = False
+        i = 0
+        while not a:
+            thick, z_ini, label = merge(float(min_layer_thick), z_ini, label)
+            if np.min(thick) >= float(min_layer_thick):
+                break
+            i += 1
+        self.lithology_json = label
+        self.depth_json = z_ini
+        idx = [int(np.where(self.depth == i)[0][0]) for i in z_ini]
+        idx.append(len(self.depth))
+        self.indx_json = idx
+
+        return
+
+    def add_json(self, jsn, id):
+        """
+        Add to json file the results.
+
+        Parameters
+        ----------
         :param jsn: Json data structure
         :param id: Scenario (index)
         """
         import numpy as np
-
-        aux = [np.int(i) for i in self.lithology]
-
-        aux2 = np.diff(aux)
-
-        #find indexes different than 0
-        idx = np.where(aux2 != 0)[0]
-        indices = [i + 1 for i in idx]
-        indices.insert(0, 0)
 
         # create data
         data = {"Lithology": [],
@@ -440,20 +527,30 @@ class CPT:
                 "var_damping": [],
                 }
 
-        for i in range(len(indices[:-1])):
-            if np.abs(self.depth[indices[i + 1]]) - np.abs(self.depth[indices[i]]) < 0.5:
-                pass
-            else:
-                data["Lithology"].append(str(self.lithology[indices[i]]))
-                data["Depth"].append(self.depth[indices[i]])
-                data["E"].append(2 * (1 + 0.3) * self.gamma[indices[i]] * 100 * self.vs[indices[i]]**2)
-                data["var_E"].append(2 * (1 + 0.3) * self.gamma[indices[i]] * 100 * self.vs[indices[i]]**2 / 10)
-                data["v"].append(self.IC[indices[i]] / 10.)
-                data["var_v"].append(self.IC[indices[i]] / 100.)
-                data["rho"].append(self.gamma[indices[i]] * 100)
-                data["var_rho"].append(self.gamma[indices[i]] * 10)
-                data["damping"].append(0.05)
-                data["var_damping"].append(0.05)
+        # populate structure
+        for i in range(len(self.indx_json) - 1):
+            data["Lithology"].append(str(self.lithology_json[i]))
+            data["Depth"].append(self.depth_json[i])
+            E = 2 * (1 + 0.3) * self.gamma[self.indx_json[i]:self.indx_json[i + 1]] * 100 * \
+                self.vs[self.indx_json[i]: self.indx_json[i + 1]]**2
+
+            data["E"].append(np.mean(E))
+            data["var_E"].append(np.std(E))
+
+            poisson = self.poisson[self.indx_json[i]:self.indx_json[i + 1]]
+
+            data["v"].append(np.mean(poisson))
+            data["var_v"].append(np.std(poisson))
+
+            rho = self.rho[self.indx_json[i]:self.indx_json[i + 1]]
+            data["rho"].append(np.mean(rho))
+            data["var_rho"].append(np.std(rho))
+
+            # ToDo update damping
+            damp = 0.05
+
+            data["damping"].append(np.mean(damp))
+            data["var_damping"].append(np.std(damp))
 
         jsn.update({"scenario " + str(id): {}})
         jsn["scenario " + str(id)].update({"Probability": "0.33",
@@ -484,229 +581,188 @@ class CPT:
             json.dump(jsn, fo, indent=4)
         return
 
-    # def write_csv(self, output_f):
-    #     """
-    #     Write CSV file into output file.
-    #
-    #     Parameters
-    #     ----------
-    #     :param output_f: output folder
-    #     """
-    #
-    #     # write csv file
-    #     import os
-    #
-    #     # if output does no exist -> create
-    #     if not os.path.isdir(output_f):
-    #         os.makedirs(output_f)
-    #
-    #     # write csv
-    #     with open(os.path.join(output_f, str(self.name) + ".csv"), "w") as fo:
-    #         fo.write("Depth NAP [m];Depth [m];tip [kPa];friction [kPa];friction number [-];gamma [kN/m3];"
-    #                  "total stress [-kPa];effective stress [kPa];Qtn [-];Fr [-];qc1n [-];IC [-];vs [m/s];G0 [kPa]\n")
-    #
-    #         for i in range(len(self.NAP)):
-    #             fo.write(str(self.NAP[i]) + ";" +
-    #                      str(self.depth[i]) + ";" +
-    #                      str(self.tip[i]) + ";" +
-    #                      str(self.friction[i]) + ";" +
-    #                      str(self.friction_nbr[i]) + ";" +
-    #                      str(self.gamma[i]) + ";" +
-    #                      str(self.total_stress[i]) + ";" +
-    #                      str(self.effective_stress[i]) + ";" +
-    #                      str(self.Qtn[i]) + ";" +
-    #                      str(self.Fr[i]) + ";" +
-    #                      str(self.qc1n[i]) + ";" +
-    #                      str(self.IC[i]) + ";" +
-    #                      str(self.vs[i]) + ";" +
-    #                      str(self.G0[i]) + '\n')
-    #
-    #     return
-    #
-    # def plot_cpt(self, output_f, nb_plots=4):
-    #     """
-    #     Plot CPT values.
-    #
-    #     Parameters
-    #     ----------
-    #     :param output_f: output folder
-    #     :param nb_plots: (optional) number of plots
-    #     """
-    #     import os
-    #     import numpy as np
-    #     import matplotlib.pylab as plt
-    #     from cycler import cycler
-    #
-    #     # checks if file_path exits. If not creates file_path
-    #     if not os.path.exists(output_f):
-    #         os.makedirs(output_f)
-    #
-    #     # data
-    #     x_data = [self.tip, self.friction_nbr, self.IC, self.G0]
-    #     y_data = self.NAP
-    #     l_name = ["Tip resistance", "Friction number", "IC", "Shear modulus"]
-    #     x_label = ["Tip resistance [kPa]", "Friction number [-]", "IC [-]", "Shear modulus [kPa]"]
-    #     y_label = "Depth NAP [m]"
-    #
-    #     # set the color list
-    #     colormap = plt.cm.gist_ncar
-    #     colors = [colormap(i) for i in np.linspace(0, 0.9, nb_plots)]
-    #     plt.gca().set_prop_cycle(cycler('color', colors))
-    #     plt.subplots(1, nb_plots, figsize=(20, 6))
-    #
-    #     # plot for each y_value
-    #     for i in range(nb_plots):
-    #         plt.subplot(1, nb_plots, i + 1)
-    #
-    #         plt.plot(x_data[i], y_data, label=l_name[i])
-    #
-    #         # plt.title(title)
-    #         plt.xlabel(x_label[i], fontsize=12)
-    #         plt.ylabel(y_label, fontsize=12)
-    #         plt.grid()
-    #         plt.legend(loc=1, prop={'size': 12})
-    #
-    #     plt.tight_layout()
-    #     # save the figure
-    #     plt.savefig(os.path.join(output_f, self.name) + "_cpt.png")
-    #     plt.savefig(os.path.join(output_f, self.name) + "_cpt.eps")
-    #     plt.close()
-    #
-    #     return
-    #
-    # def plot_lithology(self, output_f):
-    #     """
-    #     Plot CPT lithology.
-    #
-    #     Parameters
-    #     ----------
-    #     :param output_f: output folder
-    #     """
-    #     import os
-    #     import numpy as np
-    #     import matplotlib.pylab as plt
-    #     import matplotlib.patches as patches
-    #
-    #     # checks if file_path exits. If not creates file_path
-    #     if not os.path.exists(output_f):
-    #         os.makedirs(output_f)
-    #
-    #     # define figure
-    #     f, (ax1, ax3) = plt.subplots(1, 2, figsize=(7, 10), sharey=True)
-    #
-    #     # first subplot - CPT
-    #     # ax1 tip
-    #     ax1.set_position([0.15, 0.1, 0.4, 0.8])
-    #     ax1.plot(self.tip, self.NAP, label="Tip resistance", color="b")
-    #     ax1.set_xlabel("Tip resistance [kPa]", fontsize=12)
-    #     ax1.set_ylabel("Depth NAP [m]", fontsize=12)
-    #     ax1.set_xlim(left=0)
-    #
-    #     # ax2 friction number
-    #     ax2 = ax1.twiny()
-    #     ax2.set_position([0.15, 0.1, 0.4, 0.8])
-    #     ax2.plot(self.friction_nbr, self.NAP, label="Friction number", color="r")
-    #     ax2.set_xlabel("Friction number [-]", fontsize=12)
-    #     ax2.set_xlim(left=0)
-    #
-    #     # align grid
-    #     ax1.set_xticks(np.linspace(0, ax1.get_xticks()[-1], 5))
-    #     ax2.set_xticks(np.linspace(0, ax2.get_xticks()[-1], 5))
-    #
-    #     ax1.grid()
-    #
-    #     # second subplot - Lithology
-    #     litho = np.array(self.lithology).astype(int)
-    #     color_litho = ["red", "brown", "cyan", "blue", "gray", "yellow", "orange", "green", "lightgray"]
-    #
-    #     ax3.set_position([0.60, 0.1, 0.05, 0.8])
-    #     ax3.set_xlim((0, 10.))
-    #     # remove ticks
-    #     plt.setp(ax3.get_xticklabels(), visible=False)
-    #     plt.setp(ax3.get_yticklabels(), visible=False)
-    #     ax3.tick_params(axis='both', which='both', length=0)
-    #     # ax3.set_xlabel("Lithology", fontsize=12)
-    #     # ax3.xaxis.set_label_position('top')
-    #
-    #     # thickness
-    #     diff_nap = np.diff(self.NAP)
-    #
-    #     # color the field
-    #     for i in range(len(self.NAP) - 1):
-    #         ax3.add_patch(patches.Rectangle(
-    #             (0, self.NAP[i]),
-    #             10.,
-    #             diff_nap[i],
-    #             fill=True,
-    #             color=color_litho[litho[i] - 1]))
-    #
-    #     # create legend for Robertson
-    #     for i, c in enumerate(color_litho):
-    #         ax3.add_patch(patches.Rectangle(
-    #             (16, ax1.get_ylim()[1]-.85 - 0.565 * i),
-    #             10.,
-    #             0.2,
-    #             fill=True,
-    #             color=c,
-    #             clip_on=False))
-    #
-    #     # create text box
-    #     text = "Robertson classification:\n" + \
-    #            "          Type 1\n" + \
-    #            "          Type 2\n" + \
-    #            "          Type 3\n" + \
-    #            "          Type 4\n" + \
-    #            "          Type 5\n" + \
-    #            "          Type 6\n" + \
-    #            "          Type 7\n" + \
-    #            "          Type 8\n" + \
-    #            "          Type 9\n"
-    #     ax3.annotate(text, xy=(1, 1),
-    #                  xycoords='axes fraction',
-    #                  xytext=(20, 0),
-    #                  fontsize=10,
-    #                  textcoords='offset pixels',
-    #                  horizontalalignment='left',
-    #                  verticalalignment='top')
-    #
-    #     # save the figure
-    #     plt.savefig(os.path.join(output_f, self.name) + "_lithology.png")
-    #     plt.savefig(os.path.join(output_f, self.name) + "_lithology.eps")
-    #     plt.close()
-    #
-    #     # plot in the robertson chart all the points
-    #     import robertson
-    #     classification = robertson.Robertson()
-    #     classification.soil_types()
-    #     plt.figure(num=1, figsize=(9, 6), dpi=80)
-    #     plt.axes().set_position([0.11, 0.11, 0.85, 0.85])
-    #     plt.plot(classification.soil_type_1[:, 0], classification.soil_type_1[:, 1], color='k', linewidth=1)
-    #     plt.plot(classification.soil_type_2[:, 0], classification.soil_type_2[:, 1], color='k', linewidth=1)
-    #     plt.plot(classification.soil_type_3[:, 0], classification.soil_type_3[:, 1], color='k', linewidth=1)
-    #     plt.plot(classification.soil_type_4[:, 0], classification.soil_type_4[:, 1], color='k', linewidth=1)
-    #     plt.plot(classification.soil_type_5[:, 0], classification.soil_type_5[:, 1], color='k', linewidth=1)
-    #     plt.plot(classification.soil_type_6[:, 0], classification.soil_type_6[:, 1], color='k', linewidth=1)
-    #     plt.plot(classification.soil_type_7[:, 0], classification.soil_type_7[:, 1], color='k', linewidth=1)
-    #     plt.plot(classification.soil_type_8[:, 0], classification.soil_type_8[:, 1], color='k', linewidth=1)
-    #     plt.plot(classification.soil_type_9[:, 0], classification.soil_type_9[:, 1], color='k', linewidth=1)
-    #     for i in range(len(self.litho_points)):
-    #         plt.plot(self.litho_points[i, 0], self.litho_points[i, 1], marker=".", markersize=4,
-    #                  color=color_litho[litho[i] - 1], linestyle=None)
-    #
-    #     plt.xlabel("Fr", fontsize=14)
-    #     plt.ylabel("Qtn", fontsize=14)
-    #     plt.xscale("log")
-    #     plt.yscale("log")
-    #     plt.xlim(0.1, 10)
-    #     plt.ylim(1, 1000)
-    #     plt.grid()
-    #
-    #     # save the figure
-    #     plt.savefig(os.path.join(output_f, self.name) + "_Robertson.png")
-    #     plt.savefig(os.path.join(output_f, self.name) + "_Robertson.eps")
-    #     plt.close()
-    #
-    #     return
+    def plot_cpt(self, output_f, nb_plots=4):
+        """
+        Plot CPT values.
+
+        Parameters
+        ----------
+        :param output_f: output folder
+        :param nb_plots: (optional) number of plots
+        """
+        import os
+        import numpy as np
+        import matplotlib.pylab as plt
+        from cycler import cycler
+
+        # checks if file_path exits. If not creates file_path
+        if not os.path.exists(output_f):
+            os.makedirs(output_f)
+
+        # data
+        x_data = [self.tip, self.friction_nbr, self.IC, self.G0]
+        y_data = self.NAP
+        l_name = ["Tip resistance", "Friction number", "IC", "Shear modulus"]
+        x_label = ["Tip resistance [kPa]", "Friction number [-]", "IC [-]", "Shear modulus [kPa]"]
+        y_label = "Depth NAP [m]"
+
+        # set the color list
+        colormap = plt.cm.gist_ncar
+        colors = [colormap(i) for i in np.linspace(0, 0.9, nb_plots)]
+        plt.gca().set_prop_cycle(cycler('color', colors))
+        plt.subplots(1, nb_plots, figsize=(20, 6))
+
+        # plot for each y_value
+        for i in range(nb_plots):
+            plt.subplot(1, nb_plots, i + 1)
+
+            plt.plot(x_data[i], y_data, label=l_name[i])
+
+            # plt.title(title)
+            plt.xlabel(x_label[i], fontsize=12)
+            plt.ylabel(y_label, fontsize=12)
+            plt.grid()
+            plt.legend(loc=1, prop={'size': 12})
+
+        plt.tight_layout()
+        # save the figure
+        plt.savefig(os.path.join(output_f, self.name) + "_cpt.png")
+        plt.close()
+
+        return
+
+    def plot_lithology(self, output_f):
+        """
+        Plot CPT lithology.
+
+        Parameters
+        ----------
+        :param output_f: output folder
+        """
+        import os
+        import numpy as np
+        import matplotlib.pylab as plt
+        import matplotlib.patches as patches
+
+        # checks if file_path exits. If not creates file_path
+        if not os.path.exists(output_f):
+            os.makedirs(output_f)
+
+        # define figure
+        f, (ax1, ax3) = plt.subplots(1, 2, figsize=(7, 10), sharey=True)
+
+        # first subplot - CPT
+        # ax1 tip
+        ax1.set_position([0.15, 0.1, 0.4, 0.8])
+        ax1.plot(self.tip, self.NAP, label="Tip resistance", color="b")
+        ax1.set_xlabel("Tip resistance [kPa]", fontsize=12)
+        ax1.set_ylabel("Depth NAP [m]", fontsize=12)
+        ax1.set_xlim(left=0)
+
+        # ax2 friction number
+        ax2 = ax1.twiny()
+        ax2.set_position([0.15, 0.1, 0.4, 0.8])
+        ax2.plot(self.friction_nbr, self.NAP, label="Friction number", color="r")
+        ax2.set_xlabel("Friction number [-]", fontsize=12)
+        ax2.set_xlim(left=0)
+
+        # align grid
+        ax1.set_xticks(np.linspace(0, ax1.get_xticks()[-1], 5))
+        ax2.set_xticks(np.linspace(0, ax2.get_xticks()[-1], 5))
+
+        ax1.grid()
+
+        # second subplot - Lithology
+        litho = np.array(self.lithology).astype(int)
+        color_litho = ["red", "brown", "cyan", "blue", "gray", "yellow", "orange", "green", "lightgray"]
+
+        ax3.set_position([0.60, 0.1, 0.05, 0.8])
+        ax3.set_xlim((0, 10.))
+        # remove ticks
+        plt.setp(ax3.get_xticklabels(), visible=False)
+        plt.setp(ax3.get_yticklabels(), visible=False)
+        ax3.tick_params(axis='both', which='both', length=0)
+        # ax3.set_xlabel("Lithology", fontsize=12)
+        # ax3.xaxis.set_label_position('top')
+
+        # thickness
+        diff_nap = np.diff(self.NAP)
+
+        # color the field
+        for i in range(len(self.NAP) - 1):
+            ax3.add_patch(patches.Rectangle(
+                (0, self.NAP[i]),
+                10.,
+                diff_nap[i],
+                fill=True,
+                color=color_litho[litho[i] - 1]))
+
+        # create legend for Robertson
+        for i, c in enumerate(color_litho):
+            ax3.add_patch(patches.Rectangle(
+                (16, ax1.get_ylim()[1]-.85 - 0.565 * i),
+                10.,
+                0.2,
+                fill=True,
+                color=c,
+                clip_on=False))
+
+        # create text box
+        text = "Robertson classification:\n" + \
+               "          Type 1\n" + \
+               "          Type 2\n" + \
+               "          Type 3\n" + \
+               "          Type 4\n" + \
+               "          Type 5\n" + \
+               "          Type 6\n" + \
+               "          Type 7\n" + \
+               "          Type 8\n" + \
+               "          Type 9\n"
+        ax3.annotate(text, xy=(1, 1),
+                     xycoords='axes fraction',
+                     xytext=(20, 0),
+                     fontsize=10,
+                     textcoords='offset pixels',
+                     horizontalalignment='left',
+                     verticalalignment='top')
+
+        # save the figure
+        plt.savefig(os.path.join(output_f, self.name) + "_lithology.png")
+        plt.close()
+
+        # # plot in the robertson chart all the points
+        # import robertson
+        # classification = robertson.Robertson()
+        # classification.soil_types()
+        # plt.figure(num=1, figsize=(9, 6), dpi=80)
+        # plt.axes().set_position([0.11, 0.11, 0.85, 0.85])
+        # plt.plot(classification.soil_type_1[:, 0], classification.soil_type_1[:, 1], color='k', linewidth=1)
+        # plt.plot(classification.soil_type_2[:, 0], classification.soil_type_2[:, 1], color='k', linewidth=1)
+        # plt.plot(classification.soil_type_3[:, 0], classification.soil_type_3[:, 1], color='k', linewidth=1)
+        # plt.plot(classification.soil_type_4[:, 0], classification.soil_type_4[:, 1], color='k', linewidth=1)
+        # plt.plot(classification.soil_type_5[:, 0], classification.soil_type_5[:, 1], color='k', linewidth=1)
+        # plt.plot(classification.soil_type_6[:, 0], classification.soil_type_6[:, 1], color='k', linewidth=1)
+        # plt.plot(classification.soil_type_7[:, 0], classification.soil_type_7[:, 1], color='k', linewidth=1)
+        # plt.plot(classification.soil_type_8[:, 0], classification.soil_type_8[:, 1], color='k', linewidth=1)
+        # plt.plot(classification.soil_type_9[:, 0], classification.soil_type_9[:, 1], color='k', linewidth=1)
+        # for i in range(len(self.litho_points)):
+        #     plt.plot(self.litho_points[i, 0], self.litho_points[i, 1], marker=".", markersize=4,
+        #              color=color_litho[litho[i] - 1], linestyle=None)
+        #
+        # plt.xlabel("Fr", fontsize=14)
+        # plt.ylabel("Qtn", fontsize=14)
+        # plt.xscale("log")
+        # plt.yscale("log")
+        # plt.xlim(0.1, 10)
+        # plt.ylim(1, 1000)
+        # plt.grid()
+        #
+        # # save the figure
+        # plt.savefig(os.path.join(output_f, self.name) + "_Robertson.png")
+        # plt.savefig(os.path.join(output_f, self.name) + "_Robertson.eps")
+        # plt.close()
+
+        return
 
 
 def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
@@ -741,3 +797,46 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     n = 0.381 * IC + 0.05 * (sigma_eff / Pa) - 0.15
     n[n > 1.] = 1.
     return n
+
+
+def merge(min_thick, depth, lithology):
+    """
+    Merge of the CPT layers into a minimum thickness
+
+    :param min_thick: minimum layer thickness
+    :param depth: CPT depth
+    :param lithology: layer lithology
+    :return: thickness, depth, lithology, indices
+    """
+    import numpy as np
+
+    # find location of the start of the soil types
+    aux = ""
+    idx = []
+    for i, val in enumerate(lithology):
+        if val != aux:
+            aux = val
+            idx.append(i)
+
+    # z_ini - depth at the start of new layer
+    z_ini = [depth[i] for i in idx]
+    # thickness
+    thick = np.diff(z_ini)
+    # soil type
+    label = [lithology[i] for i in idx]
+
+    # merge the depths
+    try:
+        id = np.where(np.array(thick) <= min_thick)[0][0]
+    except IndexError:
+        return thick, z_ini, label
+
+    del z_ini[id + 1]
+    # determine the biggest label
+    if thick[id] >= thick[id + 1]:
+        del label[id + 1]
+    else:
+        del label[id]
+
+    thick = np.diff(z_ini)
+    return thick, z_ini, label
