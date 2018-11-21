@@ -1,6 +1,6 @@
 class CPT:
     r"""
-    Read GEF
+    CPT module
 
     Read and process cpt files: GEF format
 

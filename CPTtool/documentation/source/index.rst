@@ -38,6 +38,6 @@ Content
 .. toctree::
    :maxdepth: 2
    
-   read_gef
    cpt_tool
+   cpt_module
    robertson
