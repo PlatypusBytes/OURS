@@ -54,7 +54,8 @@ class CPT:
         """
 
         import os
-        import numpy as np
+        import numpy as np 	
+		import numpy.core.multiarray as multiarray
         import re
 
         with open(gef_file, 'r', encoding="Ansi") as f:
@@ -150,7 +151,8 @@ class CPT:
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014.
         """
         import robertson
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         classification = robertson.Robertson()
         classification.soil_types()
@@ -228,7 +230,8 @@ class CPT:
         .. rubric:: References
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 36.
         """
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         # calculate unit weight according to Robertson & Cabal 2015
         np.seterr(divide="ignore")
@@ -260,7 +263,8 @@ class CPT:
         :param z_pwp: Depth of pore water pressure in NAP
         """
         # compute total and effective stress
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         # compute depth diff
         z = np.diff(np.abs((self.depth - self.depth[0])))
@@ -299,7 +303,8 @@ class CPT:
         """
 
         # normalisation of qc and friction into Qtn and Fr: following Robertson and Cabal (2015)
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         # iteration around n to compute IC
         # start assuming n=1 for IC calculation
@@ -353,7 +358,7 @@ class CPT:
     #     .. rubric:: References
     #     .. [2] Boulanger, R.W. and Idriss, I.M. *CPT and SPT based liquefaction triggering procedures.* UC Davis, 2014, pg: 6.
     #     """
-    #     import numpy as np
+    #     import numpy as np 		
     #
     #     # normalise qc
     #     qc100 = self.tip * np.min([np.ones(len(self.tip)) * 1.7, (self.Pa / self.effective_stress)**self.n], axis=0)
@@ -373,7 +378,8 @@ class CPT:
         """
 
         # IC: following Robertson and Cabal (2015)
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
         # compute IC
         self.IC = ((3.47 - np.log10(self.Qtn)) ** 2. + (np.log10(self.Fr) + 1.22) ** 2.) ** 0.5
         return
@@ -413,7 +419,8 @@ class CPT:
         .. rubric:: References
         .. [3] Darendeli, M.B. *Development of a New Family of Normalized Modulus Reduction and material damping curves.* PhD thesis, 2001, pg: 221.
         """
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         # ToDo - define damping
         # assign size to damping
@@ -429,7 +436,8 @@ class CPT:
         .. rubric:: References
         .. [2] Mayne, P. *Cone Penetration Testing. A Synthesis of Highway Practice.* Transportation Research Board, 2007, pg: 31.
         """
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         # assign size to poisson
         self.poisson = np.zeros(len(self.lithology))
@@ -463,7 +471,8 @@ class CPT:
         # qt computed following Robertson & Cabal (2015)
         # qt = qc if sand
         # qt = qc + u2 * (1 - a) if else
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         self.qt = np.zeros(len(litho))
 
@@ -485,7 +494,8 @@ class CPT:
         ----------
         :param min_layer_thick: Minimum layer thickness
         """
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         z_ini = self.depth
         label = self.lithology
@@ -514,7 +524,8 @@ class CPT:
         :param jsn: Json data structure
         :param id: Scenario (index)
         """
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
 
         # create data
         data = {"Lithology": [],
@@ -593,7 +604,8 @@ class CPT:
         :param nb_plots: (optional) number of plots
         """
         import os
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
         import matplotlib.pylab as plt
         from cycler import cycler
 
@@ -641,7 +653,8 @@ class CPT:
         :param output_f: output folder
         """
         import os
-        import numpy as np
+        import numpy as np 		
+		import numpy.core.multiarray as multiarray
         import matplotlib.pylab as plt
         import matplotlib.patches as patches
 
@@ -779,7 +792,8 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     :return: updated n - stress exponent
     """
     # convergence of n
-    import numpy as np
+    import numpy as np 		
+	import numpy.core.multiarray as multiarray
 
     Cn = (Pa / np.array(sigma_eff)) ** n
 
@@ -809,7 +823,8 @@ def merge(min_thick, depth, lithology):
     :param lithology: layer lithology
     :return: thickness, depth, lithology, indices
     """
-    import numpy as np
+    import numpy as np 		
+	import numpy.core.multiarray as multiarray
 
     # find location of the start of the soil types
     aux = ""
