@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python37\python.exe
+#!..\python.exe
 
 # $Id: rst2latex.py 5905 2009-04-16 12:04:49Z milde $
 # Author: David Goodger <goodger@python.org>

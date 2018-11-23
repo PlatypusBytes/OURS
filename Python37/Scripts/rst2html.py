@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python37\python.exe
+#!..\python.exe
 
 # $Id: rst2html.py 4564 2006-05-21 20:44:42Z wiemann $
 # Author: David Goodger <goodger@python.org>

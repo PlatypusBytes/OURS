@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python37\python.exe
+#!..\python.exe
 
 # Author: 
 # Contact: grubert@users.sf.net

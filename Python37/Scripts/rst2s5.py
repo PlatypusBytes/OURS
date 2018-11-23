@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python37\python.exe
+#!..\python.exe
 
 # $Id: rst2s5.py 4564 2006-05-21 20:44:42Z wiemann $
 # Author: Chris Liechti <cliechti@gmx.net>

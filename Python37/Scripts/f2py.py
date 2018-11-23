@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python37\python.exe
+#!..\python.exe
 # See http://cens.ioc.ee/projects/f2py2e/
 from __future__ import division, print_function
 
