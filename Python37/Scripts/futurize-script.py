@@ -1,4 +1,4 @@
-#!..\python.exe
+#!D:\projects\RIVM\OURS\Python37\python.exe
 # EASY-INSTALL-ENTRY-SCRIPT: 'future==0.16.0','console_scripts','futurize'
 __requires__ = 'future==0.16.0'
 import re
