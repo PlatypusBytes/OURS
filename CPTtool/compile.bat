@@ -1,2 +1,1 @@
-..\Python37\python.exe .\version_compile.py
-pause
+..\Python_37\python.exe .\version_compile.py
