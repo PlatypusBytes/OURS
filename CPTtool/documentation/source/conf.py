@@ -170,4 +170,4 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
-html_theme_path = ["D:\projects\RIVM\OURS\Python37\Lib\site-packages"]
+html_theme_path = ["..\Python_37\Lib\site-packages"]
