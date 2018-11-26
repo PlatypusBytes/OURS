@@ -1,2 +1,1 @@
-..\..\Python37\python.exe -m unittest discover .\
-pause
+..\..\Python_37\python.exe -m unittest discover .\
