@@ -50,7 +50,7 @@ def read_revision():
 def compile_code():
     os.system(r"RMDIR /S /Q .\dist")
     os.system(r"RMDIR /S /Q .\build")
-    os.system(r"..\Python_37\Scripts\pyinstaller.exe --onefile main.spec")
+    os.system(r"..\Python_37\python.exe ..\Python_37\Scripts\pyinstaller.exe --onefile main.spec")
     os.remove(r"./version.txt")
 
 
