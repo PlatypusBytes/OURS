@@ -1,27 +1,19 @@
-def read_key(file_name):
+def set_key():
     """
-    Read CPT key
-
-    Reads key file for the CPT.
-    Assumes GEF file convention.
+    Define CPT key
 
     Parameters
     ----------
     :param file_name: complete path and filename for the key file
     :return: key: Dictionary with the key for CPT interpretation
     """
-
-    # read the key of the GEF files
-    with open(file_name, 'r') as f:
-        file = f.readlines()
-
-    labels = [line.strip('\n\r').split('=')[0] for line in file]
-    dat = [int(line.strip('\n\r').split('=')[1]) for line in file]
-
     key = {}
+    labels = ['depth','tip','friction','friction_nb','water']
+    dat = [1,2,3,4,6]
     for k in range(len(labels)):
-        key.update({labels[k].rstrip(): dat[k]})
+        key.update({labels[k]: dat[k]})
     return key
+
 
 
 def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=22, pwp_level=0):
@@ -84,5 +76,5 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--plots', help='make plots', required=False, default=False)
     args = parser.parse_args()
 
-    key = read_key(args.key)
+    key = set_key()
     read_cpt(args.cpt, key, args.output, args.thickness, args.plots)
