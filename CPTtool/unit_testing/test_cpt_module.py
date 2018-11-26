@@ -12,7 +12,6 @@ class TestCptModule(unittest.TestCase):
     def setUp(self):
         import cpt_module
         self.cpt = cpt_module.CPT()
-
         pass
 
     def test_rho_calculation(self):
@@ -26,7 +25,6 @@ class TestCptModule(unittest.TestCase):
         # self.assertEqual(exact_rho, self.cpt.rho)
         np.testing.assert_array_equal(exact_rho, self.cpt.rho)
         return
-
     def tearDown(self):
         return
 
