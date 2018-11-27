@@ -25,6 +25,21 @@ class TestCptModule(unittest.TestCase):
         # self.assertEqual(exact_rho, self.cpt.rho)
         np.testing.assert_array_equal(exact_rho, self.cpt.rho)
         return
+
+    def test_gamma_calc(self):
+        gamma_limit = 22
+        self.cpt.friction_nbr = np.ones(10)
+        self.cpt.qt = np.ones(10)
+        self.cpt.Pa = 100
+        # Exact solution
+        aux = 0.27/np.log10(np.ones(10))+0.36(np.log10(np.ones(10)/ 100))+1.236
+        aux[np.abs(aux) == np.inf] = gamma_limit / 9.81
+        local_gamma = aux * 9.81
+
+        self.cpt.gamma_calc(self,gamma_limit)
+
+        np.testing.assert_array_equal(local_gamma, self.cpt.gamma)
+        return
     def tearDown(self):
         return
 
