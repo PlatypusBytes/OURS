@@ -4,16 +4,15 @@ def set_key():
 
     Parameters
     ----------
-    :param file_name: complete path and filename for the key file
     :return: key: Dictionary with the key for CPT interpretation
     """
+
     key = {}
-    labels = ['depth','tip','friction','friction_nb','water']
-    dat = [1,2,3,4,6]
+    labels = ['depth', 'tip', 'friction', 'friction_nb', 'water']
+    dat = [1, 2, 3, 4, 6]
     for k in range(len(labels)):
         key.update({labels[k]: dat[k]})
     return key
-
 
 
 def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=22, pwp_level=0):
@@ -69,7 +68,6 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-k', '--key', help='location of the key file', required=True)
     parser.add_argument('-c', '--cpt', help='location of the cpt folder', required=True)
     parser.add_argument('-o', '--output', help='location of the output folder', required=True)
     parser.add_argument('-t', '--thickness', help='minimum thickness', required=True)
