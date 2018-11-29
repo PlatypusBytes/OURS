@@ -6,7 +6,7 @@ class CPT:
 
     """
 
-    def __init__(self, out_fold):
+    def __init__(self, out_fold, log_file=False):
         import os
         # variables
         self.depth = []
@@ -47,6 +47,12 @@ class CPT:
         self.Pa = 100.
         self.a = 0.8
 
+        # if log file exists: -> assign the object to the log file
+        if log_file:
+            self.log_file = log_file
+        else:
+            self.log_file = []
+
         return
 
     def read_gef(self, gef_file, key_cpt):
@@ -66,13 +72,23 @@ class CPT:
         with open(gef_file, 'r', encoding="Ansi") as f:
             data = f.readlines()
 
+        gef_file_name = os.path.split(gef_file)[-1].upper().split(".GEF")[0]
+
         # search NAP
-        idx_nap = [i for i, val in enumerate(data) if val.startswith(r'#ZID=')][0]
-        NAP = float(data[idx_nap].split(',')[1])
+        try:
+            idx_nap = [i for i, val in enumerate(data) if val.startswith(r'#ZID=')][0]
+            NAP = float(data[idx_nap].split(',')[1])
+        except IndexError:
+            self.log_file.error_message("file " + gef_file_name + " contains no NAP position")
+            return False
         # search end of header
         idx_EOH = [i for i, val in enumerate(data) if val.startswith(r'#EOH=')][0]
         # search for coordinates
-        idx_coord = [i for i, val in enumerate(data) if val.startswith(r'#XYID=')][0]
+        try:
+            idx_coord = [i for i, val in enumerate(data) if val.startswith(r'#XYID=')][0]
+        except IndexError:
+            self.log_file.error_message("file " + gef_file_name + " contains no coordinates")
+            return False
         # search index depth
         idx_depth = [int(val.split(',')[0][-1]) - 1 for i, val in enumerate(data)
                      if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['depth'])][0]
@@ -128,7 +144,7 @@ class CPT:
         idx_remove = [item for sublist in idx for item in sublist]
 
         # assign variables
-        self.name = os.path.split(gef_file)[-1].upper().split(".GEF")[0]
+        self.name = gef_file_name
         self.coord = data[idx_coord].split(',')[1:3]
 
         self.depth = np.array([np.abs(i) for j, i in enumerate(depth_tmp) if j not in idx_remove])
@@ -139,7 +155,7 @@ class CPT:
         self.friction_nbr = np.array([i for j, i in enumerate(friction_nb_tmp) if j not in idx_remove])
         self.water = np.array([i for j, i in enumerate(water_tmp) if j not in idx_remove])
 
-        return
+        return True
 
     def lithology_calc(self):
         r"""

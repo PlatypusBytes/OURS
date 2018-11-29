@@ -35,16 +35,22 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
     # read the cpt files
     import os
     import cpt_module
+    import log_handler
 
     cpts = os.listdir(folder_path)
     cpts = [i for i in cpts if i.upper().endswith(".GEF")]
+    # Define log file
+    log_file = log_handler.LogFile(output_folder)
 
     jsn = {}
     i = 1
     for f in cpts:
-        print("analysis started: " + f)
-        cpt = cpt_module.CPT(output_folder)
-        cpt.read_gef(os.path.join(folder_path, f), key_cpt)
+        log_file.info_message("analysis started for: " + f)
+        cpt = cpt_module.CPT(output_folder, log_file)
+        aux = cpt.read_gef(os.path.join(folder_path, f), key_cpt)
+        if not aux:
+            log_file.info_message("analysis failed for: " + f)
+            continue
         cpt.qt_calc()
         cpt.gamma_calc(gamma_max)
         cpt.rho_calc()
@@ -60,7 +66,9 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
             cpt.plot_cpt()
             cpt.plot_lithology()
         i += 1
+        log_file.info_message("analysis succeeded for: " + f)
     cpt.dump_json(jsn)
+    log_file.close()
     return
 
 
