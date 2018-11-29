@@ -43,25 +43,20 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
     i = 1
     for f in cpts:
         print("analysis started: " + f)
-        cpt = cpt_module.CPT()
+        cpt = cpt_module.CPT(output_folder)
         cpt.read_gef(os.path.join(folder_path, f), key_cpt)
         cpt.lithology_calc(gamma_max, pwp_level)
-        cpt.gamma_calc(gamma_max)
-        cpt.rho_calc()
-        cpt.stress_calc(pwp_level)
-        # cpt.qc1n_calc()
         cpt.IC_calc()
         cpt.vs_calc()
         cpt.damp_calc()
         cpt.poisson_calc()
         # cpt.merge_thickness(D_min)
         cpt.add_json(jsn, i)
-        # cpt.write_csv(output_folder)
         if make_plots:
-            cpt.plot_cpt(output_folder)
-            cpt.plot_lithology(output_folder)
+            cpt.plot_cpt()
+            cpt.plot_lithology()
         i += 1
-    cpt.dump_json(jsn, output_folder)
+    cpt.dump_json(jsn)
     return
 
 

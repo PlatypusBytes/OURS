@@ -6,7 +6,8 @@ class CPT:
 
     """
 
-    def __init__(self):
+    def __init__(self, out_fold):
+        import os
         # variables
         self.depth = []
         self.coord = []
@@ -36,6 +37,11 @@ class CPT:
         self.depth_json = []
         self.indx_json = []
 
+        # checks if file_path exits. If not creates file_path
+        if not os.path.exists(out_fold):
+            os.makedirs(out_fold)
+        self.output_folder = out_fold
+
         # fixed values
         self.g = 9.81
         self.Pa = 100.
@@ -55,7 +61,6 @@ class CPT:
 
         import os
         import numpy as np
-        import numpy.core.multiarray as multiarray
         import re
 
         with open(gef_file, 'r', encoding="Ansi") as f:
@@ -135,7 +140,7 @@ class CPT:
 
         return
 
-    def lithology_calc(self, gamma_limit, z_pwp, iter_max=100):
+    def lithology_calc_iter(self, gamma_limit, z_pwp, iter_max=100):
         r"""
         Lithology calculation.
 
@@ -152,7 +157,6 @@ class CPT:
         """
         import robertson
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         classification = robertson.Robertson()
         classification.soil_types()
@@ -231,7 +235,6 @@ class CPT:
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 36.
         """
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         # calculate unit weight according to Robertson & Cabal 2015
         np.seterr(divide="ignore")
@@ -264,7 +267,6 @@ class CPT:
         """
         # compute total and effective stress
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         # compute depth diff
         z = np.diff(np.abs((self.depth - self.depth[0])))
@@ -304,7 +306,6 @@ class CPT:
 
         # normalisation of qc and friction into Qtn and Fr: following Robertson and Cabal (2015)
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         # iteration around n to compute IC
         # start assuming n=1 for IC calculation
@@ -379,14 +380,15 @@ class CPT:
 
         # IC: following Robertson and Cabal (2015)
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
         # compute IC
         self.IC = ((3.47 - np.log10(self.Qtn)) ** 2. + (np.log10(self.Fr) + 1.22) ** 2.) ** 0.5
         return
 
-    def vs_calc(self):
+    def vs_calc(self, method="Robertson"):
         r"""
-        Shear wave velocity and shear modulus, following Robertson and Cabal [1]_.
+        Shear wave velocity and shear modulus. The following methods are available:
+
+        * Robertson and Cabal [1]_:
 
         .. math::
 
@@ -396,14 +398,35 @@ class CPT:
 
             G_{0} = \frac{\gamma}{g} \cdot v_{s}^{2}
 
+        * Mayne [2]_:
+
+        .. math::
+
+            v_{s} = 118.8 \cdot \log \left(f_{s} \right) + 18.5
+
         .. rubric:: References
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 48-50.
+        .. [2] Mayne, P.W. *In-Situ Test Calibrations for Evaluating Soil Parameters.* Characterisation and enginering properties of natural soils, Volume 3.
+               2006, pg: 1-56.
         """
+        import numpy as np
 
-        # vs: following Robertson and Cabal (2015)
-        alpha_vs = 10 ** (0.55 * self.IC + 1.68)
-        self.vs = (alpha_vs * self.Qtn)**0.5
-        self.G0 = self.rho * self.vs**2
+        if method == "Robertson":
+            # vs: following Robertson and Cabal (2015)
+            alpha_vs = 10 ** (0.55 * self.IC + 1.68)
+            self.vs = (alpha_vs * self.Qtn)**0.5
+            self.G0 = self.rho * self.vs**2
+        elif method == "Mayne":
+            # vs: following Mayne (2006)
+            self.vs = 118.8 * np.log(self.friction) + 18.5
+        elif method == "all":  # compares all and assumes default
+            self.vs_calc(method="Mayne")
+            vs1 = self.vs
+            self.vs_calc(method="Robertson")
+            vs2 = self.vs
+            self.plot_correlations([vs1, vs2], "Shear wave velocity [m/s]", ["Mayne", "Robertson"], "shear_wave")
+            pass
+
         return
 
     def damp_calc(self):
@@ -420,7 +443,6 @@ class CPT:
         .. [3] Darendeli, M.B. *Development of a New Family of Normalized Modulus Reduction and material damping curves.* PhD thesis, 2001, pg: 221.
         """
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         # ToDo - define damping
         # assign size to damping
@@ -437,7 +459,6 @@ class CPT:
         .. [2] Mayne, P. *Cone Penetration Testing. A Synthesis of Highway Practice.* Transportation Research Board, 2007, pg: 31.
         """
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         # assign size to poisson
         self.poisson = np.zeros(len(self.lithology))
@@ -472,7 +493,6 @@ class CPT:
         # qt = qc if sand
         # qt = qc + u2 * (1 - a) if else
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         self.qt = np.zeros(len(litho))
 
@@ -495,7 +515,6 @@ class CPT:
         :param min_layer_thick: Minimum layer thickness
         """
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         z_ini = self.depth
         label = self.lithology
@@ -525,7 +544,6 @@ class CPT:
         :param id: Scenario (index)
         """
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
 
         # create data
         data = {"Lithology": [],
@@ -571,51 +589,81 @@ class CPT:
 
         return
 
-    @staticmethod
-    def dump_json(jsn, output_f):
+    def dump_json(self, jsn):
         """
         Dump json file into output file.
 
         Parameters
         ----------
         :param jsn: json file with data structure
-        :param output_f: output folder
         :return:
         """
         import os
         import json
 
-        # if output does no exist -> create
-        if not os.path.isdir(output_f):
-            os.makedirs(output_f)
-
         # write file
-        with open(os.path.join(output_f, "results.json"), "w") as fo:
+        with open(os.path.join(self.output_folder, "results.json"), "w") as fo:
             json.dump(jsn, fo, indent=4)
         return
 
-    def plot_cpt(self, output_f, nb_plots=6):
+    def plot_correlations(self, x_data, x_label, l_name, name):
+        """
+        Plot CPT correlations.
+
+        Parameters
+        ----------
+        :param x_data: dataset for the plots
+        :param x_label: label of the plots
+        :param l_name: name of the different correlations within the dataset
+        :param name: name for the output file
+        """
+        import os
+        import numpy as np
+        import matplotlib.pylab as plt
+        from cycler import cycler
+
+        # data
+        y_data = self.depth
+        y_label = "Depth NAP [m]"
+
+        # set the color list
+        colormap = plt.cm.gist_ncar
+        colors = [colormap(i) for i in np.linspace(0, 0.9, len(x_data))]
+        plt.gca().set_prop_cycle(cycler('color', colors))
+        plt.figure(figsize=(4, 6))
+
+        # plot for each y_value
+        for i in range(len(x_data)):
+            plt.plot(x_data[i], y_data, label=l_name[i])
+
+        plt.xlabel(x_label, fontsize=12)
+        plt.ylabel(y_label, fontsize=12)
+        plt.grid()
+        plt.legend(loc=1, prop={'size': 12})
+        # invert y axis
+        plt.gca().invert_yaxis()
+        plt.tight_layout()
+        # save the figure
+        plt.savefig(os.path.join(self.output_folder, self.name + "_" + name) + ".png")
+        plt.close()
+        return
+
+    def plot_cpt(self, nb_plots=6):
         """
         Plot CPT values.
 
         Parameters
         ----------
-        :param output_f: output folder
         :param nb_plots: (optional) number of plots
         """
         import os
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
         import matplotlib.pylab as plt
         from cycler import cycler
 
-        # checks if file_path exits. If not creates file_path
-        if not os.path.exists(output_f):
-            os.makedirs(output_f)
-
         # data
         x_data = [self.tip, self.friction_nbr, self.rho, self.G0, self.poisson, self.damping]
-        y_data = self.NAP
+        y_data = self.depth
         l_name = ["Tip resistance", "Friction number", "Density", "Shear modulus", "Poisson ratio", "Damping"]
         x_label = ["Tip resistance [kPa]", "Friction number [-]", r"Density [kg/m$^{3}$]", "Shear modulus [kPa]", "Poisson ratio [-]", "Damping [%]"]
         y_label = "Depth NAP [m]"
@@ -639,28 +687,20 @@ class CPT:
 
         plt.tight_layout()
         # save the figure
-        plt.savefig(os.path.join(output_f, self.name) + "_cpt.png")
+        plt.savefig(os.path.join(self.output_folder, self.name) + "_cpt.png")
         plt.close()
 
         return
 
-    def plot_lithology(self, output_f):
+    def plot_lithology(self):
         """
         Plot CPT lithology.
 
-        Parameters
-        ----------
-        :param output_f: output folder
         """
         import os
         import numpy as np 		
-        import numpy.core.multiarray as multiarray
         import matplotlib.pylab as plt
         import matplotlib.patches as patches
-
-        # checks if file_path exits. If not creates file_path
-        if not os.path.exists(output_f):
-            os.makedirs(output_f)
 
         # define figure
         f, (ax1, ax3) = plt.subplots(1, 2, figsize=(7, 10), sharey=True)
@@ -741,7 +781,7 @@ class CPT:
                      verticalalignment='top')
 
         # save the figure
-        plt.savefig(os.path.join(output_f, self.name) + "_lithology.png")
+        plt.savefig(os.path.join(self.output_folder, self.name) + "_lithology.png")
         plt.close()
 
         # # plot in the robertson chart all the points
@@ -793,7 +833,6 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     """
     # convergence of n
     import numpy as np 		
-    import numpy.core.multiarray as multiarray
 
     Cn = (Pa / np.array(sigma_eff)) ** n
 
@@ -824,7 +863,6 @@ def merge(min_thick, depth, lithology):
     :return: thickness, depth, lithology, indices
     """
     import numpy as np 		
-    import numpy.core.multiarray as multiarray
 
     # find location of the start of the soil types
     aux = ""
