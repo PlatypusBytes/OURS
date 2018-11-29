@@ -215,7 +215,7 @@ class CPT:
 
         return
 
-    def gamma_calc(self, gamma_limit):
+    def gamma_calc(self, gamma_limit, method="Robertson"):
         r"""
         Computes unit weight.
 
@@ -227,20 +227,41 @@ class CPT:
 
             \gamma = 0.27 \log(R_{f}) + 0.36 \log\left(\frac{q_{t}}{Pa}\right) + 1.236
 
+        Alternative method of Lengkeek et al. [2]
+
+        .. math::
+
+            \gamma = \gamma_{sat,ref} - \beta\left(\frac{(log\left(\frac{q_{t,ref}}{q_{t}}\right)}{(log\left(\frac{R_{f,ref}}{R_{f}}\right)}
+
         Parameters
         ----------
         :param gamma_limit: Maximum value for gamma
+        :param method: (optional) Method to compute unit weight. Default is Robertson
 
         .. rubric:: References
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 36.
+        .. [2] Lengkeek, A., de Greef, J., & Joosten, S. *CPT based unit weight estimation extended to soft organic soils and peat.* Proceedings of the 4th International Symposium on Cone Penetration Testing (CPT'18), 2018, pp: 389-394.
         """
         import numpy as np 		
 
-        # calculate unit weight according to Robertson & Cabal 2015
         np.seterr(divide="ignore")
-        aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
-        aux[np.abs(aux) == np.inf] = gamma_limit / 9.81
-        self.gamma = aux * 9.81
+
+        # calculate unit weight according to Robertson & Cabal 2015
+        if method == "Robertson":
+            aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
+            aux[np.abs(aux) == np.inf] = gamma_limit / 9.81
+            self.gamma = aux * 9.81
+        elif method == "Lengkeek":
+            aux = 19 - 4.12 * np.log10(5000 / self.qt) / np.log10(30 / self.friction_nbr)
+            aux[np.abs(aux) == np.inf] = gamma_limit
+            self.gamma = aux
+        elif method == "all":  # if all, compares all the methods and plot
+            self.gamma_calc(gamma_limit, method="Lengkeek")
+            gamma_1 = self.gamma
+            self.gamma_calc(gamma_limit, method="Robertson")
+            gamma_2 = self.gamma
+            self.plot_correlations([gamma_1, gamma_2], "Unit Weight [kN/m3]", ["Lengkeek", "Robertson"], "unit_weight")
+            pass
         return
 
     def rho_calc(self):
