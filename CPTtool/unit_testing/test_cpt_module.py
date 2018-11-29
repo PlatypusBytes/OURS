@@ -11,7 +11,7 @@ import numpy as np
 class TestCptModule(unittest.TestCase):
     def setUp(self):
         import cpt_module
-        self.cpt = cpt_module.CPT()
+        self.cpt = cpt_module.CPT("./")
         pass
 
     def test_rho_calculation(self):
@@ -41,6 +41,7 @@ class TestCptModule(unittest.TestCase):
 
         np.testing.assert_array_equal(local_gamma, self.cpt.gamma)
         return
+
     def tearDown(self):
         return
 

@@ -21,7 +21,8 @@ class TestCptTool(unittest.TestCase):
         return
 
     def tearDown(self):
-      return
+        return
+
 
 if __name__ == '__main__':  # pragma: no cover
     from teamcity import is_running_under_teamcity
