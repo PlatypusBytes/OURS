@@ -140,6 +140,43 @@ class CPT:
 
         return
 
+    def lithology_calc(self):
+        r"""
+        Lithology calculation.
+
+        Computes the lithology following Robertson and Cabal [1]_.
+
+        .. rubric:: References
+        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014.
+        """
+        import robertson
+        import numpy as np
+
+        classification = robertson.Robertson()
+        classification.soil_types()
+
+        # compute Qtn and Fr
+        self.norm_calc()
+
+        litho, points = classification.lithology(self.Qtn, self.Fr)
+
+        # assign to variables
+        self.lithology = litho
+        self.litho_points = points
+
+        # # compute simplified lithology
+        # # group the following zones
+        # # Zones 1 & 2 & 3 -> A
+        # # Zones 4 & 5 & 6 -> B
+        # # Zones 7 & 8 & 9 -> C
+        # litho = ["A" if x=="1" or x == "2" or x == "3" else x for x in litho]
+        # litho = ["B" if x=="4" or x == "5" or x == "6" else x for x in litho]
+        # litho = ["C" if x=="7" or x == "8" or x == "9" else x for x in litho]
+        #
+        # self.lithology_simple = litho
+
+        return
+
     def lithology_calc_iter(self, gamma_limit, z_pwp, iter_max=100):
         r"""
         Lithology calculation.
@@ -492,39 +529,30 @@ class CPT:
                 self.poisson[i] = 0.2
         return
 
-    def qt_calc(self, litho):
+    def qt_calc(self):
         r"""
         Corrected cone resistance, following Robertson and Cabal [1]_.
-
-        The corrected cone resistance qt is the same as qc for sand, and corrected for the pore water pressure for soft soils.
 
         .. math::
 
             q_{t} = q_{c} + u_{2} \left( 1 - a\right)
-
-        Parameters
-        ----------
-        :param litho: CPT lithology
 
         .. rubric:: References
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 22.
         """
 
         # qt computed following Robertson & Cabal (2015)
-        # qt = qc if sand
-        # qt = qc + u2 * (1 - a) if else
-        import numpy as np 		
+        # qt = qc + u2 * (1 - a)
 
-        self.qt = np.zeros(len(litho))
+        self.qt = self.tip + self.water * (1. - self.a)
 
-        for i, typ in enumerate(litho):
-            # sand
-            if int(typ) >= 5:
-                self.qt[i] = self.tip[i]
-            # not sand
-            else:
-                self.qt[i] = self.tip[i] + self.water[i] * (1. - self.a)
-
+        # for i, typ in enumerate(litho):
+        #     # sand
+        #     if int(typ) >= 5:
+        #         self.qt[i] = self.tip[i]
+        #     # not sand
+        #     else:
+        #         self.qt[i] = self.tip[i] + self.water[i] * (1. - self.a)
         return
 
     def merge_thickness(self, min_layer_thick):
