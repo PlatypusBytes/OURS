@@ -22,14 +22,15 @@ CPT tool determines soil profiles and soil properties from CPT files.
 
 To run the code::   
 
-	/> CPTool.exe -k <key> -c <cpt> -o <output> -t <thickess> 
+	/> CPTool.exe -c <cpt> -o <output> -t <thickess> -p <plots, optional>
 	
 The arguments have the following meaning:
 
-	* *-k*:  key of cpt file
 	* *-c*: path to the cpt folder
 	* *-o*: output path to the generation of results
 	* *-t*: minimum layer thickness
+	* *-p*: (optional) plots the results
+    
 	
         
 Content
