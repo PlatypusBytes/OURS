@@ -86,11 +86,12 @@ class CPT:
         idx_friction_nb = [int(val.split(',')[0][-1]) - 1 for i, val in enumerate(data) if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['friction_nb'])][0]
 
         # search index water if water sensor is available:
-        if "water" in key_cpt.keys():
+        try:
             idx_water = [int(val.split(',')[0][-1]) - 1 for i, val in enumerate(data) if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['water'])][0]
-
+        except IndexError:
+            idx_water = False
         # rewrite data with separator ;
-        data[idx_EOH + 1:] = [re.sub("[ ,!]", ";", i) for i in data[idx_EOH+1:]]
+        data[idx_EOH + 1:] = [re.sub("[ ,!\t]+", ";", i.lstrip()) for i in data[idx_EOH + 1:]]
 
         # if first column is -9999 it is error and is is neglected
         if float(data[idx_EOH + 1].split(";")[1]) == -9999:
@@ -101,9 +102,10 @@ class CPT:
         tip_tmp = [float(data[i].split(";")[idx_tip]) * 1000. for i in range(idx_EOH + 1, len(data))]
         friction_tmp = [float(data[i].split(";")[idx_friction]) * 1000. for i in range(idx_EOH + 1, len(data))]
         friction_nb_tmp = [float(data[i].split(";")[idx_friction_nb]) for i in range(idx_EOH + 1, len(data))]
-        water_tmp = []
-        if "water" in key_cpt.keys():
-            water_tmp = [float(data[i].split(";")[idx_water]) for i in range(idx_EOH + 1, len(data))]
+        if idx_water:
+            water_tmp = [float(data[i].split(";")[idx_water]) * 1000 for i in range(idx_EOH + 1, len(data))]
+        else:
+            water_tmp = np.zeros(len(depth_tmp))
 
         # if tip / friction / friction number are negative -> zero
         tip_tmp = np.array(tip_tmp)
@@ -135,8 +137,7 @@ class CPT:
         self.tip = np.array([i for j, i in enumerate(tip_tmp) if j not in idx_remove])
         self.friction = np.array([i for j, i in enumerate(friction_tmp) if j not in idx_remove])
         self.friction_nbr = np.array([i for j, i in enumerate(friction_nb_tmp) if j not in idx_remove])
-        if "water" in key_cpt.keys():
-            self.water = np.array([i for j, i in enumerate(water_tmp) if j not in idx_remove])
+        self.water = np.array([i for j, i in enumerate(water_tmp) if j not in idx_remove])
 
         return
 
@@ -268,7 +269,7 @@ class CPT:
 
         .. math::
 
-            \gamma = \gamma_{sat,ref} - \beta\left(\frac{(log\left(\frac{q_{t,ref}}{q_{t}}\right)}{(log\left(\frac{R_{f,ref}}{R_{f}}\right)}
+            \gamma = \gamma_{sat,ref} - \beta \left( \frac{\log \left( \frac{q_{t,ref}}{q_{t}} \right)}{\log \left(\frac{R_{f,ref}}{R_{f}}\right)} \right)
 
         Parameters
         ----------
@@ -279,8 +280,7 @@ class CPT:
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 36.
         .. [2] Lengkeek, A., de Greef, J., & Joosten, S. *CPT based unit weight estimation extended to soft organic soils and peat.* Proceedings of the 4th International Symposium on Cone Penetration Testing (CPT'18), 2018, pp: 389-394.
         """
-        import numpy as np 		
-
+        import numpy as np
         np.seterr(divide="ignore")
 
         # calculate unit weight according to Robertson & Cabal 2015
