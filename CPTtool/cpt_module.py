@@ -689,7 +689,7 @@ class CPT:
 
         # data
         y_data = self.depth
-        y_label = "Depth NAP [m]"
+        y_label = "Depth [m]"
 
         # set the color list
         colormap = plt.cm.gist_ncar
@@ -731,7 +731,7 @@ class CPT:
         y_data = self.depth
         l_name = ["Tip resistance", "Friction number", "Density", "Shear modulus", "Poisson ratio", "Damping"]
         x_label = ["Tip resistance [kPa]", "Friction number [-]", r"Density [kg/m$^{3}$]", "Shear modulus [kPa]", "Poisson ratio [-]", "Damping [%]"]
-        y_label = "Depth NAP [m]"
+        y_label = "Depth [m]"
 
         # set the color list
         colormap = plt.cm.gist_ncar
@@ -749,6 +749,8 @@ class CPT:
             plt.ylabel(y_label, fontsize=12)
             plt.grid()
             plt.legend(loc=1, prop={'size': 12})
+            # invert y axis
+            plt.gca().invert_yaxis()
 
         plt.tight_layout()
         # save the figure
@@ -773,15 +775,17 @@ class CPT:
         # first subplot - CPT
         # ax1 tip
         ax1.set_position([0.15, 0.1, 0.4, 0.8])
-        ax1.plot(self.tip, self.NAP, label="Tip resistance", color="b")
+        ax1.plot(self.tip, self.depth, label="Tip resistance", color="b")
         ax1.set_xlabel("Tip resistance [kPa]", fontsize=12)
-        ax1.set_ylabel("Depth NAP [m]", fontsize=12)
+        ax1.set_ylabel("Depth [m]", fontsize=12)
         ax1.set_xlim(left=0)
+        # invert y axis
+        ax1.invert_yaxis()
 
         # ax2 friction number
         ax2 = ax1.twiny()
         ax2.set_position([0.15, 0.1, 0.4, 0.8])
-        ax2.plot(self.friction_nbr, self.NAP, label="Friction number", color="r")
+        ax2.plot(self.friction_nbr, self.depth, label="Friction number", color="r")
         ax2.set_xlabel("Friction number [-]", fontsize=12)
         ax2.set_xlim(left=0)
 
@@ -805,23 +809,23 @@ class CPT:
         # ax3.xaxis.set_label_position('top')
 
         # thickness
-        diff_nap = np.diff(self.NAP)
+        diff_depth = np.diff(self.depth)
 
         # color the field
-        for i in range(len(self.NAP) - 1):
+        for i in range(len(self.depth) - 1):
             ax3.add_patch(patches.Rectangle(
-                (0, self.NAP[i]),
+                (0, self.depth[i]),
                 10.,
-                diff_nap[i],
+                diff_depth[i],
                 fill=True,
                 color=color_litho[litho[i] - 1]))
 
         # create legend for Robertson
         for i, c in enumerate(color_litho):
             ax3.add_patch(patches.Rectangle(
-                (16, ax1.get_ylim()[1]-.85 - 0.565 * i),
+                (16, ax1.get_ylim()[1] + .85 + 0.8 * i),
                 10.,
-                0.2,
+                0.4,
                 fill=True,
                 color=c,
                 clip_on=False))
