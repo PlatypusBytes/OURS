@@ -476,12 +476,38 @@ class CPT:
 
         .. math::
 
+            v_{s} = e^{\frac{\gamma_{sat} + 4.03}{4.17}} \cdot \left( \frac{\sigma_{v0}}{\sigma_{atm}} \right)^{0.25}
+
             v_{s} = 118.8 \cdot \log \left(f_{s} \right) + 18.5
+
+        * Andrus et al. [3]_:
+
+        .. math::
+
+            v_{s} = 2.27 \cdot q_{t}^{0.412} \cdot I_{c}^{0.989} \cdot D^{0.033} \cdot ASF  (Holocene)
+
+            v_{s} = 2.62 \cdot q_{t}^{0.395} \cdot I_{c}^{0.912} \cdot D^{0.124} \cdot SF   (Pleistocene)
+
+        * Zang & Tong [4]_:
+
+        .. math::
+
+            v_{s} = 10.915 \cdot q_{t}^{0.317} \cdot I_{c}^{0.210} \cdot D^{0.057} \cdot SF^{a}  (Holocene)
+
+        * Ahmed [5]_:
+
+        .. math::
+
+            v_{s} = 1000 \cdot e^{-0.887 \cdot I_{c}} \cdot \left( \left(1 + 0.443 \cdot F_{r} \right) \cdot \left(\frac{\sigma'_{v}}{p_{a}} \right) \cdot \left(\frac{\gamma_{w}}{\gamma} \right) \right)^{0.5}
+
 
         .. rubric:: References
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 48-50.
         .. [2] Mayne, P.W. *In-Situ Test Calibrations for Evaluating Soil Parameters.* Characterisation and enginering properties of natural soils, Volume 3.
                2006, pg: 1-56.
+        .. [3] Andrus, R.D., Mohanan, N.P., Piratheepan, P., et al. *Predicting shear-wave velocity from cone penetration resistance.* Proceedings, 4th International Conference on Earthquake Geotechnical Engineering. 2007.
+        .. [4] Zang, M. & Tong, L. *New statistical and graphical assessment of CPT-based empirical correlations for the shear wave velocity of soils* Engineering Geology 226 (2017) 184–191
+        .. [5] Ahmed, S.M. *Correlating the Shear Wave Velocity with the Cone Penetration Test.* Proceedings of the 2nd World Congress on Civil, Structural, and Environmental Engineering, 2017.
         """
         import numpy as np
 
@@ -492,13 +518,39 @@ class CPT:
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
-            self.vs = 118.8 * np.log(self.friction) + 18.5
+            #self.vs = 118.8 * np.log(self.friction) + 18.5
+            self.vs = np.e ** ((self.gamma + 4.03) / 4.17) * (self.total_stress / 100) ** 0.25
+            self.G0 = self.rho * self.vs ** 2
+        elif method == "Andrus":
+            # vs: following Andrus (2007)
+            #self.vs = 2.62 * self.qt ** 0.395 * self.IC ** 0.912 * self.depth ** 0.124 * 1
+            self.vs = 2.27 * self.qt ** 0.412 * self.IC ** 0.989 * self.depth ** 0.033 * 1
+            self.G0 = self.rho * self.vs ** 2
+        elif method == "Zang":
+            # vs: following Zang & Tong (2017)
+            self.vs = 10.915 * self.qt ** 0.317 * self.IC ** 0.210 * self.depth ** 0.057 * 0.92
+            self.G0 = self.rho * self.vs ** 2
+        elif method == "Ahmed":
+            self.vs = 1000 * np.e ** (-0.887 * self.IC) * (1 + 0.443 *self.Fr * self.effective_stress / 100 * 9.81 / self.gamma) ** 0.5
+            self.G0 = self.rho * self.vs ** 2
         elif method == "all":  # compares all and assumes default
             self.vs_calc(method="Mayne")
             vs1 = self.vs
+            G0_1 = self.G0
+            self.vs_calc(method="Andrus")
+            vs3 = self.vs
+            G0_3 = self.G0
+            self.vs_calc(method="Zang")
+            vs4 = self.vs
+            G0_4 = self.G0
+            self.vs_calc(method="Ahmed")
+            vs5 = self.vs
+            G0_5 = self.G0
             self.vs_calc(method="Robertson")
             vs2 = self.vs
-            self.plot_correlations([vs1, vs2], "Shear wave velocity [m/s]", ["Mayne", "Robertson"], "shear_wave")
+            G0_2 = self.G0
+            self.plot_correlations([vs1, vs2, vs3, vs4, vs5], "Shear wave velocity [m/s]", ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_wave")
+            self.plot_correlations([G0_1, G0_2, G0_3, G0_4, G0_5], "Shear modulus [kPa]", ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_modulus")
             pass
 
         return
