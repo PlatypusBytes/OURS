@@ -63,6 +63,7 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
         # cpt.merge_thickness(D_min)
         cpt.add_json(jsn, i)
         if make_plots:
+            cpt.write_csv()
             cpt.plot_cpt()
             cpt.plot_lithology()
         i += 1

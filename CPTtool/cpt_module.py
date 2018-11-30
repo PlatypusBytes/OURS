@@ -939,6 +939,41 @@ class CPT:
 
         return
 
+    def write_csv(self):
+        """
+        Write CSV file into output file.
+
+        Parameters
+        ----------
+        :param output_f: output folder
+        """
+
+        import os
+
+        # write csv
+        with open(os.path.join(self.output_folder, str(self.name) + ".csv"), "w") as fo:
+            fo.write("Depth NAP [m];Depth [m];tip [kPa];friction [kPa];friction number [-];lithology [-];gamma [kN/m3];"
+                     "total stress [-kPa];effective stress [kPa];Qtn [-];Fr [-];IC [-];vs [m/s];G0 [kPa];"
+                     "Poisson [-];Damping [%]\n")
+
+            for i in range(len(self.NAP)):
+                fo.write(str(self.NAP[i]) + ";" +
+                         str(self.depth[i]) + ";" +
+                         str(self.tip[i]) + ";" +
+                         str(self.friction[i]) + ";" +
+                         str(self.friction_nbr[i]) + ";" +
+                         str(self.lithology[i]) + ";" +
+                         str(self.gamma[i]) + ";" +
+                         str(self.total_stress[i]) + ";" +
+                         str(self.effective_stress[i]) + ";" +
+                         str(self.Qtn[i]) + ";" +
+                         str(self.Fr[i]) + ";" +
+                         str(self.IC[i]) + ";" +
+                         str(self.vs[i]) + ";" +
+                         str(self.G0[i]) + ";" +
+                         str(self.poisson[i]) + ";" +
+                         str(self.damping[i]) + '\n')
+        return
 
 def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     """
