@@ -631,23 +631,81 @@ class CPT:
         ----------
         :param min_layer_thick: Minimum layer thickness
         """
-        import numpy as np 		
+        import numpy as np
+        import numpy.core.multiarray as multiarray
 
-        z_ini = self.depth
-        label = self.lithology
-
-        a = False
+        depth = self.depth
+        lithology = self.lithology
+        # find location of the start of the soil types
+        aux = ""
+        idx = []
+        local_IC = []
+        # here the i is where I am in the Cpt , val is the value of the lithology which is a number coresponding to Robertson
+        # if the previous layer is not the same as the next save the position and save the value for the next step
+        for j, val in enumerate(lithology):
+            if val != aux:
+                aux = val
+                idx.append(j)
+        local_IC.append(self.IC[0])
+        for counter , value in enumerate(idx):
+            try:
+                local_IC.append(np.mean(self.IC[value:idx[counter+1]]))
+            except:
+                pass
+        # retrieve the depths of the indexes found
+        # z_ini - depth at the start of new layer
+        local_z_ini = [depth[i] for i in idx]
+        # thickness between those layers calculated
+        local_thick = np.diff(local_z_ini)
+        # soil type
+        local_label = [lithology[i] for i in idx]
+        j = 0
         i = 0
-        while not a:
-            thick, z_ini, label = merge(float(min_layer_thick), z_ini, label)
-            if np.min(thick) >= float(min_layer_thick):
-                break
-            i += 1
-        self.lithology_json = label
-        self.depth_json = z_ini
-        idx = [int(np.where(self.depth == i)[0][0]) for i in z_ini]
-        idx.append(len(self.depth))
-        self.indx_json = idx
+        idx_counter = 0
+        dif_bc = 1
+        dif_fw = 0
+        new_thickness = np.zeros(len(idx))
+        new_top = np.zeros(len(idx))
+        new_index = np.zeros(len(idx))
+        new_label = np.empty(len(idx), dtype="U10")
+        while j >= 0:
+            a = False # Condition for minimum thickness
+            while not a:
+                if j == len(idx)-1:
+                    break
+                if j is not 0 :
+                    dif_fw = abs(local_IC[j] - local_IC[j + 1])
+                    dif_bc = abs(local_IC[j] - local_IC[j - 1])
+                if dif_fw > dif_bc :
+                    if new_thickness[i-1] > float(min_layer_thick):
+                        id = i-1
+                    else:
+                        id = i
+                else:
+                    id = i
+                new_thickness[id] += local_thick[j]
+                new_label[id] += '/'+local_label[j]
+                j += 1
+                idx_counter += 1
+                if new_thickness[i] >= float(min_layer_thick):
+                    new_top[i] = local_z_ini[j-idx_counter]
+                    new_index[i] = int(idx[j-idx_counter])
+                    a = True
+                    i += 1
+                    idx_counter = 0
+            else:
+                continue  
+            break
+        new_top[i] = local_z_ini[j - idx_counter]
+        new_index[i] = idx[j - idx_counter]
+        new_thickness = np.trim_zeros(new_thickness, 'b')
+        new_top = np.trim_zeros(new_top, 'b')
+        new_index = np.trim_zeros(new_index,'b')
+        new_label =  new_label[:len(new_thickness)]
+        new_index = [int(i) for i in new_index]
+        self.lithology_json = new_label
+        self.depth_json = new_top
+        self.indx_json = new_index
 
         return
 
@@ -1023,14 +1081,16 @@ def merge(min_thick, depth, lithology):
     # find location of the start of the soil types
     aux = ""
     idx = []
+    # here the i is where I am in the Cpt , val is the value of the lithology which is a number coresponding to Robertson
+    # if the previous layer is not the same as the next save the position and save the value for the next step
     for i, val in enumerate(lithology):
         if val != aux:
             aux = val
             idx.append(i)
-
+    # retrieve the depths of the indexes found
     # z_ini - depth at the start of new layer
     z_ini = [depth[i] for i in idx]
-    # thickness
+    # thickness between those layers calculated
     thick = np.diff(z_ini)
     # soil type
     label = [lithology[i] for i in idx]
