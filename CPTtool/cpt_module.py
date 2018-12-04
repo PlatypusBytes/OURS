@@ -634,6 +634,7 @@ class CPT:
         import numpy as np
         import numpy.core.multiarray as multiarray
 
+
         depth = self.depth
         lithology = self.lithology
         # find location of the start of the soil types
@@ -646,17 +647,18 @@ class CPT:
             if val != aux:
                 aux = val
                 idx.append(j)
-        local_IC.append(self.IC[0])
-        for counter , value in enumerate(idx):
-            try:
-                local_IC.append(np.mean(self.IC[value:idx[counter+1]]))
-            except:
-                pass
+        target_idx = idx[1:]
+        for i in range(len(idx)):
+            if i == len(idx)-1:
+                local_IC.append(np.mean(self.IC[idx[i]:]))
+            else:
+                local_IC.append(np.mean(self.IC[idx[i]:target_idx[i]]))
         # retrieve the depths of the indexes found
         # z_ini - depth at the start of new layer
         local_z_ini = [depth[i] for i in idx]
         # thickness between those layers calculated
-        local_thick = np.diff(local_z_ini)
+        local_thick = list(np.diff(local_z_ini)),[depth[-1] - local_z_ini[-1]]
+        local_thick = sum(local_thick,[])
         # soil type
         local_label = [lithology[i] for i in idx]
         j = 0
@@ -668,16 +670,18 @@ class CPT:
         new_top = np.zeros(len(idx))
         new_index = np.zeros(len(idx))
         new_label = np.empty(len(idx), dtype="U10")
-        while j >= 0:
+        while j is not len(idx):
             a = False # Condition for minimum thickness
             while not a:
-                if j == len(idx)-1:
-                    break
                 if j is not 0 :
-                    dif_fw = abs(local_IC[j] - local_IC[j + 1])
-                    dif_bc = abs(local_IC[j] - local_IC[j - 1])
+                    if j == len(idx)-1:
+                       dif_fw = dif_bc - 1
+                    else:
+                       dif_fw = abs(local_IC[j] - local_IC[j + 1])
+                       dif_bc = abs(local_IC[j] - local_IC[j - 1])
+
                 if dif_fw > dif_bc :
-                    if new_thickness[i-1] > float(min_layer_thick):
+                    if new_thickness[i-1] >= float(min_layer_thick):
                         id = i-1
                     else:
                         id = i
@@ -686,23 +690,19 @@ class CPT:
                 new_thickness[id] += local_thick[j]
                 new_label[id] += '/'+local_label[j]
                 j += 1
-                idx_counter += 1
+                idx_counter += 1 # this is the counter for how many indexes have been merged for one layer
                 if new_thickness[i] >= float(min_layer_thick):
-                    new_top[i] = local_z_ini[j-idx_counter]
-                    new_index[i] = int(idx[j-idx_counter])
                     a = True
                     i += 1
                     idx_counter = 0
-            else:
-                continue  
-            break
-        new_top[i] = local_z_ini[j - idx_counter]
-        new_index[i] = idx[j - idx_counter]
+        new_top = sum([[depth[0]],list(new_thickness[:-2])],[])
+        # fill up the indexes
+        for counter , value in enumerate(new_top):
+            new_index[counter] = int(depth.index(value))
         new_thickness = np.trim_zeros(new_thickness, 'b')
         new_top = np.trim_zeros(new_top, 'b')
         new_index = np.trim_zeros(new_index,'b')
         new_label =  new_label[:len(new_thickness)]
-        new_index = [int(i) for i in new_index]
         self.lithology_json = new_label
         self.depth_json = new_top
         self.indx_json = new_index
