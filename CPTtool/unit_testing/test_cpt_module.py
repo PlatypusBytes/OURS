@@ -42,15 +42,39 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(local_gamma, self.cpt.gamma)
         return
 
+    def test_merge_thickness_1(self):
+        min_layer_thick = 0.5
+        self.cpt.depth = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1]
+        self.cpt.lithology = ['0','0','0','0','0','1','2','2','2','2','2','2']
+        self.cpt.IC = [0.5,0.5,0.5,0.5,0.5,1,3,3,3,3,3,3]
+        merged = self.cpt.merge_thickness(min_layer_thick)
+        depth_test = [0.0,0.6]
+        test_lithology = ['/0/1','/2']
+        test_index = [0,6]
+        np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
+        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
+        np.testing.assert_array_equal(test_index, self.cpt.indx_json)
+
+        self.cpt.IC = [3,3,3,3,3,1,0.5,0.5,0.5,0.5,0.5,0.5]
+        merged = self.cpt.merge_thickness(min_layer_thick)
+        depth_test = [0.0,0.5]
+        test_lithology = ['/0','/1/2']
+        test_index = [0,5]
+        np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
+        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
+        np.testing.assert_array_equal(test_index, self.cpt.indx_json)
+
+        return
+
     def tearDown(self):
         return
 
 
 if __name__ == '__main__':  # pragma: no cover
-    from teamcity import is_running_under_teamcity
-    if is_running_under_teamcity():
-        from teamcity.unittestpy import TeamcityTestRunner
-        runner = TeamcityTestRunner()
-    else:
-        runner = unittest.TextTestRunner()
+#    from teamcity import is_running_under_teamcity
+#    if is_running_under_teamcity():
+#        from teamcity.unittestpy import TeamcityTestRunner
+#        runner = TeamcityTestRunner()
+#   else:
+    runner = unittest.TextTestRunner()
     unittest.main(testRunner=runner)
