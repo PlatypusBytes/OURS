@@ -158,7 +158,7 @@ class CPT:
 
         # assign variables
         self.name = gef_file_name
-        self.coord = data[idx_coord].split(',')[1:3]
+        self.coord = list(map(float, data[idx_coord].split(',')[1:3]))
 
         self.depth = np.array([np.abs(i) for j, i in enumerate(depth_tmp) if j not in idx_remove])
         self.depth -= self.depth[0]
