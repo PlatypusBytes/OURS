@@ -43,8 +43,7 @@ class Robertson:
         """
 
         import numpy as np
-        import numpy.core.multiarray as multiarray
-        from shapely.geometry import Point,Polygon
+        from shapely.geometry import Point, Polygon
         line1 = [[0.1, 1.],
                  [0.1, 10.]]
 
@@ -367,7 +366,6 @@ class Robertson:
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 26.
         """
         import numpy as np
-        import numpy.core.multiarray as multiarray
         from shapely.geometry import Point
 
         litho = [""] * len(Qtn)
