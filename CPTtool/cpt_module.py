@@ -90,20 +90,20 @@ class CPT:
             self.log_file.error_message("file " + gef_file_name + " contains no coordinates")
             return False
         # search index depth
-        idx_depth = [int(val.split(',')[0][-1]) - 1 for i, val in enumerate(data)
+        idx_depth = [int(val.split(',')[0].split("=")[-1]) - 1 for i, val in enumerate(data)
                      if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['depth'])][0]
         # search index tip resistance
-        idx_tip = [int(val.split(',')[0][-1]) - 1 for i, val in enumerate(data)
+        idx_tip = [int(val.split(',')[0].split("=")[-1]) - 1 for i, val in enumerate(data)
                    if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['tip'])][0]
         # search index friction
-        idx_friction = [int(val.split(',')[0][-1]) - 1 for i, val in enumerate(data)
+        idx_friction = [int(val.split(',')[0].split("=")[-1]) - 1 for i, val in enumerate(data)
                         if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['friction'])][0]
         # search index friction number
-        idx_friction_nb = [int(val.split(',')[0][-1]) - 1 for i, val in enumerate(data) if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['friction_nb'])][0]
+        idx_friction_nb = [int(val.split(',')[0].split("=")[-1]) - 1 for i, val in enumerate(data) if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['friction_nb'])][0]
 
         # search index water if water sensor is available:
         try:
-            idx_water = [int(val.split(',')[0][-1]) - 1 for i, val in enumerate(data) if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['water'])][0]
+            idx_water = [int(val.split(',')[0].split("=")[-1]) - 1 for i, val in enumerate(data) if val.startswith(r'#COLUMNINFO=') and int(val.split(',')[-1]) == int(key_cpt['water'])][0]
         except IndexError:
             idx_water = False
         # rewrite data with separator ;
