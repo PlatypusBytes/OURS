@@ -643,6 +643,8 @@ class CPT:
         Parameters
         ----------
         :param min_layer_thick: Minimum layer thickness
+
+
         """
         import numpy as np
         import numpy.core.multiarray as multiarray
@@ -674,20 +676,23 @@ class CPT:
         local_thick = sum(local_thick,[])
         # soil type
         local_label = [lithology[i] for i in idx]
-        j = 0
-        i = 0
-        idx_counter = 0
-        dif_bc = 1
-        dif_fw = 0
-        new_thickness = np.zeros(len(idx))
-        new_top = np.zeros(len(idx))
-        new_index = np.zeros(len(idx))
-        new_label = np.empty(len(idx), dtype="U10")
-        while j is not len(idx):
-            a = False # Condition for minimum thickness
-            while not a:
-                if j is not 0 :
-                    if j == len(idx)-1:
+
+        # Initialise all the parameter and arrays
+        j = 0 # counter for the unmerged layers
+        i = 0 # counter for the merged layers
+        dif_bc = 1 # The difference between the IC values with the previous layer
+        dif_fw = 0 # The difference between the IC values with the next layer
+        new_thickness = np.zeros(len(idx)) # The thickness of the layers after merging
+        new_label = np.empty(len(idx), dtype="U10") # The Robertson's value of the layers after merging
+        # Set stopping conditions
+        conditionLastIndexValue = len(idx)
+        conditionFirstIndexValue = 0
+        conditionSecondToLastValue = len(idx)-1
+        while j is not conditionLastIndexValue:
+            conditionNextMergedLayer = False # Condition for minimum thickness
+            while not conditionNextMergedLayer:
+                if j is not conditionFirstIndexValue :
+                    if j == conditionSecondToLastValue:
                        dif_fw = dif_bc - 1
                     else:
                        dif_fw = abs(local_IC[j] - local_IC[j + 1])
@@ -703,18 +708,21 @@ class CPT:
                 new_thickness[id] += local_thick[j]
                 new_label[id] += '/'+local_label[j]
                 j += 1
-                idx_counter += 1 # this is the counter for how many indexes have been merged for one layer
+                if j == len(idx):
+                    break
                 if new_thickness[i] >= float(min_layer_thick):
-                    a = True
+                    conditionNextMergedLayer = True
                     i += 1
-                    idx_counter = 0
-        new_top = sum([[depth[0]],list(new_thickness[:-2])],[])
-        # fill up the indexes
-        for counter , value in enumerate(new_top):
-            new_index[counter] = int(depth.index(value))
+            else:
+                continue
         new_thickness = np.trim_zeros(new_thickness, 'b')
+        new_top = sum([[depth[0]],np.cumsum(new_thickness).tolist()],[])
+        # fill up the indexes
+        new_index = []
+        for counter, value in enumerate(idx):
+            if depth[int(value)] in new_top:
+                new_index.append(int(value))
         new_top = np.trim_zeros(new_top, 'b')
-        new_index = np.trim_zeros(new_index,'b')
         new_label =  new_label[:len(new_thickness)]
         self.lithology_json = new_label
         self.depth_json = new_top
