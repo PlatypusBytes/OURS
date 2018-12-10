@@ -42,7 +42,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(local_gamma, self.cpt.gamma)
         return
 
-    def test_merge_thickness_1(self):
+    def test_merge_thickness(self):
         min_layer_thick = 0.5
         self.cpt.depth = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1]
         self.cpt.lithology = ['0','0','0','0','0','1','2','2','2','2','2','2']
@@ -66,15 +66,42 @@ class TestCptModule(unittest.TestCase):
 
         return
 
+    def test_lithology_calc(self):
+        self.Qtn = [2,2,7,7,20,100,900,700,700]
+        self.Fr = [0.2,9,10,1,0.2,0.5,0.2,3,9]
+        lithology_test =[1,2,3,4,5,6,7,8,9]
+        lithology_result = self.cpt.lithology_calc()
+        np.testing.assert_array_equal(lithology_test, self.cpt.lithology)
+        return
+
+    # def test_stress_calc(self, z_pwp):
+    #     return
+    #
+    # def test_norm_calc(self, n_method=False):
+    #     return
+    #
+    # def test_IC_calc(self):
+    #     return
+    #
+    # def test_vs_calc(self, method="Robertson"):
+    #     return
+    #
+    # def test_poisson_calc(self):
+    #     return
+    #
+    # def test_n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
+    #     return
+
+
     def tearDown(self):
         return
 
 
 if __name__ == '__main__':  # pragma: no cover
-#    from teamcity import is_running_under_teamcity
-#    if is_running_under_teamcity():
-#        from teamcity.unittestpy import TeamcityTestRunner
-#        runner = TeamcityTestRunner()
-#   else:
-    runner = unittest.TextTestRunner()
-    unittest.main(testRunner=runner)
+    from teamcity import is_running_under_teamcity
+    if is_running_under_teamcity():
+        from teamcity.unittestpy import TeamcityTestRunner
+        runner = TeamcityTestRunner()
+    else:
+        runner = unittest.TextTestRunner()
+        unittest.main(testRunner=runner)
