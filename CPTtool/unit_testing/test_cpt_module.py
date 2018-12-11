@@ -11,7 +11,10 @@ import numpy as np
 class TestCptModule(unittest.TestCase):
     def setUp(self):
         import cpt_module
-        self.cpt = cpt_module.CPT("./")
+        import log_handler
+        self.log_file = log_handler.LogFile("./results")
+
+        self.cpt = cpt_module.CPT("./", self.log_file)
         pass
 
     def test_rho_calculation(self):
@@ -48,7 +51,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.lithology = ['0','0','0','0','0','1','2','2','2','2','2','2']
         self.cpt.IC = [0.5,0.5,0.5,0.5,0.5,1,3,3,3,3,3,3]
         merged = self.cpt.merge_thickness(min_layer_thick)
-        depth_test = [0.0,0.6]
+        depth_test = [0.0,0.6,1.1]
         test_lithology = ['/0/1','/2']
         test_index = [0,6]
         np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
@@ -57,43 +60,112 @@ class TestCptModule(unittest.TestCase):
 
         self.cpt.IC = [3,3,3,3,3,1,0.5,0.5,0.5,0.5,0.5,0.5]
         merged = self.cpt.merge_thickness(min_layer_thick)
-        depth_test = [0.0,0.5]
+        depth_test = [0.0,0.5,1.1]
         test_lithology = ['/0','/1/2']
         test_index = [0,5]
         np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
         np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
         np.testing.assert_array_equal(test_index, self.cpt.indx_json)
-
         return
 
     def test_lithology_calc(self):
-        self.Qtn = [2,2,7,7,20,100,900,700,700]
-        self.Fr = [0.2,9,10,1,0.2,0.5,0.2,3,9]
-        lithology_test =[1,2,3,4,5,6,7,8,9]
-        lithology_result = self.cpt.lithology_calc()
+
+        self.cpt.Qtn = [2,2,10,7,20,100,900,700,700]
+        self.cpt.Fr = [0.2,9,8,1,0.2,0.5,0.2,3,9]
+        self.cpt.unit_testing = True
+        lithology_test =['1','2','3','4','5','6','7','8','9']
+        self.cpt.lithology_calc()
         np.testing.assert_array_equal(lithology_test, self.cpt.lithology)
         return
 
-    # def test_stress_calc(self, z_pwp):
-    #     return
-    #
-    # def test_norm_calc(self, n_method=False):
-    #     return
-    #
-    # def test_IC_calc(self):
-    #     return
-    #
-    # def test_vs_calc(self, method="Robertson"):
-    #     return
-    #
-    # def test_poisson_calc(self):
-    #     return
-    #
-    # def test_n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
-    #     return
+    def test_stress_calc(self):
+         self.cpt.depth = np.arange(0,2,0.1)
+         self.cpt.gamma = [20,20,20,20,20,20,20,20,20,20,15,15,15,15,15,15,15,15,15,15]
+         self.cpt.NAP = np.zeros(20)
+         z_pwp = 0
+         self.cpt.stress_calc(z_pwp)
+         effective_stress_test = [2.,4.,6.,8.,10.,12.,14.,16.,18.,20.,21.5,23.,24.5,26.,27.5,29.,30.5,32.,33.5,35.]
+
+         np.testing.assert_array_equal(effective_stress_test,list(np.around(self.cpt.effective_stress,1)) )
+         return
+
+    def test_norm_calc(self):
+         import csv
+         test_Qtn ,total_stress, effective_stress ,Pa , tip ,friction = [] ,[],[],[],[],[]
+         test_Fr = []
+
+         with open('test_norm_calc.csv') as csv_file:
+             csv_reader = csv.reader(csv_file, delimiter=';')
+             line_count = 0
+             for row in csv_reader:
+                 if line_count != 0:
+                     total_stress.append(float(row[0]))
+                     effective_stress.append(float(row[1]))
+                     Pa.append(float(row[2]))
+                     tip.append(float(row[3]))
+                     friction.append(float(row[4]))
+                     test_Qtn.append(float(row[5]))
+                     test_Fr.append(float(row[6]))
+                 line_count += 1
+         self.cpt.total_stress = np.array(total_stress)
+         self.cpt.effective_stress = np.array(effective_stress)
+         self.cpt.Pa = np.array(Pa)
+         self.cpt.tip = np.array(tip)
+         self.cpt.friction = np.array(friction)
+         self.cpt.norm_calc(n_method=True)
+         np.testing.assert_array_equal(test_Qtn,self.cpt.Qtn)
+         np.testing.assert_array_equal(test_Fr, self.cpt.Fr)
+         return
+
+    def test_IC_calc(self):
+        test_IC = [3.697093]
+        self.cpt.Qtn = [1]
+        self.cpt.Fr = [1]
+        self.cpt.IC_calc()
+        np.testing.assert_array_equal(list(np.around(np.array(test_IC),1)), list(np.around(self.cpt.IC,1)))
+        return
+
+    def test_vs_calc(self):
+        self.cpt.IC = np.array([1])
+        self.cpt.Qtn = np.array([1])
+        self.cpt.rho = np.array([1])
+        self.cpt.total_stress = np.array([1])
+        self.cpt.tip = np.array([2])
+        self.cpt.Pa = np.array([1])
+        test_alpha_vs = 10**(0.55*self.cpt.IC+1.68)
+        test_vs = (test_alpha_vs*(self.cpt.tip- self.cpt.total_stress)/self.cpt.Pa)**0.5
+        test_GO = self.cpt.rho* test_vs**2
+        self.cpt.vs_calc(method="Robertson")
+        np.testing.assert_array_equal(test_vs, self.cpt.vs)
+        np.testing.assert_array_equal(test_GO, self.cpt.G0)
+        return
+
+    def test_poisson_calc(self):
+        self.cpt.lithology = ['1','2','3','4','5']
+        test_poisson = [0.5,0.5,0.5,0.2,0.2]
+        self.cpt.poisson_calc()
+        np.testing.assert_array_equal(test_poisson, self.cpt.poisson)
+        return
+    def test_damp_calc(self):
+        self.cpt.lithology = ['1','2','3','4','5','6','7','8','9',]
+        test_damping = np.zeros(9)
+        self.cpt.damp_calc()
+        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        return
+    def test_qt_calc(self):
+        self.cpt.tip =np.array( [1])
+        self.cpt.water = np.array( [1])
+        self.cpt.a =np.array( [1])
+        test_qt = np.array( [1])
+        self.cpt.qt_calc()
+        np.testing.assert_array_equal(test_qt, self.cpt.qt)
+        return
 
 
     def tearDown(self):
+        import os
+        self.log_file.close()
+        os.remove("./results/log_file.txt")
         return
 
 
