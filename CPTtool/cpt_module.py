@@ -36,6 +36,7 @@ class CPT:
         self.lithology_json = []
         self.depth_json = []
         self.indx_json = []
+        self.unit_testing = False
 
         # checks if file_path exits. If not creates file_path
         if not os.path.exists(out_fold):
@@ -186,7 +187,10 @@ class CPT:
         classification.soil_types()
 
         # compute Qtn and Fr
-        self.norm_calc()
+        if self.unit_testing is True:
+            pass
+        else:
+            self.norm_calc()
 
         litho, points = classification.lithology(self.Qtn, self.Fr)
 
@@ -527,7 +531,7 @@ class CPT:
         if method == "Robertson":
             # vs: following Robertson and Cabal (2015)
             alpha_vs = 10 ** (0.55 * self.IC + 1.68)
-            self.vs = (alpha_vs * self.Qtn)**0.5
+            self.vs = (alpha_vs * (self.tip-self.total_stress)/self.Pa)**0.5
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
