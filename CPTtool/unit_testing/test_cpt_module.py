@@ -186,6 +186,32 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(test_qt, self.cpt.qt)
         return
 
+    def test_write_csv(self):
+        self.cpt.name = 'UNIT_TEST'
+        self.cpt.write_csv()
+        import os.path
+        self.assertTrue(os.path.isfile('UNIT_TEST.csv'))
+        return
+    def test_plot_lithology(self):
+        self.cpt.name = 'UNIT_TEST'
+        self.cpt.plot_lithology()
+        import os.path
+        self.assertTrue(os.path.isfile('UNIT_TEST_lithology.png'))
+        return
+
+    def test_plot_cpt(self):
+        self.cpt.name = 'UNIT_TEST'
+        self.cpt.plot_cpt()
+        import os.path
+        self.assertTrue(os.path.isfile('UNIT_TEST_cpt.png'))
+        return
+
+    def test_plot_correlations(self):
+        self.cpt.name = 'UNIT_TEST'
+        self.cpt.plot_correlations([],'Correlations' , 'Correlations', 'Correlations')
+        import os.path
+        self.assertTrue(os.path.isfile('UNIT_TEST_Correlations.png'))
+        return
 
     def tearDown(self):
         import os
