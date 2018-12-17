@@ -6,7 +6,7 @@ sys.path.append('../')
 import unittest
 import cpt_module
 import numpy as np
-
+import cpt_tool
 
 class TestCptModule(unittest.TestCase):
     def setUp(self):
@@ -16,6 +16,31 @@ class TestCptModule(unittest.TestCase):
 
         self.cpt = cpt_module.CPT("./", self.log_file)
         pass
+
+    def test_read_gef(self):
+        gef_file = 'unit_testing.gef'
+        key_cpt = cpt_tool.set_key()
+        self.cpt.read_gef(gef_file, key_cpt)
+        test_name = 'UNIT_TESTING'
+        test_coord = [244319.00, 587520.00]
+
+        test_depth = range(20)
+        test_NAP = test_depth*np.full(20,-1) + np.full(20,-0.87)
+        test_tip = np.full(20,1000)
+        test_friction = np.full(20,2000)
+        test_friction_nbr = np.full(20,5)
+        test_water = np.full(20,3000)
+
+        np.testing.assert_array_equal(test_name, self.cpt.name)
+        np.testing.assert_array_equal(test_coord, self.cpt.coord)
+        np.testing.assert_array_equal(test_depth, self.cpt.depth)
+        np.testing.assert_array_equal(test_NAP, self.cpt.NAP)
+        np.testing.assert_array_equal(test_tip, self.cpt.tip)
+        np.testing.assert_array_equal(test_friction, self.cpt.friction)
+        np.testing.assert_array_equal(test_friction_nbr, self.cpt.friction_nbr)
+        np.testing.assert_array_equal(test_water, self.cpt.water)
+
+        return
 
     def test_rho_calculation(self):
         self.cpt.gamma = np.ones(10)
