@@ -276,6 +276,13 @@ class TestCptModule(unittest.TestCase):
         self.assertTrue(os.path.isfile('UNIT_TEST_Correlations.png'))
         return
 
+    def test_dump_json(self):
+        jsn = {}
+        i = 1
+        jsn = self.cpt.add_json(jsn, i)
+        self.cpt.dump_json(jsn)
+        return
+
     def tearDown(self):
         import os
         self.log_file.close()
