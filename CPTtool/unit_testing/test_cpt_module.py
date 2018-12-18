@@ -40,6 +40,24 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(test_friction_nbr, self.cpt.friction_nbr)
         np.testing.assert_array_equal(test_water, self.cpt.water)
 
+        # Exceptions tested
+        gef_file = 'Exception_NoNAP.gef'
+        self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
+        gef_file = 'Exception_NoCoord.gef'
+        self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
+        gef_file = 'Exception_NoLength.gef'
+        self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
+        gef_file = 'Exception_NoTip.gef'
+        self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
+        gef_file = 'Exception_NoFriction.gef'
+        self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
+        gef_file = 'Exception_NoFrictionNumber.gef'
+        self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
+        gef_file = 'Exception_NoWater.gef'
+        self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
+        gef_file = 'Exception_9999.gef'
+        self.assertTrue(self.cpt.read_gef(gef_file, key_cpt))
+
         return
 
     def test_rho_calculation(self):
@@ -59,15 +77,26 @@ class TestCptModule(unittest.TestCase):
         self.cpt.friction_nbr = np.ones(10)
         self.cpt.qt = np.ones(10)
         self.cpt.Pa = 100
-        # Exact solution
+        self.cpt.depth = range(10)
+        self.cpt.name = 'UNIT_TEST'
         np.seterr(divide="ignore")
+        # Exact solution Robertson
         aux = 0.27*np.log10(np.ones(10))+0.36*(np.log10(np.ones(10)/ 100))+1.236
         aux[np.abs(aux) == np.inf] = gamma_limit / 9.81
-        local_gamma = aux * 9.81
-
+        local_gamma1 = aux * 9.81
         self.cpt.gamma_calc(gamma_limit)
+        np.testing.assert_array_equal(local_gamma1, self.cpt.gamma)
 
-        np.testing.assert_array_equal(local_gamma, self.cpt.gamma)
+        # Exact solution Lengkeek
+        local_gamma2 = 19 - 4.12*((np.log10(5000/self.cpt.qt))/(np.log10(30/self.cpt.friction_nbr)))
+        self.cpt.gamma_calc(gamma_limit,method='Lengkeek')
+        np.testing.assert_array_equal(local_gamma2, self.cpt.gamma)
+
+        #all of them
+        self.cpt.gamma_calc(gamma_limit, method='all')
+
+        import os.path
+        self.assertTrue(os.path.isfile('UNIT_TEST_unit_weight.png'))
         return
 
     def test_merge_thickness(self):
@@ -93,15 +122,6 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(test_index, self.cpt.indx_json)
         return
 
-    def test_lithology_calc(self):
-
-        self.cpt.Qtn = [2,2,10,7,20,100,900,700,700]
-        self.cpt.Fr = [0.2,9,8,1,0.2,0.5,0.2,3,9]
-        self.cpt.unit_testing = True
-        lithology_test =['1','2','3','4','5','6','7','8','9']
-        self.cpt.lithology_calc()
-        np.testing.assert_array_equal(lithology_test, self.cpt.lithology)
-        return
 
     def test_stress_calc(self):
          self.cpt.depth = np.arange(0,2,0.1)
@@ -137,9 +157,15 @@ class TestCptModule(unittest.TestCase):
          self.cpt.Pa = np.array(Pa)
          self.cpt.tip = np.array(tip)
          self.cpt.friction = np.array(friction)
+         self.cpt.friction_nbr = np.array(friction)
          self.cpt.norm_calc(n_method=True)
          np.testing.assert_array_equal(test_Qtn,self.cpt.Qtn)
          np.testing.assert_array_equal(test_Fr, self.cpt.Fr)
+
+         self.cpt.norm_calc(n_method=False)
+         np.testing.assert_array_equal(test_Qtn,self.cpt.Qtn)
+         np.testing.assert_array_equal(test_Fr, self.cpt.Fr)
+
          return
 
     def test_IC_calc(self):
@@ -155,14 +181,51 @@ class TestCptModule(unittest.TestCase):
         self.cpt.Qtn = np.array([1])
         self.cpt.rho = np.array([1])
         self.cpt.total_stress = np.array([1])
+        self.cpt.effective_stress = np.array([1])
         self.cpt.tip = np.array([2])
+        self.cpt.qt = np.array([2])
         self.cpt.Pa = np.array([1])
+        self.cpt.gamma = np.array([10])
+        self.cpt.vs = np.array([1])
+        self.cpt.depth = np.array([1])
+        self.cpt.Fr =  np.array([1])
+        self.cpt.name = "UNIT_TESTING"
+        # Robertson
         test_alpha_vs = 10**(0.55*self.cpt.IC+1.68)
         test_vs = (test_alpha_vs*(self.cpt.tip- self.cpt.total_stress)/self.cpt.Pa)**0.5
         test_GO = self.cpt.rho* test_vs**2
         self.cpt.vs_calc(method="Robertson")
         np.testing.assert_array_equal(test_vs, self.cpt.vs)
         np.testing.assert_array_equal(test_GO, self.cpt.G0)
+        # Mayne
+        test_vs = np.e**((self.cpt.gamma+4.03)/4.17)*(self.cpt.total_stress/100)**0.25
+        test_GO = self.cpt.rho * test_vs ** 2
+        self.cpt.vs_calc(method="Mayne")
+        self.assertEqual(test_vs[0],self.cpt.vs[0])
+        np.testing.assert_array_equal(test_GO, self.cpt.G0)
+        # Andrus
+        test_vs = 2.27 * self.cpt.qt**0.412 * self.cpt.IC**0.989 * self.cpt.depth **0.033*1
+        test_GO = self.cpt.rho * test_vs ** 2
+        self.cpt.vs_calc(method="Andrus")
+        self.assertEqual(test_vs[0], self.cpt.vs[0])
+        np.testing.assert_array_equal(test_GO, self.cpt.G0)
+        # Zang
+        test_vs = 10.915* self.cpt.tip**0.317 * self.cpt.IC**0.21*  self.cpt.depth**0.057*0.92
+        test_GO = self.cpt.rho * test_vs ** 2
+        self.cpt.vs_calc(method="Zang")
+        self.assertEqual(test_vs[0], self.cpt.vs[0])
+        np.testing.assert_array_equal(test_GO, self.cpt.G0)
+        # Ahmed
+        test_vs = 1000*np.e**(-0.887* self.cpt.IC)*(1+0.443*self.cpt.Fr*self.cpt.effective_stress/100*9.81/self.cpt.gamma)**0.5
+        test_GO = self.cpt.rho * test_vs ** 2
+        self.cpt.vs_calc(method="Ahmed")
+        self.assertEqual(test_vs[0], self.cpt.vs[0])
+        np.testing.assert_array_equal(test_GO, self.cpt.G0)
+        # All
+        self.cpt.vs_calc(method="all")
+        import os
+        self.assertTrue(os.path.isfile("UNIT_TESTING_shear_modulus.png"))
+        self.assertTrue(os.path.isfile("UNIT_TESTING_shear_wave.png"))
         return
 
     def test_poisson_calc(self):
