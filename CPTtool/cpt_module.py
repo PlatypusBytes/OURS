@@ -187,10 +187,7 @@ class CPT:
         classification.soil_types()
 
         # compute Qtn and Fr
-        if self.unit_testing is True:
-            pass
-        else:
-            self.norm_calc()
+        self.norm_calc()
 
         litho, points = classification.lithology(self.Qtn, self.Fr)
 
@@ -651,7 +648,6 @@ class CPT:
 
         """
         import numpy as np
-        import numpy.core.multiarray as multiarray
 
 
         depth = self.depth
@@ -672,8 +668,7 @@ class CPT:
                 local_IC.append(np.mean(self.IC[idx[i]:]))
             else:
                 local_IC.append(np.mean(self.IC[idx[i]:target_idx[i]]))
-        # retrieve the depths of the indexes found
-        # z_ini - depth at the start of new layer
+
         local_z_ini = [depth[i] for i in idx]
         # thickness between those layers calculated
         local_thick = list(np.diff(local_z_ini)),[depth[-1] - local_z_ini[-1]]
@@ -681,55 +676,39 @@ class CPT:
         # soil type
         local_label = [lithology[i] for i in idx]
 
-        # Initialise all the parameter and arrays
-        j = 0 # counter for the unmerged layers
-        i = 0 # counter for the merged layers
-        dif_bc = 1 # The difference between the IC values with the previous layer
-        dif_fw = 0 # The difference between the IC values with the next layer
-        new_thickness = np.zeros(len(idx)) # The thickness of the layers after merging
-        new_label = np.empty(len(idx), dtype="U10") # The Robertson's value of the layers after merging
-        # Set stopping conditions
-        conditionLastIndexValue = len(idx)
-        conditionFirstIndexValue = 0
-        conditionSecondToLastValue = len(idx)-1
-        while j is not conditionLastIndexValue:
-            conditionNextMergedLayer = False # Condition for minimum thickness
-            while not conditionNextMergedLayer:
-                if j is not conditionFirstIndexValue :
-                    if j == conditionSecondToLastValue:
-                       dif_fw = dif_bc - 1
-                    else:
-                       dif_fw = abs(local_IC[j] - local_IC[j + 1])
-                       dif_bc = abs(local_IC[j] - local_IC[j - 1])
-
-                if dif_fw > dif_bc :
-                    if new_thickness[i-1] >= float(min_layer_thick):
-                        id = i-1
-                    else:
-                        id = i
-                else:
-                    id = i
-                new_thickness[id] += local_thick[j]
-                new_label[id] += '/'+local_label[j]
-                j += 1
-                if j == len(idx):
-                    break
-                if new_thickness[i] >= float(min_layer_thick):
-                    conditionNextMergedLayer = True
-                    i += 1
+        IC_checker = [['next','back'][abs(local_IC[i]-local_IC[i+1]) > abs(local_IC[i-1]-local_IC[i])] for i in range(1,len(local_IC)-1)]
+        IC_checker.insert(0,'next')
+        IC_checker.append('back')
+        now_thickness = 0
+        new_thickness = np.zeros(len(idx))
+        for counter,value in enumerate(local_thick):
+            if counter is not 0 and now_thickness < float(min_layer_thick):
+                now_thickness = now_thickness + value
             else:
-                continue
-        new_thickness = np.trim_zeros(new_thickness, 'b')
-        new_top = sum([[depth[0]],np.cumsum(new_thickness).tolist()],[])
-        # fill up the indexes
-        new_index = []
-        for counter, value in enumerate(idx):
-            if depth[int(value)] in new_top:
-                new_index.append(int(value))
-        new_top = np.trim_zeros(new_top, 'b')
-        new_label =  new_label[:len(new_thickness)]
+                now_thickness = value
+            new_thickness[counter]= now_thickness
+        min_checker = [[False, True][x >= float(min_layer_thick)] for x in new_thickness]
+        # has to be changed to append
+        for counter in range(1,len(new_thickness)):
+            if IC_checker[counter] == 'back' and min_checker[counter-1] == True:
+                new_thickness[counter] = new_thickness[counter-1] + new_thickness[counter]
+            else:
+                pass
+
+        new_index , new_depth , new_label = [] , [] , []
+        last_time = -1
+        for counter,value in enumerate(idx[1:]):
+            if min_checker[counter]== True :
+                new_index.append(value)
+                new_depth.append(local_z_ini[counter+1])
+                new_label.append('/'.join(local_label[last_time+1:counter+1]))
+                last_time = counter
+        new_index.insert(0,idx[0])
+        new_depth.insert(0,self.depth[0])
+        if new_index[-1] is not idx[-1]:
+            new_label.append('/'.join(local_label[last_time+1:]))
         self.lithology_json = new_label
-        self.depth_json = new_top
+        self.depth_json = new_depth
         self.indx_json = new_index
 
         return
