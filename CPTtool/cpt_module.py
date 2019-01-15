@@ -317,10 +317,12 @@ class CPT:
         if method == "Robertson":
             aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
             aux[np.abs(aux) == np.inf] = gamma_limit / 9.81
+            aux[aux < 0] = 0.
             self.gamma = aux * 9.81
         elif method == "Lengkeek":
             aux = 19 - 4.12 * np.log10(5000 / self.qt) / np.log10(30 / self.friction_nbr)
             aux[np.abs(aux) == np.inf] = gamma_limit
+            aux[aux < 0] = 0.
             self.gamma = aux
         elif method == "all":  # if all, compares all the methods and plot
             self.gamma_calc(gamma_limit, method="Lengkeek")
@@ -490,7 +492,7 @@ class CPT:
 
         .. math::
 
-            v_{s} = e^{\frac{\gamma_{sat} + 4.03}{4.17}} \cdot \left( \frac{\sigma_{v0}}{\sigma_{atm}} \right)^{0.25}
+            v_{s} = e^{\frac{\gamma_{sat} + 4.03}{4.17}} \cdot \left( \frac{\sigma_{v0}'}{\sigma_{atm}} \right)^{0.25}
 
             v_{s} = 118.8 \cdot \log \left(f_{s} \right) + 18.5
 
@@ -528,12 +530,14 @@ class CPT:
         if method == "Robertson":
             # vs: following Robertson and Cabal (2015)
             alpha_vs = 10 ** (0.55 * self.IC + 1.68)
-            self.vs = (alpha_vs * (self.tip-self.total_stress)/self.Pa)**0.5
+            aux = alpha_vs * (self.tip - self.total_stress) / self.Pa
+            aux[aux < 0] = 0
+            self.vs = aux**0.5
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
             #self.vs = 118.8 * np.log(self.friction) + 18.5
-            self.vs = np.e ** ((self.gamma + 4.03) / 4.17) * (self.total_stress / 100) ** 0.25
+            self.vs = np.e ** ((self.gamma + 4.03) / 4.17) * (self.effective_stress / self.Pa) ** 0.25
             self.G0 = self.rho * self.vs ** 2
         elif method == "Andrus":
             # vs: following Andrus (2007)
