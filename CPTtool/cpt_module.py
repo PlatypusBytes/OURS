@@ -762,9 +762,9 @@ class CPT:
             data["damping"].append(np.mean(damp))
             data["var_damping"].append(np.std(damp))
 
-        jsn.update({"scenario " + str(id): {}})
-        jsn["scenario " + str(id)].update({"Probability": "0.33",
-                                           "data": data})
+        jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
+        jsn["scenarios"][id].update({"Probability": "0.33",
+                                     "data": data})
 
         return
 

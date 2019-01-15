@@ -1,3 +1,15 @@
+def read_json(input_file):
+    """
+
+    :param input_file:
+    :return: data:
+    """
+    import json
+    with open(input_file, "r") as f:
+        data = json.load(f)
+    return data
+
+
 def set_key():
     """
     Define CPT key
@@ -42,8 +54,8 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
     # Define log file
     log_file = log_handler.LogFile(output_folder)
 
-    jsn = {}
-    i = 1
+    jsn = {"scenarios": []}
+    i = 0
     for f in cpts:
         log_file.info_message("analysis started for: " + f)
         cpt = cpt_module.CPT(output_folder, log_file)
@@ -60,7 +72,7 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
         cpt.vs_calc()
         cpt.damp_calc()
         cpt.poisson_calc()
-        cpt.merge_thickness(D_min)
+        cpt.merge_thickness(float(D_min))
         cpt.add_json(jsn, i)
         if make_plots:
             cpt.write_csv()
@@ -84,3 +96,12 @@ if __name__ == "__main__":
 
     key = set_key()
     read_cpt(args.cpt, key, args.output, args.thickness, args.plots)
+    #
+    # parser.add_argument('-i', '--json', help='input JSON file', required=True)
+    # parser.add_argument('-o', '--output', help='location of the output folder', required=True)
+    # parser.add_argument('-p', '--plots', help='make plots', required=False, default=False)
+    # args = parser.parse_args()
+    #
+    # key = set_key()
+    # props = read_json(args.json)
+    # read_cpt(args.cpt, key, args.output, props['MinLayerThickness'], args.plots)
