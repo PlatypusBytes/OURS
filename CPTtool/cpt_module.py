@@ -181,7 +181,6 @@ class CPT:
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014.
         """
         import robertson
-        import numpy as np
 
         classification = robertson.Robertson()
         classification.soil_types()
@@ -316,11 +315,11 @@ class CPT:
         # calculate unit weight according to Robertson & Cabal 2015
         if method == "Robertson":
             aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
-            aux[np.abs(aux) == np.inf] = gamma_limit / 9.81
+            aux[np.abs(aux) == np.inf] = gamma_limit / self.g
             aux[aux < 0] = 0.
-            self.gamma = aux * 9.81
+            self.gamma = aux * self.g
         elif method == "Lengkeek":
-            aux = 19 - 4.12 * np.log10(5000 / self.qt) / np.log10(30 / self.friction_nbr)
+            aux = 19. - 4.12 * np.log10(5000. / self.qt) / np.log10(30. / self.friction_nbr)
             aux[np.abs(aux) == np.inf] = gamma_limit
             aux[aux < 0] = 0.
             self.gamma = aux
@@ -367,6 +366,7 @@ class CPT:
         # determine location of phreatic line: it cannot be above the CPT depth
         z_aux = np.min([z_pwp, self.NAP[0] + self.depth[0]])
         pwp = (z_aux - self.NAP) * self.g
+        # no suction is allowed
         pwp[pwp <= 0] = 0
         # compute effective stress
         self.effective_stress = self.total_stress - pwp
@@ -530,18 +530,16 @@ class CPT:
         if method == "Robertson":
             # vs: following Robertson and Cabal (2015)
             alpha_vs = 10 ** (0.55 * self.IC + 1.68)
-            aux = alpha_vs * (self.tip - self.total_stress) / self.Pa
+            aux = alpha_vs * (self.qt - self.total_stress) / self.Pa
             aux[aux < 0] = 0
             self.vs = aux**0.5
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
-            #self.vs = 118.8 * np.log(self.friction) + 18.5
-            self.vs = np.e ** ((self.gamma + 4.03) / 4.17) * (self.effective_stress / self.Pa) ** 0.25
+            self.vs = np.exp((self.gamma + 4.03) / 4.17) * (self.effective_stress / self.Pa) ** 0.25
             self.G0 = self.rho * self.vs ** 2
         elif method == "Andrus":
             # vs: following Andrus (2007)
-            #self.vs = 2.62 * self.qt ** 0.395 * self.IC ** 0.912 * self.depth ** 0.124 * 1
             self.vs = 2.27 * self.qt ** 0.412 * self.IC ** 0.989 * self.depth ** 0.033 * 1
             self.G0 = self.rho * self.vs ** 2
         elif method == "Zang":
@@ -549,7 +547,7 @@ class CPT:
             self.vs = 10.915 * self.qt ** 0.317 * self.IC ** 0.210 * self.depth ** 0.057 * 0.92
             self.G0 = self.rho * self.vs ** 2
         elif method == "Ahmed":
-            self.vs = 1000 * np.e ** (-0.887 * self.IC) * (1 + 0.443 *self.Fr * self.effective_stress / 100 * 9.81 / self.gamma) ** 0.5
+            self.vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 *self.Fr * self.effective_stress / self.Pa * self.g / self.gamma) ** 0.5
             self.G0 = self.rho * self.vs ** 2
         elif method == "all":  # compares all and assumes default
             self.vs_calc(method="Mayne")
@@ -631,14 +629,6 @@ class CPT:
         # qt = qc + u2 * (1 - a)
 
         self.qt = self.tip + self.water * (1. - self.a)
-
-        # for i, typ in enumerate(litho):
-        #     # sand
-        #     if int(typ) >= 5:
-        #         self.qt[i] = self.tip[i]
-        #     # not sand
-        #     else:
-        #         self.qt[i] = self.tip[i] + self.water[i] * (1. - self.a)
         return
 
     def merge_thickness(self, min_layer_thick):
