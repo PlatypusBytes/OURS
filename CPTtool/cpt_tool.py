@@ -27,7 +27,7 @@ def set_key():
     return key
 
 
-def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=22, pwp_level=0):
+def read_cpt(folder_path, key_cpt, output_folder, input_dictionary, make_plots, gamma_max=22, pwp_level=0):
     """
     Read CPT
 
@@ -38,7 +38,7 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
     :param folder_path: Folder where the cpt files are located
     :param key_cpt: File with the key for the CPT interpretation
     :param output_folder: Folder to save the files
-    :param D_min: Minimum layers thickness
+    :param input_dictionary: Dictionary with input settings
     :param gamma_max: (optional) maximum value specific weight soil
     :param pwp_level: (optional) pore water level in NAP
 
@@ -72,7 +72,7 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
         cpt.vs_calc()
         cpt.damp_calc()
         cpt.poisson_calc()
-        cpt.merge_thickness(float(D_min))
+        cpt.merge_thickness(float(input_dictionary["MinLayerThickness"]))
         cpt.add_json(jsn, i)
         if make_plots:
             cpt.write_csv()
@@ -80,7 +80,7 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
             cpt.plot_lithology()
         i += 1
         log_file.info_message("analysis succeeded for: " + f)
-    cpt.dump_json(jsn)
+    cpt.update_dump_json(jsn, input_dictionary)
     log_file.close()
     return
 
@@ -95,4 +95,4 @@ if __name__ == "__main__":
 
     key = set_key()
     props = read_json(args.json)
-    read_cpt(props["BRO_data"], key, args.output, props['MinLayerThickness'], args.plots)
+    read_cpt(props["BRO_data"], key, args.output, props, args.plots)

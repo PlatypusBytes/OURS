@@ -87,6 +87,10 @@ class CPT:
         except IndexError:
             self.log_file.error_message("file " + gef_file_name + " contains no coordinates")
             return False
+        # check if coordinates are non-zero
+        if all(i == 0 for i in list(map(float, data[idx_coord].split(',')[1:3]))):
+            self.log_file.error_message("file " + gef_file_name + " has coordinates 0, 0")
+            return False
         # search index depth
         try:
             idx_depth = [int(val.split(',')[0].split("=")[-1]) - 1 for i, val in enumerate(data)
@@ -719,8 +723,8 @@ class CPT:
         import numpy as np 		
 
         # create data
-        data = {"Lithology": [],
-                "Depth": [],
+        data = {"lithology": [],
+                "depth": [],
                 "E": [],
                 "v": [],
                 "rho": [],
@@ -733,8 +737,8 @@ class CPT:
 
         # populate structure
         for i in range(len(self.indx_json) - 1):
-            data["Lithology"].append(str(self.lithology_json[i]))
-            data["Depth"].append(self.depth_json[i])
+            data["lithology"].append(str(self.lithology_json[i]))
+            data["depth"].append(self.depth_json[i])
             E = 2 * (1 + 0.3) * self.gamma[self.indx_json[i]:self.indx_json[i + 1]] * 100 * \
                 self.vs[self.indx_json[i]: self.indx_json[i + 1]]**2
 
@@ -757,31 +761,35 @@ class CPT:
             data["var_damping"].append(np.std(damp))
 
         jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
-        jsn["scenarios"][id].update({"Probability": "0.33",
+        jsn["scenarios"][id].update({"coordinates": self.coord,
+                                     "probability": [],
                                      "data": data})
 
         return
 
-    def dump_json(self, jsn):
+    def update_dump_json(self, jsn, input_dic):
         """
-        Dump json file into output file.
+
+        Computes the probability of the scenario and dump json file into output file.
 
         Parameters
         ----------
         :param jsn: json file with data structure
+        :param input_dic: dictionary with the input information
         :return:
         """
         import os
         import json
 
+        # update the probability
+        coord_source = [float(input_dic["Source_x"]), float(input_dic["Source_y"])]
+        coord_receiver = [float(input_dic["Receiver_x"]), float(input_dic["Receiver_y"])]
+        coord_cpts = [i['coordinates'] for i in jsn["scenarios"]]
+        compute_probability(coord_cpts, coord_source, coord_receiver, jsn)
+
         # write file
         with open(os.path.join(self.output_folder, "results.json"), "w") as fo:
             json.dump(jsn, fo, indent=4)
-        return
-
-    def compute_probability(self, jsn):
-        import json
-
         return
 
     def plot_correlations(self, x_data, x_label, l_name, name):
@@ -1113,3 +1121,28 @@ def merge(min_thick, depth, lithology):
 
     thick = np.diff(z_ini)
     return thick, z_ini, label
+
+
+def compute_probability(coord_cpt, coord_src, coord_rec, jsn):
+    import numpy as np
+
+    # number of scenarios
+    nb_scenarios = len(coord_cpt)
+
+    distance_to_source = []
+    distance_to_receiver = []
+
+    # iterate around json
+    for i in range(nb_scenarios):
+        distance_to_source.append(np.sqrt((coord_cpt[i][0] - coord_src[0])**2 +
+                                          (coord_cpt[i][1] - coord_src[1])**2))
+        distance_to_receiver.append(np.sqrt((coord_cpt[i][0] - coord_rec[0])**2 +
+                                            (coord_cpt[i][1] - coord_rec[1])**2))
+
+    sum_weights = np.sum([distance_to_source[i] * (distance_to_source[i] + distance_to_receiver[i]) for i in range(nb_scenarios)])
+
+    for i in range(nb_scenarios):
+        weight = (1 - (distance_to_source[i] * (distance_to_source[i] + distance_to_receiver[i])) / sum_weights) / (nb_scenarios - 1)
+        jsn["scenarios"][i]["probability"] = weight * 100.
+
+    return
