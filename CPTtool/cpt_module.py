@@ -815,7 +815,11 @@ class CPT:
         coord_source = [float(input_dic["Source_x"]), float(input_dic["Source_y"])]
         coord_receiver = [float(input_dic["Receiver_x"]), float(input_dic["Receiver_y"])]
         coord_cpts = [i['coordinates'] for i in jsn["scenarios"]]
-        compute_probability(coord_cpts, coord_source, coord_receiver, jsn)
+        probs = compute_probability(coord_cpts, coord_source, coord_receiver)
+
+        # update the json file
+        for i in range(len(jsn["scenarios"])):
+            jsn["scenarios"][i]["probability"] = probs[i]
 
         # write file
         with open(os.path.join(self.output_folder, "results.json"), "w") as fo:
@@ -1153,7 +1157,7 @@ def merge(min_thick, depth, lithology):
     return thick, z_ini, label
 
 
-def compute_probability(coord_cpt, coord_src, coord_rec, jsn):
+def compute_probability(coord_cpt, coord_src, coord_rec):
     r"""
     Compute the probability for each scenario following the following formula:
 
@@ -1170,8 +1174,7 @@ def compute_probability(coord_cpt, coord_src, coord_rec, jsn):
     :param coord_cpt: list of coordinates of the CPTs
     :param coord_src: coordinates of the source
     :param coord_rec: coordinates of the receiver
-    :param jsn: JSON file with the results
-    :return:
+    :return: probs: probability of occurence of the scenario
     """
     import numpy as np
 
@@ -1180,6 +1183,10 @@ def compute_probability(coord_cpt, coord_src, coord_rec, jsn):
 
     distance_to_source = []
     distance_to_receiver = []
+
+    # if there if only one scenario: prob = 100
+    if nb_scenarios == 1:
+        return [100.]
 
     # iterate around json
     for i in range(nb_scenarios):
@@ -1190,8 +1197,9 @@ def compute_probability(coord_cpt, coord_src, coord_rec, jsn):
 
     sum_weights = np.sum([distance_to_source[i] * (distance_to_source[i] + distance_to_receiver[i]) for i in range(nb_scenarios)])
 
+    probs = []
     for i in range(nb_scenarios):
         weight = (1 - (distance_to_source[i] * (distance_to_source[i] + distance_to_receiver[i])) / sum_weights) / (nb_scenarios - 1)
-        jsn["scenarios"][i]["probability"] = weight * 100.
+        probs.append(weight * 100.)
 
-    return
+    return probs

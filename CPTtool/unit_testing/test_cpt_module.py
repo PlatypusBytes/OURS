@@ -283,6 +283,24 @@ class TestCptModule(unittest.TestCase):
         self.cpt.dump_json(jsn)
         return
 
+    def test_compute_prob(self):
+        cpt_coord = np.array([[0, 10], [17, 19], [14, 22], [35, 10]])
+        source_coord = [5, 10]
+        receiver_coord = [30, 10]
+        prob = cpt_module.compute_probability(cpt_coord, source_coord, receiver_coord)
+        # exact results
+        exact = [0.306964061716986,
+                 0.263692716163477,
+                 0.254225518484290,
+                 0.175117703635247]
+
+        self.assertAlmostEqual(prob[0], exact[0]*100)
+        self.assertAlmostEqual(prob[1], exact[1]*100)
+        self.assertAlmostEqual(prob[2], exact[2]*100)
+        self.assertAlmostEqual(prob[3], exact[3]*100)
+
+        return
+
     def tearDown(self):
         import os
         self.log_file.close()
