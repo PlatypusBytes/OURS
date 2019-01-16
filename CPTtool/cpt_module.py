@@ -1124,6 +1124,25 @@ def merge(min_thick, depth, lithology):
 
 
 def compute_probability(coord_cpt, coord_src, coord_rec, jsn):
+    r"""
+    Compute the probability for each scenario following the following formula:
+
+    .. math::
+
+        w_{i} = \frac{1 - \frac{R_{S,i} \cdot \left(R_{S,i} + R_{R,i} \right)}
+                               {\sum_{i=1}^{n}R_{S,i} \cdot \left(R_{S,i} + R_{R,i} \right)}}{n - 1}
+
+
+    where :math:`w_i` is the probability associated with the *i* scenario, :math:`R_{S,i}` the distance between the CPT
+    and the source location, :math:`R_{R,i}` the distance between the CPT and the receiver location, and *n* is the
+    number of scenarios/CPTs.
+
+    :param coord_cpt: list of coordinates of the CPTs
+    :param coord_src: coordinates of the source
+    :param coord_rec: coordinates of the receiver
+    :param jsn: JSON file with the results
+    :return:
+    """
     import numpy as np
 
     # number of scenarios
