@@ -88,20 +88,11 @@ def read_cpt(folder_path, key_cpt, output_folder, D_min, make_plots, gamma_max=2
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--cpt', help='location of the cpt folder', required=True)
+    parser.add_argument('-i', '--json', help='input JSON file', required=True)
     parser.add_argument('-o', '--output', help='location of the output folder', required=True)
-    parser.add_argument('-t', '--thickness', help='minimum thickness', required=True)
     parser.add_argument('-p', '--plots', help='make plots', required=False, default=False)
     args = parser.parse_args()
 
     key = set_key()
-    read_cpt(args.cpt, key, args.output, args.thickness, args.plots)
-    #
-    # parser.add_argument('-i', '--json', help='input JSON file', required=True)
-    # parser.add_argument('-o', '--output', help='location of the output folder', required=True)
-    # parser.add_argument('-p', '--plots', help='make plots', required=False, default=False)
-    # args = parser.parse_args()
-    #
-    # key = set_key()
-    # props = read_json(args.json)
-    # read_cpt(args.cpt, key, args.output, props['MinLayerThickness'], args.plots)
+    props = read_json(args.json)
+    read_cpt(props["BRO_data"], key, args.output, props['MinLayerThickness'], args.plots)
