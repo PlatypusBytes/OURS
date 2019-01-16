@@ -492,7 +492,7 @@ class CPT:
 
             G_{0} = \frac{\gamma}{g} \cdot v_{s}^{2}
 
-        * Mayne [2]_:
+        * Mayne [3]_:
 
         .. math::
 
@@ -500,7 +500,7 @@ class CPT:
 
             v_{s} = 118.8 \cdot \log \left(f_{s} \right) + 18.5
 
-        * Andrus et al. [3]_:
+        * Andrus et al. [4]_:
 
         .. math::
 
@@ -508,13 +508,13 @@ class CPT:
 
             v_{s} = 2.62 \cdot q_{t}^{0.395} \cdot I_{c}^{0.912} \cdot D^{0.124} \cdot SF   (Pleistocene)
 
-        * Zang & Tong [4]_:
+        * Zang & Tong [5]_:
 
         .. math::
 
             v_{s} = 10.915 \cdot q_{t}^{0.317} \cdot I_{c}^{0.210} \cdot D^{0.057} \cdot SF^{a}  (Holocene)
 
-        * Ahmed [5]_:
+        * Ahmed [6]_:
 
         .. math::
 
@@ -523,11 +523,11 @@ class CPT:
 
         .. rubric:: References
         .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 48-50.
-        .. [2] Mayne, P.W. *In-Situ Test Calibrations for Evaluating Soil Parameters.* Characterisation and enginering properties of natural soils, Volume 3.
+        .. [3] Mayne, P.W. *In-Situ Test Calibrations for Evaluating Soil Parameters.* Characterisation and enginering properties of natural soils, Volume 3.
                2006, pg: 1-56.
-        .. [3] Andrus, R.D., Mohanan, N.P., Piratheepan, P., et al. *Predicting shear-wave velocity from cone penetration resistance.* Proceedings, 4th International Conference on Earthquake Geotechnical Engineering. 2007.
-        .. [4] Zang, M. & Tong, L. *New statistical and graphical assessment of CPT-based empirical correlations for the shear wave velocity of soils* Engineering Geology 226 (2017) 184–191
-        .. [5] Ahmed, S.M. *Correlating the Shear Wave Velocity with the Cone Penetration Test.* Proceedings of the 2nd World Congress on Civil, Structural, and Environmental Engineering, 2017.
+        .. [4] Andrus, R.D., Mohanan, N.P., Piratheepan, P., et al. *Predicting shear-wave velocity from cone penetration resistance.* Proceedings, 4th International Conference on Earthquake Geotechnical Engineering. 2007.
+        .. [5] Zang, M. & Tong, L. *New statistical and graphical assessment of CPT-based empirical correlations for the shear wave velocity of soils* Engineering Geology 226 (2017) 184–191
+        .. [6] Ahmed, S.M. *Correlating the Shear Wave Velocity with the Cone Penetration Test.* Proceedings of the 2nd World Congress on Civil, Structural, and Environmental Engineering, 2017.
         """
         import numpy as np
 
@@ -575,24 +575,55 @@ class CPT:
 
         return
 
-    def damp_calc(self):
+    def damp_calc(self, Cu=2., D50=0.2, Ip=40., method="Kulhawy&Mayne"):
         r"""
         Damping calculation.
 
-        Damping is assumed as the minimum damping following Darendeli [3]_.
+        For clays and peats, the damping is assumed as the minimum damping following Darendeli [7]_.
 
         .. math::
 
             D_{min} = \left(0.8005 + 0.0129 \cdot PI \cdot OCR^{-0.1069} \right) \cdot \sigma_{v0}'^{-0.2889} \cdot \left[ 1 + -0.0057 \ln \left( freq \right) \right]
 
+
+        For sand the damping is assumed as the minimum damping following Menq [8]_.
+
+        .. math::
+            D_{min} = 0.55 \cdot C_{u}^{0.1} \cdot d_{50}^{-0.3} \cdot  \left(\frac{\sigma'_{v}}{p_{a}} \right)^-0.05
+
+
+        Parameters
+        ----------
+        :param Cu: (optional) Coefficient of uniformity. Default is 2.0
+        :param D50: (optional) Median grain size. Default is 0.2 mm
+        :param Ip: (optional) Plasticity index. Default is 40
+
+
         .. rubric:: References
-        .. [3] Darendeli, M.B. *Development of a New Family of Normalized Modulus Reduction and material damping curves.* PhD thesis, 2001, pg: 221.
+        .. [7] Darendeli, M.B. *Development of a New Family of Normalized Modulus Reduction and material damping curves.* PhD thesis, 2001, pg: 221.
+        .. [8] Menq, F.Y. *Dynamic Properties of Sandy and Gravelly Soils.* PhD Thesis, 2003, Department of Civil Engineering, University of Texas, Austin, TX.
         """
         import numpy as np 		
 
-        # ToDo - define damping
         # assign size to damping
         self.damping = np.zeros(len(self.lithology))
+        self.OCR = np.zeros(len(self.lithology))
+
+        for i, lit in enumerate(self.lithology):
+            # if  clay
+            if lit == "3" or lit == "4":
+                if method == "Kulhawy&Mayne":
+                    self.OCR[i] = 0.33 * (self.qt[i] - self.total_stress[i]) / self.effective_stress[i]
+                elif method == "Robertson":
+                    self.OCR[i] = 0.25 * ((self.qt[i] - self.total_stress[i]) / self.effective_stress[i]) ** 1.25
+                self.damping[i] = 0.8005 + 0.129 * Ip * self.OCR[i] ** -0.1069 * (self.effective_stress[i] / self.Pa) ** -0.2889
+            # if sand:
+            elif lit == "5" or lit == "6" or lit == "7":
+                self.damping[i] = Cu ** 0.1 * D50 ** -0.3 * (self.effective_stress[i] / self.Pa) ** -0.05
+            # if peat:
+            elif lit == "2":
+                self.damping[i] = 2.512 * (self.effective_stress[i] / self.Pa) ** -0.2889
+
         return
 
     def poisson_calc(self):
@@ -755,8 +786,7 @@ class CPT:
             data["var_rho"].append(np.std(rho))
 
             # ToDo update damping
-            damp = 0.05
-
+            damp = self.damping[self.indx_json[i]:self.indx_json[i + 1]]
             data["damping"].append(np.mean(damp))
             data["var_damping"].append(np.std(damp))
 
