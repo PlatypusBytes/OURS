@@ -184,24 +184,24 @@ class TestCptModule(unittest.TestCase):
         self.cpt.effective_stress = np.array([1])
         self.cpt.tip = np.array([2])
         self.cpt.qt = np.array([2])
-        self.cpt.Pa = np.array([1])
+        self.Pa = 100
         self.cpt.gamma = np.array([10])
         self.cpt.vs = np.array([1])
         self.cpt.depth = np.array([1])
-        self.cpt.Fr =  np.array([1])
+        self.cpt.Fr = np.array([1])
         self.cpt.name = "UNIT_TESTING"
         # Robertson
         test_alpha_vs = 10**(0.55*self.cpt.IC+1.68)
-        test_vs = (test_alpha_vs*(self.cpt.tip- self.cpt.total_stress)/self.cpt.Pa)**0.5
-        test_GO = self.cpt.rho* test_vs**2
+        test_vs = (test_alpha_vs*(self.cpt.tip - self.cpt.total_stress)/100)**0.5
+        test_GO = self.cpt.rho * test_vs**2
         self.cpt.vs_calc(method="Robertson")
         np.testing.assert_array_equal(test_vs, self.cpt.vs)
         np.testing.assert_array_equal(test_GO, self.cpt.G0)
         # Mayne
-        test_vs = np.e**((self.cpt.gamma+4.03)/4.17)*(self.cpt.total_stress/100)**0.25
+        test_vs = np.exp((self.cpt.gamma+4.03)/4.17)*(self.cpt.effective_stress/self.Pa)**0.25
         test_GO = self.cpt.rho * test_vs ** 2
         self.cpt.vs_calc(method="Mayne")
-        self.assertEqual(test_vs[0],self.cpt.vs[0])
+        self.assertEqual(test_vs[0], self.cpt.vs[0])
         np.testing.assert_array_equal(test_GO, self.cpt.G0)
         # Andrus
         test_vs = 2.27 * self.cpt.qt**0.412 * self.cpt.IC**0.989 * self.cpt.depth **0.033*1
@@ -276,11 +276,32 @@ class TestCptModule(unittest.TestCase):
         self.assertTrue(os.path.isfile('UNIT_TEST_Correlations.png'))
         return
 
+    def test_add_json(self):
+        jsn = {"scenarios": []}
+        i = 0
+        self.cpt.coord = [1, 2]
+        self.cpt.add_json(jsn, i)
+        # check if coordinates have been added
+        self.assertEqual(jsn['scenarios'][0]['coordinates'][0], self.cpt.coord[0])
+        self.assertEqual(jsn['scenarios'][0]['coordinates'][1], self.cpt.coord[1])
+        return
+
     def test_dump_json(self):
-        jsn = {}
-        i = 1
-        jsn = self.cpt.add_json(jsn, i)
-        self.cpt.dump_json(jsn)
+        import os
+        jsn = {"scenarios": []}
+        jsn["scenarios"].append({"coordinates": [1, 2]})
+
+        input_dic = {"Source_x": 1,
+                     "Source_y": 1,
+                     "Receiver_x": 1,
+                     "Receiver_y": 1,
+                     }
+        self.cpt.update_dump_json(jsn, input_dic)
+        # check if probability is 100
+        self.assertEqual(jsn['scenarios'][0]['probability'], 100)
+        # check if file has been created
+        self.assertTrue(os.path.isfile("./results.json"))
+        os.remove("./results.json")
         return
 
     def test_compute_prob(self):
