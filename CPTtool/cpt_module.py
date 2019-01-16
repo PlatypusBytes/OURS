@@ -779,6 +779,11 @@ class CPT:
             json.dump(jsn, fo, indent=4)
         return
 
+    def compute_probability(self, jsn):
+        import json
+
+        return
+
     def plot_correlations(self, x_data, x_label, l_name, name):
         """
         Plot CPT correlations.
