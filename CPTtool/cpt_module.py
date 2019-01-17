@@ -575,7 +575,7 @@ class CPT:
 
         return
 
-    def damp_calc(self, Cu=2., D50=0.2, Ip=40., method="Kulhawy&Mayne"):
+    def damp_calc(self, d_min=2, Cu=2., D50=0.2, Ip=40., method="Mayne"):
         r"""
         Damping calculation.
 
@@ -585,45 +585,60 @@ class CPT:
 
             D_{min} = \left(0.8005 + 0.0129 \cdot PI \cdot OCR^{-0.1069} \right) \cdot \sigma_{v0}'^{-0.2889} \cdot \left[ 1 + -0.0057 \ln \left( freq \right) \right]
 
+        The OCR can be computed according to Mayne [1]_ or Robertson [2]_.
+
+
+        .. math::
+
+            OCR_{Mayne} = 0.33 \cdot \frac{q_{t} - \sigma_{v0}}{\sigma_{v0}'}
+
+            OCR_{Rob} = 0.25 \left(Q_{t}\right)^{1.25}
+
 
         For sand the damping is assumed as the minimum damping following Menq [8]_.
 
         .. math::
-            D_{min} = 0.55 \cdot C_{u}^{0.1} \cdot d_{50}^{-0.3} \cdot  \left(\frac{\sigma'_{v}}{p_{a}} \right)^-0.05
+            D_{min} = 0.55 \cdot C_{u}^{0.1} \cdot d_{50}^{-0.3} \cdot  \left(\frac{\sigma'_{v}}{p_{a}} \right)^-0.08
 
 
         Parameters
         ----------
+        :param d_min: (optional) Minimum damping. Default is 2%
         :param Cu: (optional) Coefficient of uniformity. Default is 2.0
         :param D50: (optional) Median grain size. Default is 0.2 mm
         :param Ip: (optional) Plasticity index. Default is 40
+        :param method: (optional) Method for calculation of OCR. Default is Mayne
 
 
         .. rubric:: References
+        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 40.
+        .. [2] Mayne, P. *Cone Penetration Testing. A Synthesis of Highway Practice.* Transportation Research Board, 2007, pg: 34.
         .. [7] Darendeli, M.B. *Development of a New Family of Normalized Modulus Reduction and material damping curves.* PhD thesis, 2001, pg: 221.
         .. [8] Menq, F.Y. *Dynamic Properties of Sandy and Gravelly Soils.* PhD Thesis, 2003, Department of Civil Engineering, University of Texas, Austin, TX.
         """
-        import numpy as np 		
+        # ToDo missing frequency dependency
+        import numpy as np
 
         # assign size to damping
-        self.damping = np.zeros(len(self.lithology))
-        self.OCR = np.zeros(len(self.lithology))
+        self.damping = np.zeros(len(self.lithology)) + d_min
+        OCR = np.zeros(len(self.lithology))
 
         for i, lit in enumerate(self.lithology):
             # if  clay
             if lit == "3" or lit == "4":
-                if method == "Kulhawy&Mayne":
-                    self.OCR[i] = 0.33 * (self.qt[i] - self.total_stress[i]) / self.effective_stress[i]
+                if method == "Mayne":
+                    OCR[i] = 0.33 * (self.qt[i] - self.total_stress[i]) / self.effective_stress[i]
                 elif method == "Robertson":
-                    self.OCR[i] = 0.25 * ((self.qt[i] - self.total_stress[i]) / self.effective_stress[i]) ** 1.25
-                self.damping[i] = 0.8005 + 0.129 * Ip * self.OCR[i] ** -0.1069 * (self.effective_stress[i] / self.Pa) ** -0.2889
+                    OCR[i] = 0.25 * self.Qtn[i] ** 1.25
+                    # OCR[i] = 0.25 * ((self.qt[i] - self.total_stress[i]) / self.effective_stress[i]) ** 1.25
+                self.damping[i] = (0.8005 + 0.129 * Ip * OCR[i] ** -0.1069) * (self.effective_stress[i] / self.Pa) ** -0.2889
             # if sand:
             elif lit == "5" or lit == "6" or lit == "7":
-                self.damping[i] = Cu ** 0.1 * D50 ** -0.3 * (self.effective_stress[i] / self.Pa) ** -0.05
+                self.damping[i] = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.effective_stress[i] / self.Pa) ** -0.08
             # if peat:
             elif lit == "2":
+                # same as clay: OCR=1 IP=100
                 self.damping[i] = 2.512 * (self.effective_stress[i] / self.Pa) ** -0.2889
-
         return
 
     def poisson_calc(self):
