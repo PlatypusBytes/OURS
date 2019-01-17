@@ -65,7 +65,7 @@ where the attributes have the following meaning:
        * *MaxCalcDist*: Maximum distance of calculation 
        * *MaxCalcDepth*: Maximum depth of calculation
        * *MinLayerThickness*:  Minimum layer thickness for the vertical discretisation
-       * *SpectrumType*: Sprectum type 1=Octave bands 2=One-third octave bands
+       * *SpectrumType*: Spectrum type 1=Octave bands 2=One-third octave bands
        * *LowFreq*: Minimum frequency of interest
        * *HighFreq*: Maximum frequency of interest
        * *CalcType*: Type of calculation 1=2D-FEM; 2=3D-FEM
