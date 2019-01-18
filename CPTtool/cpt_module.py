@@ -720,41 +720,46 @@ class CPT:
         # soil type
         local_label = [lithology[i] for i in idx]
 
-        IC_checker = [['next','back'][abs(local_IC[i]-local_IC[i+1]) > abs(local_IC[i-1]-local_IC[i])] for i in range(1,len(local_IC)-1)]
-        IC_checker.insert(0,'next')
-        IC_checker.append('back')
-        now_thickness = 0
-        new_thickness = np.zeros(len(idx))
-        for counter,value in enumerate(local_thick):
-            if counter is not 0 and now_thickness < float(min_layer_thick):
-                now_thickness = now_thickness + value
+        #set up the merging rules
+        min_thickness_rule = [ True if i >= min_layer_thick else False for i in local_thick ]
+        IC_rule = []
+        for counter, value in enumerate(local_IC):
+            if counter == 0 :
+                IC_rule.append(False)
+            elif counter == len(local_IC)-1:
+                IC_rule.append(True)
             else:
-                now_thickness = value
-            new_thickness[counter]= now_thickness
-        min_checker = [[False, True][x >= float(min_layer_thick)] for x in new_thickness]
-        # has to be changed to append
-        for counter in range(1,len(new_thickness)):
-            if IC_checker[counter] == 'back' and min_checker[counter-1] == True:
-                new_thickness[counter] = new_thickness[counter-1] + new_thickness[counter]
-            else:
-                pass
-
+                if abs(local_IC[counter-1] - value)< abs(local_IC[counter+1] - value) :
+                    IC_rule.append(True)
+                else:
+                    IC_rule.append(False)
+        merged_with_previous_rule= True
+        # Merge the layers according to the rules
         new_index , new_depth , new_label = [] , [] , []
-        last_time = -1
-        for counter,value in enumerate(idx[1:]):
-            if min_checker[counter]== True :
+        new_thickness = []
+
+        for counter,value in enumerate(local_thick):
+            if min_thickness_rule[counter] :
+                if merged_with_previous_rule :
+                    new_thickness.append( value)
+                    new_label.append(local_label[counter])
+                else:
+                    pass
+            else:
+                if IC_rule[counter] :
+                    new_thickness[counter-1] = new_thickness[counter-1] +value
+                    new_label[counter-1] = new_label[counter-1] +'/' +local_label[counter]
+                else:
+                    new_thickness.append(local_thick[counter + 1] + value)
+                    new_label.append(local_label[counter+1] +'/' +local_label[counter])
+                    merged_with_previous_rule = False
+        new_depth = np.insert(np.cumsum(new_thickness)[:-1],0,depth[0])
+        for counter,value in enumerate(idx):
+            if depth[value] in new_depth:
                 new_index.append(value)
-                new_depth.append(local_z_ini[counter+1])
-                new_label.append('/'.join(local_label[last_time+1:counter+1]))
-                last_time = counter
-        new_index.insert(0,idx[0])
-        new_depth.insert(0,self.depth[0])
-        if new_index[-1] is not idx[-1]:
-            new_label.append('/'.join(local_label[last_time+1:]))
         self.lithology_json = new_label
         self.depth_json = new_depth
         self.indx_json = new_index
-
         return
 
     def add_json(self, jsn, id):
