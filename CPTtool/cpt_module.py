@@ -527,7 +527,7 @@ class CPT:
                2006, pg: 1-56.
         .. [4] Andrus, R.D., Mohanan, N.P., Piratheepan, P., et al. *Predicting shear-wave velocity from cone penetration resistance.* Proceedings, 4th International Conference on Earthquake Geotechnical Engineering. 2007.
         .. [5] Zang, M. & Tong, L. *New statistical and graphical assessment of CPT-based empirical correlations for the shear wave velocity of soils* Engineering Geology 226 (2017) 184–191
-        .. [6] Ahmed, S.M. *Correlating the Shear Wave Velocity with the Cone Penetration Test.* Proceedings of the 2nd World Congress on Civil, Structural, and Environmental Engineering, 2017.
+        .. [6] Ahmed, S.M. *Correlating the Shear Wave Velocity with the Cone Penetration Test.* Proceedings of the 2nd World Congress on Civil, Structural, and Environmental Engineering, 2017 ,page 4.
         """
         import numpy as np
 
@@ -583,7 +583,7 @@ class CPT:
 
         .. math::
 
-            D_{min} = \left(0.8005 + 0.0129 \cdot PI \cdot OCR^{-0.1069} \right) \cdot \sigma_{v0}'^{-0.2889} \cdot \left[ 1 + -0.0057 \ln \left( freq \right) \right]
+            D_{min} = \left(0.8005 + 0.0129 \cdot PI \cdot OCR^{-0.1069} \right) \cdot \sigma_{v0}'^{-0.2889} \cdot \left[ 1 + 0.2919 \ln \left( freq \right) \right]
 
         The OCR can be computed according to Mayne [1]_ or Robertson [2]_.
 
