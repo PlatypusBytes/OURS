@@ -20,7 +20,7 @@ class TestCptModule(unittest.TestCase):
         pass
 
     def test_read_gef(self):
-        gef_file = 'unit_testing.gef'
+        gef_file = 'unit_testing_files/unit_testing.gef'
         key_cpt = cpt_tool.set_key()
         self.cpt.read_gef(gef_file, key_cpt)
         test_name = 'UNIT_TESTING'
@@ -43,21 +43,21 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(test_water, self.cpt.water)
 
         # Exceptions tested
-        gef_file = 'Exception_NoNAP.gef'
+        gef_file = 'unit_testing_files/Exception_NoNAP.gef'
         self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-        gef_file = 'Exception_NoCoord.gef'
+        gef_file = 'unit_testing_files/Exception_NoCoord.gef'
         self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-        gef_file = 'Exception_NoLength.gef'
+        gef_file = 'unit_testing_files/Exception_NoLength.gef'
         self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-        gef_file = 'Exception_NoTip.gef'
+        gef_file = 'unit_testing_files/Exception_NoTip.gef'
         self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-        gef_file = 'Exception_NoFriction.gef'
+        gef_file = 'unit_testing_files/Exception_NoFriction.gef'
         self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-        gef_file = 'Exception_NoFrictionNumber.gef'
+        gef_file = 'unit_testing_files/Exception_NoFrictionNumber.gef'
         self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-        gef_file = 'Exception_NoWater.gef'
+        gef_file = 'unit_testing_files/Exception_NoWater.gef'
         self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-        gef_file = 'Exception_9999.gef'
+        gef_file = 'unit_testing_files/Exception_9999.gef'
         self.assertTrue(self.cpt.read_gef(gef_file, key_cpt))
 
         return
@@ -406,6 +406,11 @@ class TestCptModule(unittest.TestCase):
         import os
         self.log_file.close()
         os.remove("./results/log_file.txt")
+        list_delete = ["UNIT_TEST.csv","UNIT_TEST_Correlations.png","UNIT_TEST_cpt.png","UNIT_TEST_lithology.png",
+"UNIT_TEST_unit_weight.png" ,"UNIT_TESTING_shear_modulus.png","UNIT_TESTING_shear_wave.png",]
+        for i in list_delete:
+            if os.path.exists(i):
+               os.remove(i)
         return
 
 
