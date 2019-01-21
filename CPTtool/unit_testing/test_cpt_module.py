@@ -390,10 +390,42 @@ class TestCptModule(unittest.TestCase):
         jsn = {"scenarios": []}
         i = 0
         self.cpt.coord = [1, 2]
+        self.cpt.indx_json = range(5)
+        self.cpt.lithology_json = ['1.0', '1.0', '1.0', '1.0']
+        self.cpt.depth_json = [0, 1, 2, 3]
+        self.cpt.gamma = np.ones(5)
+        self.cpt.vs = np.ones(5)
+        self.cpt.poisson = np.full(5,0.3)
+        self.cpt.rho = np.full(5,0.3)
+        self.cpt.damping = np.full(5,0.3)
         self.cpt.add_json(jsn, i)
+
         # check if coordinates have been added
         self.assertEqual(jsn['scenarios'][0]['coordinates'][0], self.cpt.coord[0])
         self.assertEqual(jsn['scenarios'][0]['coordinates'][1], self.cpt.coord[1])
+        self.assertEqual(jsn['scenarios'][0]['data']['lithology'] , self.cpt.lithology_json)
+        self.assertEqual(jsn['scenarios'][0]['data']['depth'], self.cpt.depth_json)
+        E = 2*1.3 *self.cpt.gamma *100/self.cpt.vs**2
+        self.assertEqual(jsn['scenarios'][0]['data']['E'],E.tolist()[:-1])
+        self.assertEqual(jsn['scenarios'][0]['data']['v'][0], self.cpt.poisson[0])
+        self.assertEqual(jsn['scenarios'][0]['data']['rho'][0], self.cpt.rho[0])
+        self.assertEqual(jsn['scenarios'][0]['data']['damping'][0], self.cpt.damping[0])
+        self.assertEqual(jsn['scenarios'][0]['data']['var_E'][0], 0)
+        self.assertEqual(jsn['scenarios'][0]['data']['var_v'][0],0 )
+        self.assertEqual(jsn['scenarios'][0]['data']['var_rho'][0],0 )
+        self.assertEqual(jsn['scenarios'][0]['data']['var_damping'][0],0 )
+        return
+
+    def test_lithology_calc(self):
+        self.cpt.tip = np.array([1])
+        self.cpt.friction_nbr = np.array([1])
+        self.cpt.friction = np.array([1])
+        self.cpt.effective_stress = np.array([2])
+        self.cpt.total_stress= np.array([2])
+        self.cpt.Pa= 100
+        lithology_test = ['1']
+        self.cpt.lithology_calc()
+        self.assertEqual( self.cpt.lithology ,lithology_test)
         return
 
     def test_dump_json(self):
