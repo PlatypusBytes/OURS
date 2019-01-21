@@ -53,6 +53,7 @@ release = ''
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.imgmath',
+    'sphinxcontrib.bibtex'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -29,7 +29,6 @@ The arguments have the following meaning:
 
 	* *-i*: path to the input JSON file
 	* *-o*: output path to the generation of results
-	* *-t*: minimum layer thickness
 	* *-p*: (optional) plots the results
 
 Example: 
