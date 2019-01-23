@@ -542,7 +542,7 @@ class CPT:
             OCR_{Rob} = 0.25 \left(Q_{t}\right)^{1.25}
 
 
-        For sand the damping is assumed as the minimum damping following Menq :cite`menq_2033`.
+        For sand the damping is assumed as the minimum damping following Menq :cite`menq_2003`.
 
         .. math::
             D_{min} = 0.55 \cdot C_{u}^{0.1} \cdot d_{50}^{-0.3} \cdot  \left(\frac{\sigma'_{v}}{p_{a}} \right)^-0.08
@@ -579,6 +579,9 @@ class CPT:
             elif lit == "2":
                 # same as clay: OCR=1 IP=100
                 self.damping[i] = 2.512 * (self.effective_stress[i] / self.Pa) ** -0.2889
+
+        # damping units -> dimensionless
+        self.damping /= 100
         return
 
     def poisson_calc(self):
@@ -999,7 +1002,7 @@ class CPT:
         with open(os.path.join(self.output_folder, str(self.name) + ".csv"), "w") as fo:
             fo.write("Depth NAP [m];Depth [m];tip [kPa];friction [kPa];friction number [-];lithology [-];gamma [kN/m3];"
                      "total stress [-kPa];effective stress [kPa];Qtn [-];Fr [-];IC [-];vs [m/s];G0 [kPa];"
-                     "Poisson [-];Damping [%]\n")
+                     "Poisson [-];Damping [-]\n")
 
             for i in range(len(self.NAP)):
                 fo.write(str(self.NAP[i]) + ";" +
