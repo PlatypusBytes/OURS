@@ -991,10 +991,6 @@ class CPT:
     def write_csv(self):
         """
         Write CSV file into output file.
-
-        Parameters
-        ----------
-        :param output_f: output folder
         """
         import os
 
