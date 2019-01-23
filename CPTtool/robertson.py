@@ -36,14 +36,11 @@ class Robertson:
 
     def soil_types(self):
         r"""
-        Defines geometries for the soil types, following Robertson and Cabal [1]_.
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg. 26.
+        Defines geometries for the soil types, following Robertson and Cabal :cite:`robertson_cabal_2014`.
         """
-
         import numpy as np
         from shapely.geometry import Point, Polygon
+
         line1 = [[0.1, 1.],
                  [0.1, 10.]]
 
@@ -352,18 +349,14 @@ class Robertson:
 
     def lithology(self, Qtn, Fr):
         r"""
-        Identifies lithology of CPT points, following Robertson and Cabal [1]_.
+        Identifies lithology of CPT points, following Robertson and Cabal :cite:`robertson_cabal_2014`.
 
         Parameters
         ----------
         :param gamma_limit: Maximum value for gamma
         :param z_pwp: Depth pore water pressure
         :param iter_max: (optional) Maximum number of iterations
-        :return: lithology array
-        :return: Qtn, Fr coordinates for CPT
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 26.
+        :return: lithology array, Qtn, Fr
         """
         import numpy as np
         from shapely.geometry import Point

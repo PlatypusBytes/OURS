@@ -3,7 +3,6 @@ class CPT:
     CPT module
 
     Read and process cpt files: GEF format
-
     """
 
     def __init__(self, out_fold, log_file):
@@ -62,7 +61,6 @@ class CPT:
         :param gef_file: file path and file name to the CPT gef file
         :param key_cpt: dictionary with the CPT key
         """
-
         import os
         import numpy as np
         import re
@@ -179,10 +177,7 @@ class CPT:
         r"""
         Lithology calculation.
 
-        Computes the lithology following Robertson and Cabal [1]_.
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014.
+        Computes the lithology following Robertson and Cabal :cite:`robertson_cabal_2014`.
         """
         import robertson
 
@@ -198,33 +193,20 @@ class CPT:
         self.lithology = litho
         self.litho_points = points
 
-        # # compute simplified lithology
-        # # group the following zones
-        # # Zones 1 & 2 & 3 -> A
-        # # Zones 4 & 5 & 6 -> B
-        # # Zones 7 & 8 & 9 -> C
-        # litho = ["A" if x=="1" or x == "2" or x == "3" else x for x in litho]
-        # litho = ["B" if x=="4" or x == "5" or x == "6" else x for x in litho]
-        # litho = ["C" if x=="7" or x == "8" or x == "9" else x for x in litho]
-        #
-        # self.lithology_simple = litho
-
         return
 
     def lithology_calc_iter(self, gamma_limit, z_pwp, iter_max=100):
         r"""
         Lithology calculation.
 
-        Computes the lithology following Robertson and Cabal [1]_.
+        Computes the lithology following Robertson and Cabal :cite:`robertson_cabal_2014`.
+        It computes the qt iteratively  based on the lithology.
 
         Parameters
         ----------
         :param gamma_limit: Maximum value for gamma
         :param z_pwp: Depth pore water pressure
         :param iter_max: (optional) Maximum number of iterations
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014.
         """
         import robertson
         import numpy as np 		
@@ -272,25 +254,13 @@ class CPT:
         # assign to variables
         self.lithology = litho
         self.litho_points = points
-
-        # # compute simplified lithology
-        # # group the following zones
-        # # Zones 1 & 2 & 3 -> A
-        # # Zones 4 & 5 & 6 -> B
-        # # Zones 7 & 8 & 9 -> C
-        # litho = ["A" if x=="1" or x == "2" or x == "3" else x for x in litho]
-        # litho = ["B" if x=="4" or x == "5" or x == "6" else x for x in litho]
-        # litho = ["C" if x=="7" or x == "8" or x == "9" else x for x in litho]
-        #
-        # self.lithology_simple = litho
-
         return
 
     def gamma_calc(self, gamma_limit, method="Robertson"):
         r"""
         Computes unit weight.
 
-        Computes the unit weight following Robertson and Cabal [1]_.
+        Computes the unit weight following Robertson and Cabal :cite:`robertson_cabal_2014`.
         If unit weight is infinity, it is set to gamma_limit.
         The formula for unit weight is:
 
@@ -298,20 +268,17 @@ class CPT:
 
             \gamma = 0.27 \log(R_{f}) + 0.36 \log\left(\frac{q_{t}}{Pa}\right) + 1.236
 
-        Alternative method of Lengkeek et al. [2]
+        Alternative method of Lengkeek et al. :cite:`lengkeek_2018`:
 
         .. math::
 
-            \gamma = \gamma_{sat,ref} - \beta \left( \frac{\log \left( \frac{q_{t,ref}}{q_{t}} \right)}{\log \left(\frac{R_{f,ref}}{R_{f}}\right)} \right)
+            \gamma = \gamma_{sat,ref} - \beta
+            \left( \frac{\log \left( \frac{q_{t,ref}}{q_{t}} \right)}{\log \left(\frac{R_{f,ref}}{R_{f}}\right)} \right)
 
         Parameters
         ----------
         :param gamma_limit: Maximum value for gamma
         :param method: (optional) Method to compute unit weight. Default is Robertson
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 36.
-        .. [2] Lengkeek, A., de Greef, J., & Joosten, S. *CPT based unit weight estimation extended to soft organic soils and peat.* Proceedings of the 4th International Symposium on Cone Penetration Testing (CPT'18), 2018, pp: 389-394.
         """
         import numpy as np
         np.seterr(divide="ignore")
@@ -358,8 +325,7 @@ class CPT:
         ----------
         :param z_pwp: Depth of pore water pressure in NAP
         """
-        # compute total and effective stress
-        import numpy as np 		
+        import numpy as np
 
         # compute depth diff
         z = np.diff(np.abs((self.depth - self.depth[0])))
@@ -376,12 +342,11 @@ class CPT:
         self.effective_stress = self.total_stress - pwp
         # if effective stress is negative -> effective stress = 0
         self.effective_stress[self.effective_stress <= 0] = 0
-
         return
 
     def norm_calc(self, n_method=False):
         r"""
-        normalisation of qc and friction into Qtn and Fr, following Robertson and Cabal [1]_.
+        normalisation of qc and friction into Qtn and Fr, following Robertson and Cabal :cite:`robertson_cabal_2014`.
 
         .. math::
 
@@ -393,13 +358,10 @@ class CPT:
         Parameters
         ----------
         :param n_method: (optional) parameter *n* stress exponent. Default is n computed in an iterative way.
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 108.
         """
+        import numpy as np
 
-        # normalisation of qc and friction into Qtn and Fr: following Robertson and Cabal (2015)
-        import numpy as np 		
+        # normalisation of qc and friction into Qtn and Fr: following Robertson and Cabal (2014)
 
         # iteration around n to compute IC
         # start assuming n=1 for IC calculation
@@ -444,14 +406,12 @@ class CPT:
     #     r"""
     #     Normalisation of qc into qc1n
     #
-    #     Normalisation of qc into qc1n following Boulanger and Idriss [2]_.
+    #     Normalisation of qc into qc1n following :cite:`boulanger_2014`.
     #
     #     .. math::
     #
     #         q_{c1N} = C_{N} \cdot \frac{q_{c}}{Pa}
     #
-    #     .. rubric:: References
-    #     .. [2] Boulanger, R.W. and Idriss, I.M. *CPT and SPT based liquefaction triggering procedures.* UC Davis, 2014, pg: 6.
     #     """
     #     import numpy as np 		
     #
@@ -462,18 +422,16 @@ class CPT:
 
     def IC_calc(self):
         r"""
-        IC, following Robertson and Cabal [1]_.
+        IC, following Robertson and Cabal :cite:`robertson_cabal_2014`.
 
         .. math::
 
             I_{c} = \left[ \left(3.47 - \log\left(Q_{tn}\right) \right)^{2} + \left(\log\left(F_{r}\right) + 1.22 \right)^{2} \right]^{0.5}
 
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 104.
         """
+        import numpy as np
 
         # IC: following Robertson and Cabal (2015)
-        import numpy as np 		
         # compute IC
         self.IC = ((3.47 - np.log10(self.Qtn)) ** 2. + (np.log10(self.Fr) + 1.22) ** 2.) ** 0.5
         return
@@ -482,7 +440,7 @@ class CPT:
         r"""
         Shear wave velocity and shear modulus. The following methods are available:
 
-        * Robertson and Cabal [1]_:
+        * Robertson and Cabal :cite:`robertson_cabal_2014`:
 
         .. math::
 
@@ -492,7 +450,7 @@ class CPT:
 
             G_{0} = \frac{\gamma}{g} \cdot v_{s}^{2}
 
-        * Mayne [3]_:
+        * Mayne :cite:`mayne_2006`:
 
         .. math::
 
@@ -500,7 +458,7 @@ class CPT:
 
             v_{s} = 118.8 \cdot \log \left(f_{s} \right) + 18.5
 
-        * Andrus et al. [4]_:
+        * Andrus *et al.* :cite:`andrus_2007`:
 
         .. math::
 
@@ -508,26 +466,17 @@ class CPT:
 
             v_{s} = 2.62 \cdot q_{t}^{0.395} \cdot I_{c}^{0.912} \cdot D^{0.124} \cdot SF   (Pleistocene)
 
-        * Zang & Tong [5]_:
+        * Zhang and Tong :cite:`zhang_2017`:
 
         .. math::
 
             v_{s} = 10.915 \cdot q_{t}^{0.317} \cdot I_{c}^{0.210} \cdot D^{0.057} \cdot SF^{a}  (Holocene)
 
-        * Ahmed [6]_:
+        * Ahmed :cite:`ahmed_2017`:
 
         .. math::
 
             v_{s} = 1000 \cdot e^{-0.887 \cdot I_{c}} \cdot \left( \left(1 + 0.443 \cdot F_{r} \right) \cdot \left(\frac{\sigma'_{v}}{p_{a}} \right) \cdot \left(\frac{\gamma_{w}}{\gamma} \right) \right)^{0.5}
-
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 48-50.
-        .. [3] Mayne, P.W. *In-Situ Test Calibrations for Evaluating Soil Parameters.* Characterisation and enginering properties of natural soils, Volume 3.
-               2006, pg: 1-56.
-        .. [4] Andrus, R.D., Mohanan, N.P., Piratheepan, P., et al. *Predicting shear-wave velocity from cone penetration resistance.* Proceedings, 4th International Conference on Earthquake Geotechnical Engineering. 2007.
-        .. [5] Zang, M. & Tong, L. *New statistical and graphical assessment of CPT-based empirical correlations for the shear wave velocity of soils* Engineering Geology 226 (2017) 184–191
-        .. [6] Ahmed, S.M. *Correlating the Shear Wave Velocity with the Cone Penetration Test.* Proceedings of the 2nd World Congress on Civil, Structural, and Environmental Engineering, 2017 ,page 4.
         """
         import numpy as np
 
@@ -571,21 +520,19 @@ class CPT:
             G0_2 = self.G0
             self.plot_correlations([vs1, vs2, vs3, vs4, vs5], "Shear wave velocity [m/s]", ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_wave")
             self.plot_correlations([G0_1, G0_2, G0_3, G0_4, G0_5], "Shear modulus [kPa]", ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_modulus")
-            pass
-
         return
 
     def damp_calc(self, d_min=2, Cu=2., D50=0.2, Ip=40., method="Mayne"):
         r"""
         Damping calculation.
 
-        For clays and peats, the damping is assumed as the minimum damping following Darendeli [7]_.
+        For clays and peats, the damping is assumed as the minimum damping following Darendeli :cite:`darendeli_2001`.
 
         .. math::
 
             D_{min} = \left(0.8005 + 0.0129 \cdot PI \cdot OCR^{-0.1069} \right) \cdot \sigma_{v0}'^{-0.2889} \cdot \left[ 1 + 0.2919 \ln \left( freq \right) \right]
 
-        The OCR can be computed according to Mayne [1]_ or Robertson [2]_.
+        The OCR can be computed according to Mayne :cite:`mayne_2007` or Robertson and Cabal :cite:`robertson_cabal_2014`.
 
 
         .. math::
@@ -595,11 +542,10 @@ class CPT:
             OCR_{Rob} = 0.25 \left(Q_{t}\right)^{1.25}
 
 
-        For sand the damping is assumed as the minimum damping following Menq [8]_.
+        For sand the damping is assumed as the minimum damping following Menq :cite`menq_2033`.
 
         .. math::
             D_{min} = 0.55 \cdot C_{u}^{0.1} \cdot d_{50}^{-0.3} \cdot  \left(\frac{\sigma'_{v}}{p_{a}} \right)^-0.08
-
 
         Parameters
         ----------
@@ -608,16 +554,10 @@ class CPT:
         :param D50: (optional) Median grain size. Default is 0.2 mm
         :param Ip: (optional) Plasticity index. Default is 40
         :param method: (optional) Method for calculation of OCR. Default is Mayne
-
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 40.
-        .. [2] Mayne, P. *Cone Penetration Testing. A Synthesis of Highway Practice.* Transportation Research Board, 2007, pg: 34.
-        .. [7] Darendeli, M.B. *Development of a New Family of Normalized Modulus Reduction and material damping curves.* PhD thesis, 2001, pg: 221.
-        .. [8] Menq, F.Y. *Dynamic Properties of Sandy and Gravelly Soils.* PhD Thesis, 2003, Department of Civil Engineering, University of Texas, Austin, TX.
         """
-        # ToDo missing frequency dependency
         import numpy as np
+
+        # ToDo missing frequency dependency
 
         # assign size to damping
         self.damping = np.zeros(len(self.lithology)) + d_min
@@ -643,12 +583,9 @@ class CPT:
 
     def poisson_calc(self):
         r"""
-        Poisson ratio. Following [2]_.
+        Poisson ratio. Following Mayne :cite:`mayne_2007`.
 
         Poisson assumed 0.5 for soft layers and 0.2 for sandy layers.
-
-        .. rubric:: References
-        .. [2] Mayne, P. *Cone Penetration Testing. A Synthesis of Highway Practice.* Transportation Research Board, 2007, pg: 31.
         """
         import numpy as np 		
 
@@ -665,19 +602,15 @@ class CPT:
 
     def qt_calc(self):
         r"""
-        Corrected cone resistance, following Robertson and Cabal [1]_.
+        Corrected cone resistance, following Robertson and Cabal :cite:`robertson_cabal_2014`.
 
         .. math::
 
             q_{t} = q_{c} + u_{2} \left( 1 - a\right)
-
-        .. rubric:: References
-        .. [1] Robertson, P.K. and Cabal, K.L. *Guide to Cone Penetration Testing for Geotechnical Engineering.* 6th Edition, Gregg, 2014, pg: 22.
         """
 
         # qt computed following Robertson & Cabal (2015)
         # qt = qc + u2 * (1 - a)
-
         self.qt = self.tip + self.water * (1. - self.a)
         return
 
@@ -689,10 +622,8 @@ class CPT:
         ----------
         :param min_layer_thick: Minimum layer thickness
 
-
         """
         import numpy as np
-
 
         depth = self.depth
         lithology = self.lithology
@@ -821,7 +752,6 @@ class CPT:
         ----------
         :param jsn: json file with data structure
         :param input_dic: dictionary with the input information
-        :return:
         """
         import os
         import json
@@ -926,13 +856,11 @@ class CPT:
         # save the figure
         plt.savefig(os.path.join(self.output_folder, self.name) + "_cpt.png")
         plt.close()
-
         return
 
     def plot_lithology(self):
         """
         Plot CPT lithology.
-
         """
         import os
         import numpy as np 		
@@ -1065,7 +993,6 @@ class CPT:
         ----------
         :param output_f: output folder
         """
-
         import os
 
         # write csv
@@ -1093,6 +1020,7 @@ class CPT:
                          str(self.damping[i]) + '\n')
         return
 
+
 def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     """
     Computation of stress exponent *n*
@@ -1105,9 +1033,9 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     :param Pa: atmospheric pressure
     :return: updated n - stress exponent
     """
-    # convergence of n
-    import numpy as np 		
+    import numpy as np
 
+    # convergence of n
     Cn = (Pa / np.array(sigma_eff)) ** n
 
     Q = ((np.array(qt) - np.array(sigma_tot)) / Pa) * Cn
@@ -1189,7 +1117,7 @@ def compute_probability(coord_cpt, coord_src, coord_rec):
     :param coord_cpt: list of coordinates of the CPTs
     :param coord_src: coordinates of the source
     :param coord_rec: coordinates of the receiver
-    :return: probs: probability of occurence of the scenario
+    :return: probs: probability of occurrence of the scenario
     """
     import numpy as np
 
