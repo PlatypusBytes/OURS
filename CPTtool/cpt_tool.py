@@ -1,3 +1,5 @@
+import argparse
+
 def define_methods(input_file):
     """
     Defines correlations for the CPT
@@ -144,7 +146,6 @@ def read_cpt(folder_path, key_cpt, methods, output_folder, input_dictionary, mak
 
 
 if __name__ == "__main__":
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--json', help='input JSON file', required=True)
     parser.add_argument('-o', '--output', help='location of the output folder', required=True)
@@ -156,3 +157,6 @@ if __name__ == "__main__":
     props = read_json(args.json)
     methods = define_methods(args.methods)
     read_cpt(props["BRO_data"], key, methods, args.output, props, args.plots)
+
+    # Read CPTs from XML (zip)
+    # cpts = read_bro(props)

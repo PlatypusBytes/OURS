@@ -1,3 +1,5 @@
+import numpy as np
+
 class CPT:
     r"""
     CPT module
@@ -69,6 +71,12 @@ class CPT:
             data = f.readlines()
 
         gef_file_name = os.path.split(gef_file)[-1].upper().split(".GEF")[0]
+
+
+        newdata = {}
+        for line in data:
+            k, v = line.split("=")
+            newdata.update({k:v})
 
         # search NAP
         try:
@@ -209,7 +217,7 @@ class CPT:
         :param iter_max: (optional) Maximum number of iterations
         """
         import robertson
-        import numpy as np 		
+        import numpy as np
 
         classification = robertson.Robertson()
         classification.soil_types()
@@ -413,7 +421,7 @@ class CPT:
     #         q_{c1N} = C_{N} \cdot \frac{q_{c}}{Pa}
     #
     #     """
-    #     import numpy as np 		
+    #     import numpy as np
     #
     #     # normalise qc
     #     qc100 = self.tip * np.min([np.ones(len(self.tip)) * 1.7, (self.Pa / self.effective_stress)**self.n], axis=0)
@@ -478,7 +486,6 @@ class CPT:
 
             v_{s} = 1000 \cdot e^{-0.887 \cdot I_{c}} \cdot \left( \left(1 + 0.443 \cdot F_{r} \right) \cdot \left(\frac{\sigma'_{v}}{p_{a}} \right) \cdot \left(\frac{\gamma_{w}}{\gamma} \right) \right)^{0.5}
         """
-        import numpy as np
 
         if method == "Robertson":
             # vs: following Robertson and Cabal (2015)
@@ -590,7 +597,7 @@ class CPT:
 
         Poisson assumed 0.5 for soft layers and 0.2 for sandy layers.
         """
-        import numpy as np 		
+        import numpy as np
 
         # assign size to poisson
         self.poisson = np.zeros(len(self.lithology))
@@ -700,7 +707,7 @@ class CPT:
         :param jsn: Json data structure
         :param id: Scenario (index)
         """
-        import numpy as np 		
+        import numpy as np
 
         # create data
         data = {"lithology": [],
@@ -825,7 +832,7 @@ class CPT:
         :param nb_plots: (optional) number of plots
         """
         import os
-        import numpy as np 		
+        import numpy as np
         import matplotlib.pylab as plt
         from cycler import cycler
 
@@ -866,7 +873,7 @@ class CPT:
         Plot CPT lithology.
         """
         import os
-        import numpy as np 		
+        import numpy as np
         import matplotlib.pylab as plt
         import matplotlib.patches as patches
 
@@ -1063,7 +1070,7 @@ def merge(min_thick, depth, lithology):
     :param lithology: layer lithology
     :return: thickness, depth, lithology, indices
     """
-    import numpy as np 		
+    import numpy as np
 
     # find location of the start of the soil types
     aux = ""
