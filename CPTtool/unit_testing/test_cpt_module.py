@@ -278,7 +278,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
         self.cpt.qt = np.ones(len(self.cpt.lithology))
 
-        test_damping = np.array([2, 2, 2])
+        test_damping = np.array([2, 2, 2]) / 100
         self.cpt.damp_calc()
         np.testing.assert_array_equal(test_damping, self.cpt.damping)
         return
@@ -290,7 +290,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
         self.cpt.qt = np.ones(len(self.cpt.lithology))
 
-        test_damping = np.array([2, 2, 2])
+        test_damping = np.array([2, 2, 2]) / 100
         self.cpt.damp_calc()
         np.testing.assert_array_equal(test_damping, self.cpt.damping)
         return
@@ -302,7 +302,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
         self.cpt.qt = np.ones(len(self.cpt.lithology))
 
-        test_damping = np.array([2, 2, 2])
+        test_damping = np.array([2, 2, 2]) / 100
         self.cpt.damp_calc()
         np.testing.assert_array_equal(test_damping, self.cpt.damping)
         return
@@ -318,6 +318,7 @@ class TestCptModule(unittest.TestCase):
         Cu = 3
         D50 = .025
         test_damping = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.cpt.effective_stress / 100) ** -0.08
+        test_damping /=  100
         self.cpt.damp_calc(Cu=Cu, D50=D50)
         np.testing.assert_array_equal(test_damping, self.cpt.damping)
         return
