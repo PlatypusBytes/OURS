@@ -469,11 +469,12 @@ class TestCptModule(unittest.TestCase):
         import os
         self.log_file.close()
         os.remove("./results/log_file.txt")
-        list_delete = ["UNIT_TEST.csv","UNIT_TEST_Correlations.png","UNIT_TEST_cpt.png","UNIT_TEST_lithology.png",
-"UNIT_TEST_unit_weight.png" ,"UNIT_TESTING_shear_modulus.png","UNIT_TESTING_shear_wave.png",]
+        list_delete = ["UNIT_TEST.csv", "UNIT_TEST_Correlations.png", "UNIT_TEST_cpt.png","UNIT_TEST_lithology.png",
+                       "UNIT_TEST_unit_weight.png", "UNIT_TESTING_shear_modulus.png", "UNIT_TESTING_shear_wave.png"]
         for i in list_delete:
             if os.path.exists(i):
-               os.remove(i)
+                os.remove(i)
+        os.rmdir("./results")
         return
 
 
