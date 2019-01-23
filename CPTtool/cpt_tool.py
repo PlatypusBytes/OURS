@@ -1,8 +1,9 @@
 def read_json(input_file):
     """
+    Reads input json file
 
-    :param input_file:
-    :return: data:
+    :param input_file: json file with the input values
+    :return: data: dictionary with the input files
     """
     import json
     with open(input_file, "r") as f:
