@@ -176,7 +176,7 @@ class TestCptModule(unittest.TestCase):
         test_Qtn, total_stress, effective_stress, Pa, tip, friction = [], [], [], [], [], []
         test_Fr = []
 
-        with open('test_norm_calc.csv') as csv_file:
+        with open('unit_testing_files/test_norm_calc.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=';')
             line_count = 0
             for row in csv_reader:
