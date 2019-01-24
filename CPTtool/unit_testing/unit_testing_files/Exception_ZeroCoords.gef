@@ -18,8 +18,8 @@
 #COLUMNVOID= 5, -9999.000000
 #COLUMNVOID= 6, -9999.000000
 #LASTSCAN= 2519
-#ZID= 31000, 0.13, 0.00
-#XYID = 0, 0,0, 0, 0
+#XYID= 0.0, 0.0, 0.0, 0.0, 0.0
+#ZID=  0.0, 0.0, 0.0
 #MEASUREMENTTEXT= 1, 1, opdrachtgever
 #MEASUREMENTTEXT= 2, toetsing en aardbevingsbestendigmaken van Eemskanaalkade (km 10 t/m 25.5), projectnaam
 #MEASUREMENTTEXT= 3, WOLTERSUM, name of location
