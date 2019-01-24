@@ -182,14 +182,14 @@ def query_index(index, x, y, radius=1000):
     points = tree.query_ball_point((x, y), radius)
 
     # Return slices
-    return npindex[points, 2:4].astype(int)
+    return npindex[points, 2:4].astype(np.int64)
 
 
 def read_bro_xml(fn, indices):
     cpts = []
     with open(fn, "r") as f:
         # memory-map the file, size 0 means whole file
-        mm = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         i = mm.find(searchstring, 0)
         header = mm[0:i]
         for (start, end) in indices:
@@ -238,6 +238,7 @@ def read_bro(parameters):
 
 if __name__ == "__main__":
     input = {"BRO_data": "/Volumes/wdmpu/bro/brocpt.xml", "Source_x": 104882, "Source_y": 478455}
+    input = {"BRO_data": "H:/bro/brocpt.xml", "Source_x": 104882, "Source_y": 478455}
     # input = {"BRO_data": "/Users/epta/Downloads/brocpt_2019.zip", "Source_x": 104882, "Source_y": 478455}
     cpts = read_bro(input)
     print(cpts)
