@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python_37\python.exe
+#!D:\OneDrive - Stichting Deltares\projects\RIVM\OURS\Python_37\python.exe
 
 # $Id: rst2s5.py 4564 2006-05-21 20:44:42Z wiemann $
 # Author: Chris Liechti <cliechti@gmx.net>

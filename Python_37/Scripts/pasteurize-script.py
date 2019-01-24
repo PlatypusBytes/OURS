@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python_37\python.exe
+#!"D:\OneDrive - Stichting Deltares\projects\RIVM\OURS\Python_37\python.exe"
 # EASY-INSTALL-ENTRY-SCRIPT: 'future==0.17.1','console_scripts','pasteurize'
 __requires__ = 'future==0.17.1'
 import re

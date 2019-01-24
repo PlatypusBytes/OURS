@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python_37\python.exe
+#!D:\OneDrive - Stichting Deltares\projects\RIVM\OURS\Python_37\python.exe
 
 # $Id: rst2xetex.py 7847 2015-03-17 17:30:47Z milde $
 # Author: Guenter Milde

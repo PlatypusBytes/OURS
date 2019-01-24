@@ -1,4 +1,4 @@
-#!d:\projects\rivm\ours\python_37\python.exe
+#!"D:\OneDrive - Stichting Deltares\projects\RIVM\OURS\Python_37\python.exe"
 # EASY-INSTALL-ENTRY-SCRIPT: 'Twisted==18.9.0','console_scripts','trial'
 __requires__ = 'Twisted==18.9.0'
 import re
