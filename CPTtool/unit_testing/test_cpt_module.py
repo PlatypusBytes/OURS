@@ -109,9 +109,9 @@ class TestCptModule(unittest.TestCase):
         self.cpt.depth = [0,0.1,0.2,0.3,0.4,0.5,0.8,0.9,1.0,1.1,1.2,1.3]
         self.cpt.lithology = ['0','0','0','0','0','1','2','2','2','2','2','2']
         merged = self.cpt.merge_thickness(min_layer_thick)
-        depth_test = [0.0,0.5]
-        test_lithology = ['0','2/1']
-        test_index = [0,5]
+        depth_test = [0.0,0.5, 1.3]
+        test_lithology = ['0','1/2']
+        test_index = [0,5,11]
         np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
         np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
         np.testing.assert_array_equal(test_index, self.cpt.indx_json)
@@ -123,9 +123,9 @@ class TestCptModule(unittest.TestCase):
          self.cpt.depth = [0,0.1,0.2,0.3,0.4,0.5,0.8,0.9,1.0,1.1,1.2,1.3]
          self.cpt.lithology = ['0','0','0','0','0','1','2','2','2','2','2','2']
          merged = self.cpt.merge_thickness(min_layer_thick)
-         depth_test = [0.0,0.8]
-         test_lithology = ['0/1','2']
-         test_index = [0,6]
+         depth_test = [0.0,0.5, 1.3]
+         test_lithology = ['0','1/2']
+         test_index = [0,5,11]
          np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
          np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
          np.testing.assert_array_equal(test_index, self.cpt.indx_json)
@@ -136,12 +136,12 @@ class TestCptModule(unittest.TestCase):
         self.cpt.depth = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2  ]
         self.cpt.IC = [1,1,1,1,1,1,1,0.9,0.9,0.9,4,4,4,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5]
         self.cpt.lithology =['0','0','0','0','0','0','0','1','1','1','2','2','2','3','3','3','3','3','3','3','3']
-        depth_test = [0,1]
-        test_lithology = [ '0/1','2/3']
-        test_index = [0,10]
+        depth_test = [0,0.7,1.3,2.]
+        test_lithology = [ '0','1/2','3']
+        test_index = [0,7,13,20]
         merged = self.cpt.merge_thickness(min_layer_thick)
         np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
-#        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
+        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
         np.testing.assert_array_equal(test_index, self.cpt.indx_json)
         return
 
@@ -150,12 +150,12 @@ class TestCptModule(unittest.TestCase):
         self.cpt.depth = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5]
         self.cpt.IC = [4,4,4,4,4,4,4,0.9,0.9,0.9,1,1,1,1,1,1]
         self.cpt.lithology =['0','0','0','0','0','0','0','1','1','1','2','2','2','3','3','3']
-        depth_test = [0,0.7,1.3]
-        test_lithology = [ '0','1/2','3']
-        test_index = [0,10]
+        depth_test = [0,0.7,1.5]
+        test_lithology = [ '0','1/2/3']
+        test_index = [0,7,15]
         merged = self.cpt.merge_thickness(min_layer_thick)
         np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
- #       np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
+        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
         np.testing.assert_array_equal(test_index, self.cpt.indx_json)
         return
 

@@ -630,66 +630,72 @@ class CPT:
 
         depth = self.depth
         lithology = self.lithology
-        # find location of the start of the soil types
+        #Find indeces of local unmerged layers
         aux = ""
         idx = []
         local_IC = []
-        # here the i is where I am in the Cpt , val is the value of the lithology which is a number coresponding to Robertson
-        # if the previous layer is not the same as the next save the position and save the value for the next step
         for j, val in enumerate(lithology):
             if val != aux:
                 aux = val
                 idx.append(j)
         target_idx = idx[1:]
+
+        # IC mean calculation not used at this moment
         for i in range(len(idx)):
             if i == len(idx)-1:
                 local_IC.append(np.mean(self.IC[idx[i]:]))
             else:
                 local_IC.append(np.mean(self.IC[idx[i]:target_idx[i]]))
 
+        #Depth between local unmerged layers
         local_z_ini = [depth[i] for i in idx]
-        # thickness between those layers calculated
+        #Thicknesses between local unmerged layers
         local_thick = list(np.diff(local_z_ini)),[depth[-1] - local_z_ini[-1]]
         local_thick = sum(local_thick,[])
-        # soil type
-        local_label = [lithology[i] for i in idx]
+        # Actual Merging
+        new_thickness = self.merging_thickness(local_thick, min_layer_thick)
 
-        IC_checker = [['next','back'][abs(local_IC[i]-local_IC[i+1]) > abs(local_IC[i-1]-local_IC[i])] for i in range(1,len(local_IC)-1)]
-        IC_checker.insert(0,'next')
-        IC_checker.append('back')
-        now_thickness = 0
-        new_thickness = np.zeros(len(idx))
-        for counter,value in enumerate(local_thick):
-            if counter is not 0 and now_thickness < float(min_layer_thick):
-                now_thickness = now_thickness + value
-            else:
-                now_thickness = value
-            new_thickness[counter]= now_thickness
-        min_checker = [[False, True][x >= float(min_layer_thick)] for x in new_thickness]
-        # has to be changed to append
-        for counter in range(1,len(new_thickness)):
-            if IC_checker[counter] == 'back' and min_checker[counter-1] == True:
-                new_thickness[counter] = new_thickness[counter-1] + new_thickness[counter]
-            else:
-                pass
-
-        new_index , new_depth , new_label = [] , [] , []
-        last_time = -1
-        for counter,value in enumerate(idx[1:]):
-            if min_checker[counter]== True :
-                new_index.append(value)
-                new_depth.append(local_z_ini[counter+1])
-                new_label.append('/'.join(local_label[last_time+1:counter+1]))
-                last_time = counter
-        new_index.insert(0,idx[0])
-        new_depth.insert(0,self.depth[0])
-        if new_index[-1] is not idx[-1]:
-            new_label.append('/'.join(local_label[last_time+1:]))
-        self.lithology_json = new_label
-        self.depth_json = new_depth
-        self.indx_json = new_index
+        self.depth_json = self.merging_depth(new_thickness)
+        self.indx_json = self.merging_index()
+        self.lithology_json = self.merging_label()
 
         return
+
+    def merging_label(self):
+        new_label = []
+        start = self.indx_json[:-1]
+        finish = self.indx_json[1:]
+        for i in range(len(start)):
+            new_label.append('/'.join(set(self.lithology[start[i]:finish[i]])))
+        return new_label
+
+    def merging_index(self):
+        new_index = []
+        for i in range(len(self.depth)):
+            if self.depth[i] in self.depth_json:
+                new_index.append(i)
+        return new_index
+
+    def merging_depth(self,new_thickness):
+        import numpy as np
+        new_depth = [[self.depth[0]],np.cumsum(new_thickness).tolist()]
+        new_depth = sum(new_depth, [])
+        return new_depth
+
+    def merging_thickness(self,local_thick,min_layer_thick):
+        new_thickness = []
+        now_thickness = 0
+        counter = 0
+        while counter <= len(local_thick)-1:
+            while now_thickness < min_layer_thick:
+                now_thickness += local_thick[counter]
+                counter +=1
+                if counter == len(local_thick) and now_thickness < min_layer_thick:
+                    new_thickness[-1] += now_thickness
+                    return new_thickness
+            new_thickness.append(now_thickness)
+            now_thickness = 0
+        return new_thickness
 
     def add_json(self, jsn, id):
         """
