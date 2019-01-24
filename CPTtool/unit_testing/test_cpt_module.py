@@ -352,6 +352,16 @@ class TestCptModule(unittest.TestCase):
         self.cpt.damp_calc(Cu=Cu, D50=D50, Ip=PI, method="Robertson")
         return
 
+
+    def test_damp_calc_6(self):
+        # all soil sand
+        self.cpt.lithology = ["2", "2", "2", "2"]
+        self.cpt.effective_stress = np.ones(len(self.cpt.lithology))
+        self.cpt.Pa = 1
+        test_damping = (2.512/100)*np.ones(len(self.cpt.lithology))
+        self.cpt.damp_calc()
+        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        return
     def test_qt_calc(self):
         self.cpt.tip = np.array([1])
         self.cpt.water = np.array([1])
