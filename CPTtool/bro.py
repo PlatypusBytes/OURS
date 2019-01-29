@@ -221,7 +221,7 @@ def read_bro(parameters):
         index = create_index(fn, ifn, datasize)
 
     # Find CPT indexes
-    indices = query_index(index, x, y)
+    indices = query_index(index, x, y, radius=parameters["Radius"])
     n_cpts = len(indices)
     if n_cpts == 0:
         logging.warning("Found no CPTs, try another location or increase the radius.")
@@ -237,8 +237,6 @@ def read_bro(parameters):
 
 
 if __name__ == "__main__":
-    input = {"BRO_data": "/Volumes/wdmpu/bro/brocpt.xml", "Source_x": 104882, "Source_y": 478455}
-    input = {"BRO_data": "H:/bro/brocpt.xml", "Source_x": 104882, "Source_y": 478455}
-    # input = {"BRO_data": "/Users/epta/Downloads/brocpt_2019.zip", "Source_x": 104882, "Source_y": 478455}
+    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 104882, "Source_y": 478455, "Radius": 1000}
     cpts = read_bro(input)
     print(cpts)
