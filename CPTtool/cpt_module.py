@@ -839,7 +839,7 @@ class CPT:
         x_data = [self.tip, self.friction_nbr, self.rho, self.G0, self.poisson, self.damping]
         y_data = self.depth
         l_name = ["Tip resistance", "Friction number", "Density", "Shear modulus", "Poisson ratio", "Damping"]
-        x_label = ["Tip resistance [kPa]", "Friction number [-]", r"Density [kg/m$^{3}$]", "Shear modulus [kPa]", "Poisson ratio [-]", "Damping [%]"]
+        x_label = ["Tip resistance [kPa]", "Friction number [-]", r"Density [kg/m$^{3}$]", "Shear modulus [kPa]", "Poisson ratio [-]", "Damping [-]"]
         y_label = "Depth [m]"
 
         # set the color list
