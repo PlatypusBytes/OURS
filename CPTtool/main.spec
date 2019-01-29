@@ -1,6 +1,7 @@
 # -*- mode: python -*-
 a = Analysis(['cpt_tool.py'],
              pathex=['.'],
+             hiddenimports=['numpy.core._dtype_ctypes'],
              hookspath=None,
              runtime_hooks=None)
 			 
