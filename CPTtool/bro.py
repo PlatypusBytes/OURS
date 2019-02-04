@@ -27,6 +27,8 @@ req_columns = ["penetrationLength", "depth", "coneResistance", "localFriction", 
 ns = "{http://www.broservices.nl/xsd/cptcommon/1.1}"
 ns2 = "{http://www.broservices.nl/xsd/dscpt/1.1}"
 ns3 = "{http://www.opengis.net/gml/3.2}"
+ns4 = "{http://www.broservices.nl/xsd/brocommon/3.0}"
+ns5 = "{http://www.opengis.net/om/2.0}"
 footer = b"</gml:FeatureCollection>"
 nodata = -999999
 
@@ -39,7 +41,7 @@ def writexml(data):
 def parse_bro_xml(xml):
     root = etree.fromstring(xml)
 
-    data = {"location_x": None, "location_y": None,
+    data = {"id": None, "location_x": None, "location_y": None,
             "offset_z": None, "predrilled_z": None}
 
     # Location
@@ -48,6 +50,10 @@ def parse_bro_xml(xml):
             x, y = pos.text.split(" ")
             data["location_x"] = float(x)
             data["location_y"] = float(y)
+
+    # BRO Id
+    for loc in root.iter(ns4 + "broId"):
+        data["id"] = loc.text
 
     # NAP offset
     for loc in root.iter(ns + "offset"):
@@ -106,7 +112,7 @@ def create_index(fn, ifn, datasize):
     ext = splitext(fn)[1]
 
     # Setup progress
-    pbar = tqdm(total=datasize, unit='bytes')
+    pbar = tqdm(total=datasize//1000000, unit='Mbytes')
 
     # Memory map OS specifc options
     if name == 'nt':
@@ -130,7 +136,7 @@ def create_index(fn, ifn, datasize):
                     else:
                         tdata = header+data+footer
                         if i != -1:
-                            pbar.update(i-previ)
+                            pbar.update((i-previ)//1000000)
                             (x, y) = parse_xml_location(tdata)
                             locations.append((x, y, previ, i))
                     cpt_count += 1
@@ -238,5 +244,6 @@ def read_bro(parameters):
 
 if __name__ == "__main__":
     input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 104882, "Source_y": 478455, "Radius": 1000}
+
     cpts = read_bro(input)
     print(cpts)
