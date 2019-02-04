@@ -63,7 +63,15 @@ def read_json(input_file):
     :param input_file: json file with the input values
     :return: data: dictionary with the input files
     """
+    import os
+    import sys
     import json
+
+    # check if file exits
+    if not os.path.isfile(input_file):
+        sys.exit("Input JSON file does not exist")
+
+    # read file
     with open(input_file, "r") as f:
         data = json.load(f)
     return data
