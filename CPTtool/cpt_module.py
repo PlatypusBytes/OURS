@@ -173,6 +173,41 @@ class CPT:
 
         return True
 
+    def parse_bro(self, cpt):
+        """
+        Parse the BRO information into the object structure
+
+        :param cpt: BRO cpt
+        :return:
+        """
+        import numpy as np
+
+        # remove NAN row from the dataframe
+        for key in cpt["dataframe"]:
+            cpt["dataframe"] = cpt["dataframe"].dropna(subset = [key])
+
+        # parse cpt file name
+        self.name = cpt['id']
+        # parse coordinates
+        self.coord = [cpt['location_x'], cpt['location_y']]
+        # parse depth
+        self.depth = cpt['dataframe']["depth"].values
+        # parse NAP depth
+        self.NAP = cpt['offset_z'] - cpt['dataframe']["depth"].values
+        # parse tip resistance
+        self.tip = cpt['dataframe']["coneResistance"].values * 1000.
+        # parse friction
+        self.friction = cpt['dataframe']["localFriction"].values * 1000.
+        # parser friction number
+        self.friction_nbr = cpt['dataframe']["frictionRatio"].values
+        # default water is zero
+        self.water = np.zeros(len(self.depth))
+        # if water exists parse water
+        if "porePressureU2" in cpt["dataframe"]:
+            self.water = cpt['dataframe']["porePressureU2"].values * 1000.
+
+        return
+
     def lithology_calc(self):
         r"""
         Lithology calculation.

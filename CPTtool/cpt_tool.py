@@ -1,4 +1,6 @@
 import argparse
+import bro
+
 
 def define_methods(input_file):
     """
@@ -94,7 +96,7 @@ def set_key():
     return key
 
 
-def read_cpt(folder_path, key_cpt, methods, output_folder, input_dictionary, make_plots, gamma_max=22, pwp_level=0):
+def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, gamma_max=22, pwp_level=0):
     """
     Read CPT
 
@@ -102,35 +104,28 @@ def read_cpt(folder_path, key_cpt, methods, output_folder, input_dictionary, mak
 
     Parameters
     ----------
-    :param folder_path: Folder where the cpt files are located
+    :param cpt_BRO: cpt information from the BRO
     :param key_cpt: File with the key for the CPT interpretation
     :param methods: Methods for the CPT correlations
     :param output_folder: Folder to save the files
     :param input_dictionary: Dictionary with input settings
     :param gamma_max: (optional) maximum value specific weight soil
     :param pwp_level: (optional) pore water level in NAP
-
     """
 
     # read the cpt files
-    import os
     import cpt_module
     import log_handler
 
-    cpts = os.listdir(folder_path)
-    cpts = [i for i in cpts if i.upper().endswith(".GEF")]
     # Define log file
     log_file = log_handler.LogFile(output_folder)
 
     jsn = {"scenarios": []}
     i = 0
-    for f in cpts:
-        log_file.info_message("analysis started for: " + f)
+    for idx_cpt in range(len(cpt_BRO)):
+        log_file.info_message("analysis started for: " + cpt_BRO[idx_cpt]["id"])
         cpt = cpt_module.CPT(output_folder, log_file)
-        aux = cpt.read_gef(os.path.join(folder_path, f), key_cpt)
-        if not aux:
-            log_file.info_message("analysis failed for: " + f)
-            continue
+        cpt.parse_bro(cpt_BRO[idx_cpt])
         cpt.qt_calc()
         cpt.gamma_calc(gamma_max, method=methods["gamma"])
         cpt.rho_calc()
@@ -147,7 +142,7 @@ def read_cpt(folder_path, key_cpt, methods, output_folder, input_dictionary, mak
             cpt.plot_cpt()
             cpt.plot_lithology()
         i += 1
-        log_file.info_message("analysis succeeded for: " + f)
+        log_file.info_message("analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
     cpt.update_dump_json(jsn, input_dictionary)
     log_file.close()
     return
@@ -164,7 +159,11 @@ if __name__ == "__main__":
     key = set_key()
     props = read_json(args.json)
     methods = define_methods(args.methods)
-    read_cpt(props["BRO_data"], key, methods, args.output, props, args.plots)
 
-    # Read CPTs from XML (zip)
-    # cpts = read_bro(props)
+    # read BRO data base
+    inpt = {"BRO_data": props["BRO_data"],
+            "Source_x": props["Source_x"], "Source_y": props["Source_y"],
+            "Radius": 1000}
+    cpts = bro.read_bro(inpt)
+    # process cpts
+    read_cpt(cpts, methods, args.output, props, args.plots)
