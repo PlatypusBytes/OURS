@@ -8,13 +8,14 @@ import unittest
 import cpt_module
 import numpy as np
 import cpt_tool
+import tools_utils
 
 
 class TestCptModule(unittest.TestCase):
     def setUp(self):
         import cpt_module
         import log_handler
-        self.log_file = log_handler.LogFile("./results")
+        self.log_file = log_handler.LogFile("./results", 0)
 
         self.cpt = cpt_module.CPT("./", self.log_file)
         pass
@@ -110,7 +111,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.lithology = ['0','0','0','0','0','1','2','2','2','2','2','2']
         merged = self.cpt.merge_thickness(min_layer_thick)
         depth_test = [0.0,0.5, 1.3]
-        test_lithology = ['0','1/2']
+        test_lithology = ['0', r'1/2']
         test_index = [0,5,11]
         np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
         np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
@@ -124,7 +125,7 @@ class TestCptModule(unittest.TestCase):
          self.cpt.lithology = ['0','0','0','0','0','1','2','2','2','2','2','2']
          merged = self.cpt.merge_thickness(min_layer_thick)
          depth_test = [0.0,0.5, 1.3]
-         test_lithology = ['0','1/2']
+         test_lithology = ['0', r'1/2']
          test_index = [0,5,11]
          np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
          np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
@@ -137,7 +138,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.IC = [1,1,1,1,1,1,1,0.9,0.9,0.9,4,4,4,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5]
         self.cpt.lithology =['0','0','0','0','0','0','0','1','1','1','2','2','2','3','3','3','3','3','3','3','3']
         depth_test = [0,0.7,1.3,2.]
-        test_lithology = [ '0','1/2','3']
+        test_lithology = ['0', r'1/2','3']
         test_index = [0,7,13,20]
         merged = self.cpt.merge_thickness(min_layer_thick)
         np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
@@ -150,9 +151,9 @@ class TestCptModule(unittest.TestCase):
         self.cpt.depth = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5]
         self.cpt.IC = [4,4,4,4,4,4,4,0.9,0.9,0.9,1,1,1,1,1,1]
         self.cpt.lithology =['0','0','0','0','0','0','0','1','1','1','2','2','2','3','3','3']
-        depth_test = [0,0.7,1.5]
-        test_lithology = [ '0','1/2/3']
-        test_index = [0,7,15]
+        depth_test = [0, 0.7, 1.5]
+        test_lithology = ['0', r'1/2/3']
+        test_index = [0, 7, 15]
         merged = self.cpt.merge_thickness(min_layer_thick)
         np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
         np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
@@ -446,24 +447,25 @@ class TestCptModule(unittest.TestCase):
         jsn = {"scenarios": []}
         jsn["scenarios"].append({"coordinates": [1, 2]})
 
-        input_dic = {"Source_x": 1,
-                     "Source_y": 1,
-                     "Receiver_x": 1,
-                     "Receiver_y": 1,
+        input_dic = {"Source_x": [1],
+                     "Source_y": [1],
+                     "Receiver_x": [1],
+                     "Receiver_y": [1],
                      }
-        self.cpt.update_dump_json(jsn, input_dic)
+        self.cpt.update_dump_json(jsn, input_dic, 0)
         # check if probability is 100
         self.assertEqual(jsn['scenarios'][0]['probability'], 100)
         # check if file has been created
-        self.assertTrue(os.path.isfile("./results.json"))
-        os.remove("./results.json")
+        self.assertTrue(os.path.isfile("./results_0.json"))
+        os.remove("./results_0.json")
         return
 
     def test_compute_prob(self):
+
         cpt_coord = np.array([[0, 10], [17, 19], [14, 22], [35, 10]])
         source_coord = [5, 10]
         receiver_coord = [30, 10]
-        prob = cpt_module.compute_probability(cpt_coord, source_coord, receiver_coord)
+        prob = tools_utils.compute_probability(cpt_coord, source_coord, receiver_coord)
         # exact results
         exact = [0.306964061716986,
                  0.263692716163477,
@@ -561,7 +563,7 @@ class TestCptModule(unittest.TestCase):
     def tearDown(self):
         import os
         self.log_file.close()
-        os.remove("./results/log_file.txt")
+        os.remove("./results/log_file_0.txt")
         list_delete = ["UNIT_TEST.csv", "UNIT_TEST_Correlations.png", "UNIT_TEST_cpt.png","UNIT_TEST_lithology.png",
                        "UNIT_TEST_unit_weight.png", "UNIT_TESTING_shear_modulus.png", "UNIT_TESTING_shear_wave.png"]
         for i in list_delete:

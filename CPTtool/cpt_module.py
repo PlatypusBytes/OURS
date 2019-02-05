@@ -654,7 +654,7 @@ class CPT:
         return
 
     def merge_thickness(self, min_layer_thick):
-        """
+        r"""
         Reorganises the lithology based on the minimum layer thickness.
 
         Parameters
@@ -676,18 +676,17 @@ class CPT:
                 idx.append(j)
         target_idx = idx[1:]
 
-        # IC mean calculation not used at this moment
-        for i in range(len(idx)):
-            if i == len(idx)-1:
-                local_IC.append(np.mean(self.IC[idx[i]:]))
-            else:
-                local_IC.append(np.mean(self.IC[idx[i]:target_idx[i]]))
+        # # IC mean calculation not used at this moment
+        # for i in range(len(idx)):
+        #     if i == len(idx)-1:
+        #         local_IC.append(np.mean(self.IC[idx[i]:]))
+        #     else:
+        #         local_IC.append(np.mean(self.IC[idx[i]:target_idx[i]]))
 
         #Depth between local unmerged layers
         local_z_ini = [depth[i] for i in idx]
         #Thicknesses between local unmerged layers
-        local_thick = list(np.diff(local_z_ini)),[depth[-1] - local_z_ini[-1]]
-        local_thick = sum(local_thick,[])
+        local_thick = np.append(np.diff(local_z_ini), depth[-1] - local_z_ini[-1])
         # Actual Merging
         new_thickness = self.merging_thickness(local_thick, min_layer_thick)
 
@@ -702,7 +701,9 @@ class CPT:
         start = self.indx_json[:-1]
         finish = self.indx_json[1:]
         for i in range(len(start)):
-            new_label.append('/'.join(set(self.lithology[start[i]:finish[i]])))
+            # sorted label list
+            label_list = sorted(set(self.lithology[start[i]:finish[i]]), key=lambda x: self.lithology[start[i]:finish[i]].index(x))
+            new_label.append(r'/'.join(label_list))
         return new_label
 
     def merging_index(self):
@@ -712,20 +713,20 @@ class CPT:
                 new_index.append(i)
         return new_index
 
-    def merging_depth(self,new_thickness):
+    def merging_depth(self, new_thickness):
         import numpy as np
-        new_depth = [[self.depth[0]],np.cumsum(new_thickness).tolist()]
-        new_depth = sum(new_depth, [])
+        new_depth = np.append(self.depth[0], new_thickness)
+        new_depth = np.cumsum(new_depth)
         return new_depth
 
-    def merging_thickness(self,local_thick,min_layer_thick):
+    def merging_thickness(self, local_thick, min_layer_thick):
         new_thickness = []
         now_thickness = 0
         counter = 0
-        while counter <= len(local_thick)-1:
+        while counter <= len(local_thick) - 1:
             while now_thickness < min_layer_thick:
                 now_thickness += local_thick[counter]
-                counter +=1
+                counter += 1
                 if counter == len(local_thick) and now_thickness < min_layer_thick:
                     new_thickness[-1] += now_thickness
                     return new_thickness
