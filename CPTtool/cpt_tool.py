@@ -96,7 +96,7 @@ def set_key():
     return key
 
 
-def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, gamma_max=22, pwp_level=0):
+def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index, gamma_max=22, pwp_level=0):
     """
     Read CPT
 
@@ -109,6 +109,9 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, gamm
     :param methods: Methods for the CPT correlations
     :param output_folder: Folder to save the files
     :param input_dictionary: Dictionary with input settings
+    :param make_plots: Bool to make plots
+    :param index: index of the calculation point
+    :param input_dictionary: Dictionary with input settings
     :param gamma_max: (optional) maximum value specific weight soil
     :param pwp_level: (optional) pore water level in NAP
     """
@@ -118,7 +121,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, gamm
     import log_handler
 
     # Define log file
-    log_file = log_handler.LogFile(output_folder)
+    log_file = log_handler.LogFile(output_folder, index)
 
     jsn = {"scenarios": []}
     i = 0
@@ -143,8 +146,26 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, gamm
             cpt.plot_lithology()
         i += 1
         log_file.info_message("analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
-    cpt.update_dump_json(jsn, input_dictionary)
+    cpt.update_dump_json(jsn, input_dictionary, index)
     log_file.close()
+    return
+
+
+def analysis(properties, methods_cpt, output, plots):
+
+    # number of points
+    nb_points = len(props["Source_x"])
+
+    # for each calculation point
+    for i in range(nb_points):
+        # read BRO data base
+        inpt = {"BRO_data": properties["BRO_data"],
+                "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
+                "Radius": 1000}
+        cpts = bro.read_bro(inpt)
+        # process cpts
+        read_cpt(cpts, methods_cpt, output, properties, plots, i)
+
     return
 
 
@@ -160,10 +181,6 @@ if __name__ == "__main__":
     props = read_json(args.json)
     methods = define_methods(args.methods)
 
-    # read BRO data base
-    inpt = {"BRO_data": props["BRO_data"],
-            "Source_x": props["Source_x"], "Source_y": props["Source_y"],
-            "Radius": 1000}
-    cpts = bro.read_bro(inpt)
-    # process cpts
-    read_cpt(cpts, methods, args.output, props, args.plots)
+    # do analysis
+    analysis(props, methods, args.output, args.plots)
+

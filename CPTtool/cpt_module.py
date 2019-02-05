@@ -789,7 +789,7 @@ class CPT:
 
         return
 
-    def update_dump_json(self, jsn, input_dic):
+    def update_dump_json(self, jsn, input_dic, index):
         """
 
         Computes the probability of the scenario and dump json file into output file.
@@ -798,14 +798,15 @@ class CPT:
         ----------
         :param jsn: json file with data structure
         :param input_dic: dictionary with the input information
+        :param index: index of the calculation point
         """
         import os
         import json
         import tools_utils
 
         # update the probability
-        coord_source = [float(input_dic["Source_x"]), float(input_dic["Source_y"])]
-        coord_receiver = [float(input_dic["Receiver_x"]), float(input_dic["Receiver_y"])]
+        coord_source = [float(input_dic["Source_x"][index]), float(input_dic["Source_y"][index])]
+        coord_receiver = [float(input_dic["Receiver_x"][index]), float(input_dic["Receiver_y"][index])]
         coord_cpts = [i['coordinates'] for i in jsn["scenarios"]]
         probs = tools_utils.compute_probability(coord_cpts, coord_source, coord_receiver)
 
@@ -814,7 +815,7 @@ class CPT:
             jsn["scenarios"][i]["probability"] = probs[i]
 
         # write file
-        with open(os.path.join(self.output_folder, "results.json"), "w") as fo:
+        with open(os.path.join(self.output_folder, "results_" + str(index) + ".json"), "w") as fo:
             json.dump(jsn, fo, indent=4)
         return
 

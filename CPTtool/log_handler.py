@@ -1,11 +1,11 @@
 class LogFile:
-    def __init__(self, output_folder):
+    def __init__(self, output_folder, index):
         import os
         # checks if file_path exits. If not creates file_path
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        self.file = open(os.path.join(output_folder, "log_file.txt"), "w")
+        self.file = open(os.path.join(output_folder, "log_file_" + str(index) + ".txt"), "w")
         return
 
     def error_message(self, message):
