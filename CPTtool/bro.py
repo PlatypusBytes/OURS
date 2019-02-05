@@ -63,7 +63,7 @@ def parse_bro_xml(xml):
     # Pre drilled depth
     for loc in root.iter(ns + "predrilledDepth"):
         z = loc.text
-        data["predrilled_z"] = float(z)
+        data["predrilled_z"] = z
 
     # Find which columns are not empty
     avail_columns = []

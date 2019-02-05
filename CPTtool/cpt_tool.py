@@ -152,6 +152,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
 
 
 def analysis(properties, methods_cpt, output, plots):
+    import sys
 
     # number of points
     nb_points = len(props["Source_x"])
@@ -163,6 +164,9 @@ def analysis(properties, methods_cpt, output, plots):
                 "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
                 "Radius": 1000}
         cpts = bro.read_bro(inpt)
+        if not cpts:
+            print("# WARNING #: No CPTS in this coordinate point: " + properties["Source_x"][i] + " " + properties["Source_y"][i])
+            continue
         # process cpts
         read_cpt(cpts, methods_cpt, output, properties, plots, i)
 
