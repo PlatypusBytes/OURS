@@ -112,7 +112,7 @@ def create_index(fn, ifn, datasize):
     ext = splitext(fn)[1]
 
     # Setup progress
-    pbar = tqdm(total=datasize//1000000, unit='Mbytes')
+    pbar = tqdm(total=datasize, unit_scale=1)
 
     # Memory map OS specifc options
     if name == 'nt':
@@ -136,7 +136,8 @@ def create_index(fn, ifn, datasize):
                     else:
                         tdata = header+data+footer
                         if i != -1:
-                            pbar.update((i-previ)//1000000)
+                            pbar.update((i-previ))
+
                             (x, y) = parse_xml_location(tdata)
                             locations.append((x, y, previ, i))
                     cpt_count += 1
