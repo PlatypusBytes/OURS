@@ -55,7 +55,7 @@ The JSON file has the following structure:
        "Source_y": "222222.22",
        "Receiver_x": "111111.11",
        "Receiver_y": "222222.22",
-       "BRO_data": "./cpts/"
+       "BRO_data": "./BRO/brocpt.xml"
     }
 
 where the attributes have the following meaning:
