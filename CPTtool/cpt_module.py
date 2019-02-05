@@ -184,7 +184,7 @@ class CPT:
 
         # remove NAN row from the dataframe
         for key in cpt["dataframe"]:
-            cpt["dataframe"] = cpt["dataframe"].dropna(subset = [key])
+            cpt["dataframe"] = cpt["dataframe"].dropna(subset=[key])
 
         # parse cpt file name
         self.name = cpt['id']

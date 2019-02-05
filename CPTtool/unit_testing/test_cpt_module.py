@@ -477,6 +477,87 @@ class TestCptModule(unittest.TestCase):
 
         return
 
+    def test_bro_parser_no_water(self):
+        import pandas as pd
+
+        d = {'depth': [0.1, 0.2],
+             'coneResistance': [1, 2],
+             'localFriction': [3, 4],
+             'frictionRatio': [0.22, 0.33],
+             }
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    "dataframe": df}
+        self.cpt.parse_bro(cpt_data)
+
+        np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]])
+        np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, d["frictionRatio"])
+        np.testing.assert_array_equal(self.cpt.depth, d["depth"])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in d["depth"]])
+        np.testing.assert_array_equal(self.cpt.water, [0., 0.])
+        np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
+        np.testing.assert_equal(self.cpt.name, "cpt_name")
+        return
+
+    def test_bro_parser_water(self):
+        import pandas as pd
+
+        d = {'depth': [0.1, 0.2],
+             'coneResistance': [1, 2],
+             'localFriction': [3, 4],
+             'porePressureU2': [0.5, 1],
+             'frictionRatio': [0.22, 0.33],
+             }
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    "dataframe": df}
+        self.cpt.parse_bro(cpt_data)
+
+        np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]])
+        np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, d["frictionRatio"])
+        np.testing.assert_array_equal(self.cpt.depth, d["depth"])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in d["depth"]])
+        np.testing.assert_array_equal(self.cpt.water, [i * 1000 for i in d["porePressureU2"]])
+        np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
+        np.testing.assert_equal(self.cpt.name, "cpt_name")
+        return
+
+    def test_bro_parser_nan(self):
+        import pandas as pd
+        import numpy as np
+
+        d = {'depth': [0.1, 0.2],
+             'coneResistance': [1, 2],
+             'localFriction': [3, np.nan],
+             'porePressureU2': [0.5, 1],
+             'frictionRatio': [0.22, 0.33],
+             }
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    "dataframe": df}
+        self.cpt.parse_bro(cpt_data)
+
+        np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]][:-1])
+        np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]][:-1])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, d["frictionRatio"][:-1])
+        np.testing.assert_array_equal(self.cpt.depth, d["depth"][:-1])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in d["depth"]][:-1])
+        np.testing.assert_array_equal(self.cpt.water, [i * 1000 for i in d["porePressureU2"]][:-1])
+        np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
+        np.testing.assert_equal(self.cpt.name, "cpt_name")
+        return
+
     def tearDown(self):
         import os
         self.log_file.close()
