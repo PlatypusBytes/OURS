@@ -10,8 +10,21 @@ class TestRobertson(TestCase):
     def setUp(self):
         return
 
-#    def test_soil_types(self):
-#        self.fail()
+    def test_soil_types1(self):
+        actual = robertson.Robertson()
+        actual.soil_types()
+        test = robertson.Robertson()
+        test.soil_types1(path_shapefile=r'../shapefiles/')
+        np.testing.assert_array_equal(actual.poligon_1 , test.poligon_1)
+        np.testing.assert_array_equal(actual.poligon_2,  test.poligon_2)
+        np.testing.assert_array_equal(actual.poligon_3 , test.poligon_3)
+        np.testing.assert_array_equal(actual.poligon_4,  test.poligon_4)
+        np.testing.assert_array_equal(actual.poligon_5 , test.poligon_5)
+        np.testing.assert_array_equal(actual.poligon_6,  test.poligon_6)
+        np.testing.assert_array_equal(actual.poligon_7 , test.poligon_7)
+        np.testing.assert_array_equal(actual.poligon_8,  test.poligon_8)
+        np.testing.assert_array_equal(actual.poligon_9,  test.poligon_9)
+        return
 
     def test_lithology(self):
 
