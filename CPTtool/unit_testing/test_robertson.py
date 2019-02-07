@@ -11,10 +11,12 @@ class TestRobertson(TestCase):
         return
 
     def test_soil_types1(self):
-        actual = robertson.Robertson()
-        actual.soil_types()
+        sys.path.append('../../Auxiliary_Code/')
+        from shape_file_creator import Create_Shape_File
+        actual = Create_Shape_File
+        actual.soil_types_robertson(actual)
         test = robertson.Robertson()
-        test.soil_types1(path_shapefile=r'../shapefiles/')
+        test.soil_types(path_shapefile=r'../shapefiles/')
         np.testing.assert_array_equal(actual.poligon_1 , test.poligon_1)
         np.testing.assert_array_equal(actual.poligon_2,  test.poligon_2)
         np.testing.assert_array_equal(actual.poligon_3 , test.poligon_3)
