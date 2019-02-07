@@ -656,10 +656,17 @@ class CPT:
     def merge_thickness(self, min_layer_thick):
         r"""
         Reorganises the lithology based on the minimum layer thickness.
-
+        This function call the functions merging_label, merging_index , merging_depth , merging_thickness.
+        These functions merge the layers acoording to the min_layer_thick.
+        For more information refer to those.
         Parameters
         ----------
-        :param min_layer_thick: Minimum layer thickness
+        :param
+        min_layer_thick: Minimum layer thickness
+        idx: The indexes of all unmerged layers
+        local_z_ini : The depth of all umerged layers
+        local_thick: the thickness of the unmerged layers
+        new_thickness: merged thickness according to the min_layer_thick
 
         """
         import numpy as np
@@ -669,12 +676,10 @@ class CPT:
         #Find indeces of local unmerged layers
         aux = ""
         idx = []
-        local_IC = []
         for j, val in enumerate(lithology):
             if val != aux:
                 aux = val
                 idx.append(j)
-        target_idx = idx[1:]
 
         # # IC mean calculation not used at this moment
         # for i in range(len(idx)):
@@ -720,6 +725,16 @@ class CPT:
         return new_depth
 
     def merging_thickness(self, local_thick, min_layer_thick):
+        r"""
+         In this function the merging og the layers is achieved acoording to the min_layer thick.
+         .. _element:
+         .. figure:: ./_static/Merge_Flowchart.png
+         :width: 350px
+         :align: center
+         :figclass: align-center
+
+
+         """
         new_thickness = []
         now_thickness = 0
         counter = 0
