@@ -661,12 +661,11 @@ class CPT:
         For more information refer to those.
         Parameters
         ----------
-        :param
-        min_layer_thick: Minimum layer thickness
-        idx: The indexes of all unmerged layers
-        local_z_ini : The depth of all umerged layers
-        local_thick: the thickness of the unmerged layers
-        new_thickness: merged thickness according to the min_layer_thick
+        :param min_layer_thick: Minimum layer thickness
+        :param idx: The indexes of all unmerged layers
+        :param local_z_ini : The depth of all umerged layers
+        :param local_thick: the thickness of the unmerged layers
+        :param new_thickness: merged thickness according to the min_layer_thick
 
         """
         import numpy as np
@@ -702,6 +701,9 @@ class CPT:
         return
 
     def merging_label(self):
+        r"""
+        Function that joins the lithology labels of each layer.
+        """
         new_label = []
         start = self.indx_json[:-1]
         finish = self.indx_json[1:]
@@ -712,6 +714,9 @@ class CPT:
         return new_label
 
     def merging_index(self):
+        r"""
+        Function that produces the indexes of the merged layers by finding which depths are referred.
+        """
         new_index = []
         for i in range(len(self.depth)):
             if self.depth[i] in self.depth_json:
@@ -719,6 +724,9 @@ class CPT:
         return new_index
 
     def merging_depth(self, new_thickness):
+        r"""
+        Function that calculates the top level depth of each layer by summing the thicknesses.
+        """
         import numpy as np
         new_depth = np.append(self.depth[0], new_thickness)
         new_depth = np.cumsum(new_depth)
@@ -729,11 +737,9 @@ class CPT:
          In this function the merging og the layers is achieved acoording to the min_layer thick.
          .. _element:
          .. figure:: ./_static/Merge_Flowchart.png
-         :width: 350px
-         :align: center
-         :figclass: align-center
-
-
+             :width: 350px
+             :align: center
+             :figclass: align-center
          """
         new_thickness = []
         now_thickness = 0
