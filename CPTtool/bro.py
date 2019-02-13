@@ -13,11 +13,6 @@ from os import stat, name
 from zipfile import ZipFile
 from tqdm import tqdm
 
-# patch module-level attribute to enable pickle to work
-# kdtree.node = kdtree.KDTree.node
-# kdtree.leafnode = kdtree.KDTree.leafnode
-# kdtree.innernode = kdtree.KDTree.innernode
-
 fn = "/Volumes/wdmpu/bro/brocpt.xml"
 searchstring = b"<gml:featureMember>"
 columns = ["penetrationLength", "depth", "elapsedTime", "coneResistance", "correctedConeResistance", "netConeResistance", "magneticFieldStrengthX", "magneticFieldStrengthY", "magneticFieldStrengthZ", "magneticFieldStrengthTotal", "electricalConductivity",
@@ -33,8 +28,8 @@ footer = b"</gml:FeatureCollection>"
 nodata = -999999
 
 
-def writexml(data):
-    with open("test.xml", "wb") as f:
+def writexml(data, id="test"):
+    with open("{}.xml".format(id), "wb") as f:
         f.write(data)
 
 
@@ -80,15 +75,23 @@ def parse_bro_xml(xml):
         return None
 
     # Parse data array, replace nodata, filter and sort
-    for element in root.iter(ns + "values"):
-        sar = StringIO(element.text.replace(";", "\n"))
-        ar = np.loadtxt(sar, delimiter=",")
-        ar[ar == nodata] = np.nan
-        df = pd.DataFrame(ar, columns=columns)
-        df = df[avail_columns]
-        df.sort_values(by=['depth'], inplace=True)
+    for cpt in root.iter(ns + "conePenetrationTest"):
+        for element in cpt.iter(ns + "values"):
+            sar = StringIO(element.text.replace(";", "\n"))
+            ar = np.loadtxt(sar, delimiter=",")
 
-    data["dataframe"] = df
+            found_columns = ar.shape[1]
+            if found_columns != len(columns):
+                writexml(xml, id=data["id"])
+                logging.warning("Data has the wrong size! {} columns instead of {}".format(found_columns, len(columns)))
+                return None
+
+            ar[ar == nodata] = np.nan
+            df = pd.DataFrame(ar, columns=columns)
+            df = df[avail_columns]
+            df.sort_values(by=['depth'], inplace=True)
+
+        data["dataframe"] = df
 
     return data
 
@@ -244,7 +247,7 @@ def read_bro(parameters):
 
 
 if __name__ == "__main__":
-    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 104882, "Source_y": 478455, "Radius": 1000}
+    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 1000}
 
     cpts = read_bro(input)
     print(cpts)
