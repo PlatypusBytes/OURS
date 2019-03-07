@@ -1,1 +1,1 @@
-..\Python_37\python.exe .\version_compile.py
+conda activate OURS & python.exe .\version_compile.py
