@@ -227,7 +227,7 @@ class CPT:
            average_fr_ratio = numpy.average(cpt_BRO['dataframe'].frictionRatio[:length_of_average_points])
            average_loc_fr = numpy.average(cpt_BRO['dataframe'].localFriction[:length_of_average_points])
            #Define all in the lists
-           local_depth = numpy.arange(starting_depth, cpt_BRO['dataframe'].depth[0], dicritisation)
+           local_depth = numpy.arange(starting_depth, float(cpt_BRO['predrilled_z']), dicritisation)
            local_cone_res = numpy.repeat(average_cone_res,len(local_depth))
            local_fr_ratio = numpy.repeat(average_fr_ratio,len(local_depth))
            local_loc_fr = numpy.repeat(average_loc_fr    ,len(local_depth))
