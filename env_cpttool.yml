@@ -48,5 +48,6 @@ dependencies:
   - wheel=0.33.1=py36_0
   - wincertstore=0.2=py36h7fe50ca_0
   - zlib=1.2.11=h62dcd97_3
+  - descartes=1.1.0=0
 prefix: C:\Users\zuada\AppData\Local\Continuum\anaconda3\envs\OURS
 
