@@ -20,6 +20,52 @@ class TestCptModule(unittest.TestCase):
         self.cpt = cpt_module.CPT("./", self.log_file)
         pass
 
+    def test__pre_drill_No_Exception(self):
+        import pandas as pd
+
+        d = {'depth': [1.5, 2.0 , 2.5],
+             'coneResistance': [1, 2 , 3],
+             'localFriction': [4, 5 , 6],
+             'frictionRatio': [0.22, 0.33 , 0.44],
+             }
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    'predrilled_z': 1.5,
+                    "dataframe": df}
+        self.cpt.parse_bro(cpt_data)
+
+        np.testing.assert_array_equal(self.cpt.tip, [2000., 2000., 2000., 1000., 2000., 3000.] )
+        np.testing.assert_array_equal(self.cpt.friction, [5000., 5000., 5000., 4000., 5000., 6000.])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.33,0.33,0.33,0.22,0.33,0.44])
+        np.testing.assert_array_equal(self.cpt.depth, [0,0.5,1.,1.5,2.,2.5])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0,0.5,1.,1.5,2.,2.5]])
+        np.testing.assert_array_equal(self.cpt.water, [0., 0.,0., 0.,0., 0.])
+        np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
+        np.testing.assert_equal(self.cpt.name, "cpt_name")
+        return
+    def test__pre_drill_Raise_Exception(self):
+        import pandas as pd
+
+        d = {'depth': [1.5, 2.0 ],
+             'coneResistance': [1, 2 ],
+             'localFriction': [4, 5 ],
+             'frictionRatio': [0.22, 0.33 ],
+             }
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    'predrilled_z': 1.5,
+                    "dataframe": df}
+
+        with self.assertRaises(Exception) as context:
+            self.cpt.parse_bro(cpt_data)
+        self.assertTrue('CPT Length should exceed 3 points' in str(context.exception))
+        return
     def test_read_gef(self):
         gef_file = 'unit_testing_files/unit_testing.gef'
         key_cpt = cpt_tool.set_key()
@@ -431,6 +477,7 @@ class TestCptModule(unittest.TestCase):
         return
 
     def test_lithology_calc(self):
+        import shapefile
         self.cpt.tip = np.array([1])
         self.cpt.friction_nbr = np.array([1])
         self.cpt.friction = np.array([1])
@@ -492,6 +539,7 @@ class TestCptModule(unittest.TestCase):
                     "location_x": 111,
                     "location_y": 222,
                     "offset_z": 0.5,
+                    'predrilled_z' : 0.,
                     "dataframe": df}
         self.cpt.parse_bro(cpt_data)
 
@@ -519,7 +567,8 @@ class TestCptModule(unittest.TestCase):
                     "location_x": 111,
                     "location_y": 222,
                     "offset_z": 0.5,
-                    "dataframe": df}
+                    "dataframe": df,
+                    'predrilled_z' : 0.}
         self.cpt.parse_bro(cpt_data)
 
         np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]])
@@ -547,6 +596,7 @@ class TestCptModule(unittest.TestCase):
                     "location_x": 111,
                     "location_y": 222,
                     "offset_z": 0.5,
+                    "predrilled_z" : 0.,
                     "dataframe": df}
         self.cpt.parse_bro(cpt_data)
 

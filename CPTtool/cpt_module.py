@@ -190,23 +190,64 @@ class CPT:
         self.name = cpt['id']
         # parse coordinates
         self.coord = [cpt['location_x'], cpt['location_y']]
+
+        depth , coneResistance , frictionRatio , localFriction  ,pore_pressure = self.define_pre_drill(cpt)
         # parse depth
-        self.depth = cpt['dataframe']["depth"].values
+        self.depth = depth
         # parse NAP depth
-        self.NAP = cpt['offset_z'] - cpt['dataframe']["depth"].values
+        self.NAP = cpt['offset_z'] - depth
         # parse tip resistance
-        self.tip = cpt['dataframe']["coneResistance"].values * 1000.
+        self.tip = coneResistance * 1000.
         # parse friction
-        self.friction = cpt['dataframe']["localFriction"].values * 1000.
+        self.friction = localFriction * 1000.
         # parser friction number
-        self.friction_nbr = cpt['dataframe']["frictionRatio"].values
+        self.friction_nbr = frictionRatio
         # default water is zero
         self.water = np.zeros(len(self.depth))
         # if water exists parse water
         if "porePressureU2" in cpt["dataframe"]:
-            self.water = cpt['dataframe']["porePressureU2"].values * 1000.
-
+            self.water = pore_pressure *1000.
         return
+
+    def define_pre_drill(self,cpt_BRO):
+        import numpy
+        place = 0
+        starting_depth = 0
+        length_of_average_points = 3
+        pore_pressure = None
+        if float(cpt_BRO['predrilled_z']) != 0. :
+            # check the size
+           if len(cpt_BRO['dataframe'].coneResistance) < 3:
+              raise Exception('CPT Length should exceed 3 points')
+
+           # Set the discritisation
+           dicritisation = numpy.average(numpy.diff(cpt_BRO['dataframe']['depth'].values))
+           #find the average
+           average_cone_res = numpy.average(cpt_BRO['dataframe'].coneResistance[:length_of_average_points])
+           average_fr_ratio = numpy.average(cpt_BRO['dataframe'].frictionRatio[:length_of_average_points])
+           average_loc_fr = numpy.average(cpt_BRO['dataframe'].localFriction[:length_of_average_points])
+           #Define all in the lists
+           local_depth = numpy.arange(starting_depth, cpt_BRO['dataframe'].depth[0], dicritisation)
+           local_cone_res = numpy.repeat(average_cone_res,len(local_depth))
+           local_fr_ratio = numpy.repeat(average_fr_ratio,len(local_depth))
+           local_loc_fr = numpy.repeat(average_loc_fr    ,len(local_depth))
+           if "porePressureU2" in cpt_BRO["dataframe"]:
+               local_pore_pressure = numpy.linspace(0,cpt_BRO['dataframe']["porePressureU2"].values[0],len(local_depth))
+               pore_pressure = numpy.append(local_pore_pressure,cpt_BRO['dataframe']["porePressureU2"].values)
+           #Enrich the Penetration Length
+           depth = numpy.append(local_depth, cpt_BRO['dataframe']['depth'].values)
+           coneResistance = numpy.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
+           frictionRatio = numpy.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
+           localFriction =numpy.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
+        else:
+           # No predrill existing
+           depth = cpt_BRO['dataframe'].depth.values
+           coneResistance = cpt_BRO['dataframe'].coneResistance.values
+           frictionRatio = cpt_BRO['dataframe'].frictionRatio.values
+           localFriction = cpt_BRO['dataframe'].localFriction.values
+           if "porePressureU2" in cpt_BRO["dataframe"]:
+               pore_pressure = cpt_BRO['dataframe']["porePressureU2"].values
+        return   depth , coneResistance , frictionRatio , localFriction  , pore_pressure
 
     def lithology_calc(self):
         r"""
@@ -735,11 +776,14 @@ class CPT:
     def merging_thickness(self, local_thick, min_layer_thick):
         r"""
          In this function the merging og the layers is achieved acoording to the min_layer thick.
-         .. _element:
+
+         .._element:
          .. figure:: ./_static/Merge_Flowchart.png
              :width: 350px
              :align: center
              :figclass: align-center
+
+
          """
         new_thickness = []
         now_thickness = 0
@@ -809,6 +853,7 @@ class CPT:
                                      "data": data})
 
         return
+
 
     def update_dump_json(self, jsn, input_dic, index):
         """
