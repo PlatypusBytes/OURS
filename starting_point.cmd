@@ -1,3 +1,3 @@
 conda create -n OURS python=3.6
-conta activate OURS
+conda activate OURS
 conda install -f env_cpttool.yml
