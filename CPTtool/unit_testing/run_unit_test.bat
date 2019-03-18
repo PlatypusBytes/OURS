@@ -1,1 +1,2 @@
-..\..\Python_37\python.exe -m unittest discover .\
+call conda activate OURS
+python -m unittest discover .\
