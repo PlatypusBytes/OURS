@@ -1,12 +1,15 @@
 name: OURS
 channels:
   - conda-forge
+  - anaconda
   - defaults
 dependencies:
   - blas=1.0=mkl
-  - ca-certificates=2019.1.23=0
-  - certifi=2018.11.29=py36_0
+  - ca-certificates=2019.3.9=hecc5488_0
+  - certifi=2019.3.9=py36_0
+  - coverage=4.5.3=py36he774522_0
   - cycler=0.10.0=py36h009560c_0
+  - descartes=1.1.0=py_2
   - freetype=2.9.1=ha9979f8_1
   - geos=3.7.1=h33f27b4_0
   - icc_rt=2019.0.0=h0cc432a_1
@@ -25,7 +28,7 @@ dependencies:
   - mkl_random=1.0.2=py36h343c172_0
   - numpy=1.16.2=py36h19fb1c0_0
   - numpy-base=1.16.2=py36hc3f5095_0
-  - openssl=1.1.1b=he774522_1
+  - openssl=1.1.1b=hfa6e2cd_1
   - pandas=0.24.1=py36ha925a31_0
   - pip=19.0.3=py36_0
   - pyparsing=2.3.1=py36_0
@@ -48,6 +51,7 @@ dependencies:
   - wheel=0.33.1=py36_0
   - wincertstore=0.2=py36h7fe50ca_0
   - zlib=1.2.11=h62dcd97_3
-  - descartes=1.1.0=0
+  - pip:
+    - teamcity-messages==1.23
 prefix: C:\Users\zuada\AppData\Local\Continuum\anaconda3\envs\OURS
 
