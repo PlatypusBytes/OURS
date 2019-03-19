@@ -1,2 +1,2 @@
-call conda activate OURS
+CALL activate OURS
 sphinx-build -b html .\documentation\source .\documentation\html
