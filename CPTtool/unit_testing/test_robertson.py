@@ -6,6 +6,7 @@ import unittest
 sys.path.append('../')
 import robertson
 
+
 class TestRobertson(TestCase):
     def setUp(self):
         return
@@ -13,6 +14,7 @@ class TestRobertson(TestCase):
     def test_soil_types1(self):
         sys.path.append('../../Auxiliary_Code/')
         from shape_file_creator import Create_Shape_File
+
         actual = Create_Shape_File
         actual.soil_types_robertson(actual)
         test = robertson.Robertson()
