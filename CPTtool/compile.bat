@@ -1,1 +1,2 @@
-conda activate OURS & python.exe .\version_compile.py
+call conda activate OURS 
+python .\version_compile.py
