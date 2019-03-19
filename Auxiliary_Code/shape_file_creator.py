@@ -1,10 +1,9 @@
-
 from matplotlib import pyplot as plt
 from shapely.geometry.polygon import Polygon
 from descartes import PolygonPatch
 
-class Create_Shape_File:
 
+class Create_Shape_File:
     def __init__(self):
         self.soil_type_1 = []
         self.soil_type_2 = []
@@ -341,6 +340,7 @@ class Create_Shape_File:
 
         return
 
+
     def create_shape_file(self):
         import shapefile
         self.soil_types_robertson()
@@ -360,6 +360,8 @@ class Create_Shape_File:
         w.close()
 
         return
+
+
 def plot_shape_file(path):
     # Plot Shape file
     import shapefile
@@ -375,4 +377,4 @@ def plot_shape_file(path):
     return
 
 
-plot_shape_file('shapefiles/Robertson')
+# plot_shape_file('shapefiles/Robertson')
