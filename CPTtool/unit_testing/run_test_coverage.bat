@@ -1,2 +1,7 @@
 CALL activate OURS
-python .\run_coverage.py
+pip install teamcity-messages
+coverage run -a test_cpt_tool.py
+coverage run -a test_cpt_module.py
+coverage run -a test_robertson.py
+coverage report
+coverage html

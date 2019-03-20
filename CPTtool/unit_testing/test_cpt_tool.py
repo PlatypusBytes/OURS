@@ -1,11 +1,14 @@
 # unit test for the cpt_module
 
 import sys
+import numpy as np
+from teamcity import is_running_under_teamcity
+from teamcity.unittestpy import TeamcityTestRunner
+
 # add the src folder to the path to search for files
 sys.path.append('../')
 import unittest
 import cpt_tool
-import numpy as np
 
 
 class TestCptTool(unittest.TestCase):
@@ -25,9 +28,7 @@ class TestCptTool(unittest.TestCase):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    from teamcity import is_running_under_teamcity
     if is_running_under_teamcity():
-        from teamcity.unittestpy import TeamcityTestRunner
         runner = TeamcityTestRunner()
     else:
         runner = unittest.TextTestRunner()
