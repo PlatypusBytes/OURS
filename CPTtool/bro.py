@@ -1,20 +1,43 @@
-# BRO Datadump reader and parser
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""BRO XML CPT database reader, indexer and parser.
+
+Enables searching of very large XML CPT database dumps.
+In order to speed up these operations, an index will
+be created by searching for `featureMember`s (CPTs) in the xml
+if it does not yet exist next to the XML file.
+
+The index is stored next to the file and stores the xml
+filesize to validate the xml database is the same. If not,
+we assumme the database is new and a new index will be created
+as well. The index itself is an array with columns that store
+the x y location of the CPT and the start/end bytes in the XML file.
+
+As of January 2019, almost a 100.000 CPTs are stored in the XML
+and creating the index will take 5-10min depending on disk performance.
+
+"""
+
 import mmap
 import logging
-from lxml import etree
-import numpy as np
 from io import StringIO
-# from pykdtree.kdtree import KDTree
-from scipy.spatial import cKDTree as KDTree
 import pickle
-import pandas as pd
 from os.path import exists, splitext
 from os import stat, name
 from zipfile import ZipFile
-from tqdm import tqdm
 
-fn = "/Volumes/wdmpu/bro/brocpt.xml"
+# External modules
+from lxml import etree
+import numpy as np
+from scipy.spatial import cKDTree as KDTree
+from tqdm import tqdm
+import pandas as pd
+
+
+# Constants for XML parsing
 searchstring = b"<gml:featureMember>"
+footer = b"</gml:FeatureCollection>"
+
 columns = ["penetrationLength", "depth", "elapsedTime", "coneResistance", "correctedConeResistance", "netConeResistance", "magneticFieldStrengthX", "magneticFieldStrengthY", "magneticFieldStrengthZ", "magneticFieldStrengthTotal", "electricalConductivity",
            "inclinationEW", "inclinationNS", "inclinationX", "inclinationY", "inclinationResultant", "magneticInclination", "magneticDeclination", "localFriction", "poreRatio", "temperature", "porePressureU1", "porePressureU2", "porePressureU3", "frictionRatio"]
 req_columns = ["penetrationLength", "depth", "coneResistance", "localFriction", "frictionRatio"]
@@ -24,18 +47,34 @@ ns2 = "{http://www.broservices.nl/xsd/dscpt/1.1}"
 ns3 = "{http://www.opengis.net/gml/3.2}"
 ns4 = "{http://www.broservices.nl/xsd/brocommon/3.0}"
 ns5 = "{http://www.opengis.net/om/2.0}"
-footer = b"</gml:FeatureCollection>"
+
 nodata = -999999
 
 
 def writexml(data, id="test"):
+    """Quick function to write xml in memory to disk.
+    :param data: XML bytes.
+    :param id: Filename to use."""
     with open("{}.xml".format(id), "wb") as f:
         f.write(data)
 
 
 def parse_bro_xml(xml):
+    """Parse bro CPT xml.
+    Searches for the cpt data, but also
+    - location
+    - offset z
+    - id
+    - predrilled_z
+    TODO Replace iter by single search
+    as iter can give multiple results
+
+    :param xml: XML bytes
+    :returns: dict -- parsed CPT data + metadata
+    """
     root = etree.fromstring(xml)
 
+    # Initialize data dictionary
     data = {"id": None, "location_x": None, "location_y": None,
             "offset_z": None, "predrilled_z": None}
 
@@ -77,15 +116,20 @@ def parse_bro_xml(xml):
     # Parse data array, replace nodata, filter and sort
     for cpt in root.iter(ns + "conePenetrationTest"):
         for element in cpt.iter(ns + "values"):
+            # Load string data and parse as 2d array
             sar = StringIO(element.text.replace(";", "\n"))
             ar = np.loadtxt(sar, delimiter=",")
 
+            # Check shape of array
             found_columns = ar.shape[1]
             if found_columns != len(columns):
                 writexml(xml, id=data["id"])
                 logging.warning("Data has the wrong size! {} columns instead of {}".format(found_columns, len(columns)))
                 return None
 
+            # Replace nodata constant with nan
+            # Create a DataFrame from array
+            # and sort by depth
             ar[ar == nodata] = np.nan
             df = pd.DataFrame(ar, columns=columns)
             df = df[avail_columns]
@@ -97,7 +141,12 @@ def parse_bro_xml(xml):
 
 
 def parse_xml_location(tdata):
-    """Return x y of location."""
+    """Return x y of location.
+    TODO Don't user iter
+
+    :param tdata: XML bytes
+    :returns: list -- of x y string coordinates
+    """
     root = etree.fromstring(tdata)
 
     for loc in root.iter(ns2 + "deliveredLocation"):
@@ -106,6 +155,14 @@ def parse_xml_location(tdata):
 
 
 def create_index(fn, ifn, datasize):
+    """Create an index into the large BRO xml database.
+
+    :param fn: Filename for bro xml file.
+    :param ifn: Filename for index of fn.
+    :param datasize: int -- Size of bro xml file.
+    :returns: list -- of locations and indices into file.
+    """
+
     logging.warning("Creating index, this may take a while...")
 
     # Iterate over file to search for Features
@@ -121,7 +178,6 @@ def create_index(fn, ifn, datasize):
     if name == 'nt':
         mm_options = {}
 
-
     if ext == ".xml":
         with open(fn, "r") as f:
             len_ss = len(searchstring)
@@ -130,22 +186,23 @@ def create_index(fn, ifn, datasize):
                 i = 0
                 while i != -1:
                     previ = i
-                    i = mm.find(searchstring, i+1)
+                    i = mm.find(searchstring, i + 1)
                     data = mm[previ:i]
 
                     if cpt_count == 0:
                         header = data
                         footer = b"</gml:FeatureCollection>"
                     else:
-                        tdata = header+data+footer
+                        tdata = header + data + footer
                         if i != -1:
-                            pbar.update((i-previ))
+                            pbar.update((i - previ))
 
                             (x, y) = parse_xml_location(tdata)
                             locations.append((x, y, previ, i))
                     cpt_count += 1
 
     # This won't work yet!
+    # TODO Implement zip streaming
     elif ext == ".zip":
         with ZipFile(fn) as zf:
             with zf.open("brocpt.xml") as f:
@@ -153,14 +210,14 @@ def create_index(fn, ifn, datasize):
                     i = 0
                     while i != -1:
                         previ = i
-                        i = mm.find(searchstring, i+1)
+                        i = mm.find(searchstring, i + 1)
                         data = mm[previ:i]
 
                         if cpt_count == 0:
                             header = data
                             footer = b"</gml:FeatureCollection>"
                         else:
-                            tdata = header+data+footer
+                            tdata = header + data + footer
                             if i != -1:
                                 (x, y) = parse_xml_location(tdata)
                                 locations.append((x, y, previ, i))
@@ -178,11 +235,21 @@ def create_index(fn, ifn, datasize):
     return locations
 
 
-def query_index(index, x, y, radius=1000):
+def query_index(index, x, y, radius=1000.):
     """Query database for CPTs
     within radius of x, y.
 
-    Index is a array with columns: x y begin end"""
+    :param index: Index is a array with columns: x y begin end
+    :type index: np.array
+    :param x: X coordinate
+    :type x: float
+    :param y: Y coordinate
+    :type y: float
+    :param radius: Radius (m) to use for searching. Defaults to 1000.
+    :type radius: float
+    :return: 2d array of start/end (columns) for each location (rows).
+    :rtype: np.array
+    """
 
     # Setup KDTree based on points
     npindex = np.array(index)
@@ -196,6 +263,16 @@ def query_index(index, x, y, radius=1000):
 
 
 def read_bro_xml(fn, indices):
+    """Read XML file at specific indices and parse these.
+
+    :param fn: Bro XML filename.
+    :type fn: str
+    :param indices: List of tuples containing start/end bytes.
+    :type indices: list
+    :return: List of parsed CPTs as dicts
+    :rtype: list
+
+    """
     cpts = []
     with open(fn, "r") as f:
         # memory-map the file, size 0 means whole file
@@ -212,6 +289,14 @@ def read_bro_xml(fn, indices):
 
 
 def read_bro(parameters):
+    """Main function to read the BRO database.
+
+    :param parameters: Dict of input `parameters` containing filename, locationd and radius.
+    :type parameters: dict
+    :return: List of parsed CPTs as dicts
+    :rtype: list
+
+    """
     fn = parameters["BRO_data"]
     ifn = splitext(fn)[0] + ".idx"  # index
     x, y = parameters["Source_x"], parameters["Source_y"]
@@ -246,7 +331,7 @@ def read_bro(parameters):
     return cpts
 
 
-if __name__ == "__main__":
+if __name__ == "__main_":
     input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 1000}
 
     cpts = read_bro(input)
