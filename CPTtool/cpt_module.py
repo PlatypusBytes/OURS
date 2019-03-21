@@ -987,7 +987,7 @@ class CPT:
         # first subplot - CPT
         # ax1 tip
         ax1.set_position([0.15, 0.1, 0.4, 0.8])
-        ax1.plot(self.tip, self.depth, label="Tip resistance", color="b")
+        l1, = ax1.plot(self.tip, self.depth, label="Tip resistance", color="b")
         ax1.set_xlabel("Tip resistance [kPa]", fontsize=12)
         ax1.set_ylabel("Depth [m]", fontsize=12)
         ax1.set_xlim(left=0)
@@ -997,7 +997,7 @@ class CPT:
         # ax2 friction number
         ax2 = ax1.twiny()
         ax2.set_position([0.15, 0.1, 0.4, 0.8])
-        ax2.plot(self.friction_nbr, self.depth, label="Friction number", color="r")
+        l2, = ax2.plot(self.friction_nbr, self.depth, label="Friction number", color="r")
         ax2.set_xlabel("Friction number [-]", fontsize=12)
         ax2.set_xlim(left=0)
 
@@ -1005,7 +1005,11 @@ class CPT:
         ax1.set_xticks(np.linspace(0, ax1.get_xticks()[-1], 5))
         ax2.set_xticks(np.linspace(0, ax2.get_xticks()[-1], 5))
 
+        # grid
         ax1.grid()
+
+        # legend
+        plt.legend(handles=[l1, l2], loc="upper right")
 
         # second subplot - Lithology
         litho = np.array(self.lithology).astype(int)
@@ -1035,15 +1039,15 @@ class CPT:
         # create legend for Robertson
         for i, c in enumerate(color_litho):
             ax3.add_patch(patches.Rectangle(
-                (16, ax1.get_ylim()[1] + .85 + 0.8 * i),
+                (16, ax1.get_ylim()[1] + .925 + 0.475 * i),
                 10.,
-                0.4,
+                0.3,
                 fill=True,
                 color=c,
                 clip_on=False))
 
         # create text box
-        text = "Robertson classification:\n" + \
+        text = "Robertson classification:\n\n" + \
                "          Type 1\n" + \
                "          Type 2\n" + \
                "          Type 3\n" + \
