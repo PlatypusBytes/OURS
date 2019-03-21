@@ -158,6 +158,9 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
 
 def analysis(properties, methods_cpt, output, plots):
     """
+    Analysis of CPT
+
+    Extracts the CPT from the BRO PDOK database, based on coordinate location and processes the cpt
 
     :param properties: JSON file with the properties of the analysis: location
     :param methods_cpt: methods to use for the CPT interpretation
