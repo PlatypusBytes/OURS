@@ -20,6 +20,18 @@ class LogFile:
         self.file.write("# Error # : " + message + "\n")
         return
 
+    def warning_message(self, message):
+        r"""
+        Warning message for the log file
+
+        Parameters
+        ----------
+        :param message: message that will be displayed
+        """
+
+        self.file.write("# Warning # : " + message + "\n")
+        return
+
     def info_message(self, message):
         r"""
         Warning message for the log file
