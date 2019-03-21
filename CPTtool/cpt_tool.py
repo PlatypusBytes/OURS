@@ -1,4 +1,5 @@
 import argparse
+import log_handler
 import bro
 
 
@@ -10,7 +11,6 @@ def define_methods(input_file):
     :return: methods: dictionary with the methods for CPT correlations
     """
     import os
-    import sys
     import json
 
     # possible keys:
@@ -101,7 +101,8 @@ def read_json(input_file):
 #     return key
 
 
-def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index, gamma_max=22, pwp_level=0):
+def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file,
+             gamma_max=22, pwp_level=0):
     """
     Read CPT
 
@@ -110,49 +111,69 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     Parameters
     ----------
     :param cpt_BRO: cpt information from the BRO
-    :param key_cpt: File with the key for the CPT interpretation
     :param methods: Methods for the CPT correlations
     :param output_folder: Folder to save the files
     :param input_dictionary: Dictionary with input settings
     :param make_plots: Bool to make plots
-    :param index: index of the calculation point
-    :param input_dictionary: Dictionary with input settings
+    :param index_coordinate: Index of the calculation coordinate point
+    :param log_file: Log file for the analysis
     :param gamma_max: (optional) maximum value specific weight soil
     :param pwp_level: (optional) pore water level in NAP
     """
 
     # read the cpt files
     import cpt_module
-    import log_handler
 
-    # Define log file
-    log_file = log_handler.LogFile(output_folder, index)
-
+    # dictionary for the results
     jsn = {"scenarios": []}
-    i = 0
+    # index for the scenarios. does not take into account the scenarios
+    scenario = 0
     for idx_cpt in range(len(cpt_BRO)):
-        log_file.info_message("analysis started for: " + cpt_BRO[idx_cpt]["id"])
-        cpt = cpt_module.CPT(output_folder, log_file)
-        cpt.parse_bro(cpt_BRO[idx_cpt])
+        # add message to log file
+        log_file.info_message("Reading CPT: " + cpt_BRO[idx_cpt]["id"])
+
+        # initialise CPT module
+        cpt = cpt_module.CPT(output_folder)
+        # read data from BRO
+        data_quality = cpt.parse_bro(cpt_BRO[idx_cpt])
+        # check data quality from the BRO file
+        if data_quality != True:
+            # If the quality is not good skip this cpt file
+            log_file.error_message(data_quality)
+            continue
+        # compute qc
         cpt.qt_calc()
+        # compute unit weight
         cpt.gamma_calc(gamma_max, method=methods["gamma"])
+        # compute density
         cpt.rho_calc()
+        # compute stresses: total, effective and porewater pressures
         cpt.stress_calc(pwp_level)
+        # compute lithology
         cpt.lithology_calc()
+        # compute IC
         cpt.IC_calc()
+        # compute shear wave velocity and shear modulus
         cpt.vs_calc(method=methods["vs"])
+        # compute damping
         cpt.damp_calc(method=methods["OCR"])
+        # compute Poisson ratio
         cpt.poisson_calc()
+        # merge the layers thickness
         cpt.merge_thickness(float(input_dictionary["MinLayerThickness"]))
-        cpt.add_json(jsn, i)
+        # add results to the dictionary
+        cpt.add_json(jsn, scenario)
+        # make the plots (optional)
         if make_plots:
             cpt.write_csv()
             cpt.plot_cpt()
             cpt.plot_lithology()
-        i += 1
+        # increase index of the scenario
+        scenario += 1
+        # add to log file that the analysis is successful
         log_file.info_message("analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
-    cpt.update_dump_json(jsn, input_dictionary, index)
-    log_file.close()
+    # save the resuts file
+    cpt.update_dump_json(jsn, input_dictionary, index_coordinate)
     return
 
 
@@ -173,17 +194,24 @@ def analysis(properties, methods_cpt, output, plots):
 
     # for each calculation point
     for i in range(nb_points):
+        # Define log file
+        log_file = log_handler.LogFile(output, i)
+        log_file.info_message("Analysis started for coordinate point: (" + properties["Source_x"][i] + ", " + properties["Source_y"][i] + ")")
+
         # read BRO data base
         inpt = {"BRO_data": properties["BRO_data"],
                 "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
                 "Radius": 500}
         cpts = bro.read_bro(inpt)
         if not cpts:
-            print("# WARNING #: No CPTS in this coordinate point: " + properties["Source_x"][i] + " " + properties["Source_y"][i])
+            log_file.error_message("No CPTS in this coordinate point")
+            log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", " + properties["Source_y"][i] + ")")
+            log_file.close()
             continue
         # process cpts
-        read_cpt(cpts, methods_cpt, output, properties, plots, i)
-
+        read_cpt(cpts, methods_cpt, output, properties, plots, i, log_file)
+        log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", " + properties["Source_y"][i] + ")")
+        log_file.close()
     return
 
 
