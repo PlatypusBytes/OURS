@@ -30,7 +30,8 @@ def define_methods(input_file):
 
     # check if input file exists
     if not os.path.isfile(input_file):
-        sys.exit("File methods does not exist")
+        print("File with methods definition does not exist")
+        exit(4)
 
     # if the file is available
     with open(input_file, "r") as f:
@@ -39,17 +40,21 @@ def define_methods(input_file):
     # # checks if the keys are correct
     for i in data.keys():
         if not any(i in k for k in keys):
-            sys.exit("Error: Key " + i + " is not known. Keys must be: " + ', '.join(keys))
+            print("Error: Key " + i + " is not known. Keys must be: " + ', '.join(keys))
+            exit(5)
 
     # check if the key-values are correct for gamma
     if not any(data["gamma"] in k for k in gamma_keys):
-        sys.exit("Error: gamma key is not known. gamma keys must be: " + ', '.join(gamma_keys))
+        print("Error: gamma key is not known. gamma keys must be: " + ', '.join(gamma_keys))
+        exit(5)
     # check if the key-values are correct for vs
     if not any(data["vs"] in k for k in vs_keys):
-        sys.exit("Error: gamma key is not known. vs keys must be: " + ', '.join(vs_keys))
+        print("Error: gamma key is not known. vs keys must be: " + ', '.join(vs_keys))
+        exit(5)
     # check if the key-values are correct for OCR
     if not any(data["OCR"] in k for k in OCR_keys):
-        sys.exit("Error: gamma key is not known. OCR keys must be: " + ', '.join(OCR_keys))
+        print("Error: gamma key is not known. OCR keys must be: " + ', '.join(OCR_keys))
+        exit(5)
 
     methods = {"gamma": data["gamma"],
                "vs": data["vs"],
@@ -66,12 +71,12 @@ def read_json(input_file):
     :return: data: dictionary with the input files
     """
     import os
-    import sys
     import json
 
     # check if file exits
     if not os.path.isfile(input_file):
-        sys.exit("Input JSON file does not exist")
+        print("Input JSON file does not exist")
+        exit(-3)
 
     # read file
     with open(input_file, "r") as f:
@@ -79,21 +84,21 @@ def read_json(input_file):
     return data
 
 
-def set_key():
-    """
-    Define CPT key
-
-    Parameters
-    ----------
-    :return: key: Dictionary with the key for CPT interpretation
-    """
-
-    key = {}
-    labels = ['depth', 'tip', 'friction', 'friction_nb', 'water']
-    dat = [1, 2, 3, 4, 6]
-    for k in range(len(labels)):
-        key.update({labels[k]: dat[k]})
-    return key
+# def set_key():
+#     """
+#     Define CPT key
+#
+#     Parameters
+#     ----------
+#     :return: key: Dictionary with the key for CPT interpretation
+#     """
+#
+#     key = {}
+#     labels = ['depth', 'tip', 'friction', 'friction_nb', 'water']
+#     dat = [1, 2, 3, 4, 6]
+#     for k in range(len(labels)):
+#         key.update({labels[k]: dat[k]})
+#     return key
 
 
 def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index, gamma_max=22, pwp_level=0):
@@ -152,7 +157,6 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
 
 
 def analysis(properties, methods_cpt, output, plots):
-    import sys
 
     # number of points
     nb_points = len(props["Source_x"])
@@ -162,7 +166,7 @@ def analysis(properties, methods_cpt, output, plots):
         # read BRO data base
         inpt = {"BRO_data": properties["BRO_data"],
                 "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
-                "Radius": 1000}
+                "Radius": 500}
         cpts = bro.read_bro(inpt)
         if not cpts:
             print("# WARNING #: No CPTS in this coordinate point: " + properties["Source_x"][i] + " " + properties["Source_y"][i])
@@ -181,8 +185,9 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--methods', help='define methods for CPT correlations', required=False, default=False)
     args = parser.parse_args()
 
-    key = set_key()
+    # reads input json file
     props = read_json(args.json)
+    # define methods for the analysis of CPT
     methods = define_methods(args.methods)
 
     # do analysis
