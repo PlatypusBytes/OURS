@@ -157,7 +157,14 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
 
 
 def analysis(properties, methods_cpt, output, plots):
+    """
 
+    :param properties: JSON file with the properties of the analysis: location
+    :param methods_cpt: methods to use for the CPT interpretation
+    :param output: path for the output results
+    :param plots: boolean create the plots
+    :return:
+    """
     # number of points
     nb_points = len(props["Source_x"])
 
