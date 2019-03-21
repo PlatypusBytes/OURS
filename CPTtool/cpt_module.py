@@ -1044,8 +1044,6 @@ class CPT:
         plt.setp(ax3.get_xticklabels(), visible=False)
         plt.setp(ax3.get_yticklabels(), visible=False)
         ax3.tick_params(axis='both', which='both', length=0)
-        # ax3.set_xlabel("Lithology", fontsize=12)
-        # ax3.xaxis.set_label_position('top')
 
         # thickness
         diff_depth = np.diff(self.depth)
@@ -1062,9 +1060,9 @@ class CPT:
         # create legend for Robertson
         for i, c in enumerate(color_litho):
             ax3.add_patch(patches.Rectangle(
-                (16, ax1.get_ylim()[1] + .925 + 0.475 * i),
+                (16, ax1.get_ylim()[1] + (ax1.get_ylim()[0] - ax1.get_ylim()[1]) * 0.0425 + (ax1.get_ylim()[0] - ax1.get_ylim()[1]) * 0.02 * i),
                 10.,
-                0.3,
+                (ax1.get_ylim()[0] - ax1.get_ylim()[1]) * 0.015,
                 fill=True,
                 color=c,
                 clip_on=False))
