@@ -32,7 +32,7 @@ import numpy as np
 from scipy.spatial import cKDTree as KDTree
 from tqdm import tqdm
 import pandas as pd
-
+import pyproj
 
 # Constants for XML parsing
 searchstring = b"<gml:featureMember>"
@@ -49,6 +49,8 @@ ns4 = "{http://www.broservices.nl/xsd/brocommon/3.0}"
 ns5 = "{http://www.opengis.net/om/2.0}"
 
 nodata = -999999
+to_epsg = "28992"
+to_srs = pyproj.Proj(init='epsg:{}'.format(to_epsg))
 
 
 def writexml(data, id="test"):
@@ -79,11 +81,9 @@ def parse_bro_xml(xml):
             "offset_z": None, "predrilled_z": None}
 
     # Location
-    for loc in root.iter(ns2 + "deliveredLocation"):
-        for pos in loc.iter(ns3 + "pos"):
-            x, y = pos.text.split(" ")
-            data["location_x"] = float(x)
-            data["location_y"] = float(y)
+    x, y = parse_xml_location(xml)
+    data["location_x"] = float(x)
+    data["location_y"] = float(y)
 
     # BRO Id
     for loc in root.iter(ns4 + "broId"):
@@ -143,15 +143,31 @@ def parse_bro_xml(xml):
 def parse_xml_location(tdata):
     """Return x y of location.
     TODO Don't user iter
-
     :param tdata: XML bytes
     :returns: list -- of x y string coordinates
+
+    Will transform coordinates not in EPSG:28992
     """
     root = etree.fromstring(tdata)
+    crs = None
 
     for loc in root.iter(ns2 + "deliveredLocation"):
+        for point in loc.iter(ns3 + "Point"):
+            srs = point.get("srsName")
+            if srs is not None and "EPSG" in srs:
+                crs = srs.split("::")[-1]
+            break
         for pos in loc.iter(ns3 + "pos"):
-            return pos.text.split(" ")
+            x, y = map(float, pos.text.split(" "))
+            break
+
+    if crs is not None and crs != to_epsg:
+        logging.warning("Reprojecting from epsg::{}".format(crs))
+        source_srs = pyproj.Proj('+init=epsg:{}'.format(crs))
+        x, y = pyproj.transform(source_srs, to_srs, y, x)
+        return x, y
+    else:
+        return x, y
 
 
 def create_index(fn, ifn, datasize):
@@ -331,8 +347,7 @@ def read_bro(parameters):
     return cpts
 
 
-if __name__ == "__main_":
-    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 1000}
-
+if __name__ == "__main__":
+    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
     cpts = read_bro(input)
     print(cpts)
