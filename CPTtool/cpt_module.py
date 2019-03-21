@@ -193,12 +193,12 @@ class CPT:
 
         # check criteria of minimum length
         if np.max(np.abs(cpt['dataframe'].depth.values)) < minimum_lenght:
-            message = "file " + cpt["id"] + " has a length smaller than " + str(minimum_lenght)
+            message = "File " + cpt["id"] + " has a length smaller than " + str(minimum_lenght)
             return message
 
         # check criteria of minimum samples
         if len(cpt['dataframe'].depth.values) < minimum_samples:
-            message = "file " + cpt["id"] + " has a number of samples smaller than " + str(minimum_samples)
+            message = "File " + cpt["id"] + " has a number of samples smaller than " + str(minimum_samples)
             return message
 
         # check if there is a pre_drill. if so pad the data

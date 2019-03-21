@@ -171,7 +171,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         # increase index of the scenario
         scenario += 1
         # add to log file that the analysis is successful
-        log_file.info_message("analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
+        log_file.info_message("Analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
     # save the resuts file
     cpt.update_dump_json(jsn, input_dictionary, index_coordinate)
     return
