@@ -177,7 +177,7 @@ class CPT:
         """
         Parse the BRO information into the object structure
 
-        :param cpt: BRO cpt
+        :param cpt: BRO cpt dataset
         :return:
         """
         import numpy as np
@@ -191,7 +191,9 @@ class CPT:
         # parse coordinates
         self.coord = [cpt['location_x'], cpt['location_y']]
 
-        depth , coneResistance , frictionRatio , localFriction  ,pore_pressure = self.define_pre_drill(cpt)
+        # check if there is a pre_drill. if so pad the data
+        depth, coneResistance, frictionRatio, localFriction, pore_pressure = self.define_pre_drill(cpt)
+
         # parse depth
         self.depth = depth
         # parse NAP depth
@@ -206,48 +208,69 @@ class CPT:
         self.water = np.zeros(len(self.depth))
         # if water exists parse water
         if "porePressureU2" in cpt["dataframe"]:
-            self.water = pore_pressure *1000.
+            self.water = pore_pressure * 1000.
         return
 
-    def define_pre_drill(self,cpt_BRO):
-        import numpy
-        place = 0
-        starting_depth = 0
-        length_of_average_points = 3
-        pore_pressure = None
-        if float(cpt_BRO['predrilled_z']) != 0. :
-            # check the size
-           if len(cpt_BRO['dataframe'].coneResistance) < 3:
-              raise Exception('CPT Length should exceed 3 points')
+    def define_pre_drill(self, cpt_BRO, length_of_average_points=10):
+        """
+        Checks the existance of pre-drill.
+        If predrill exists it add the average value of tip, friction and friction number to the pre-drill length.
+        The average is computed over the lenght_of_average_points.
+        If pore water pressure is measured, the pwp is assumed to be zero at surface level.
 
-           # Set the discritisation
-           dicritisation = numpy.average(numpy.diff(cpt_BRO['dataframe']['depth'].values))
-           #find the average
-           average_cone_res = numpy.average(cpt_BRO['dataframe'].coneResistance[:length_of_average_points])
-           average_fr_ratio = numpy.average(cpt_BRO['dataframe'].frictionRatio[:length_of_average_points])
-           average_loc_fr = numpy.average(cpt_BRO['dataframe'].localFriction[:length_of_average_points])
-           #Define all in the lists
-           local_depth = numpy.arange(starting_depth, float(cpt_BRO['predrilled_z']), dicritisation)
-           local_cone_res = numpy.repeat(average_cone_res,len(local_depth))
-           local_fr_ratio = numpy.repeat(average_fr_ratio,len(local_depth))
-           local_loc_fr = numpy.repeat(average_loc_fr    ,len(local_depth))
-           if "porePressureU2" in cpt_BRO["dataframe"]:
-               local_pore_pressure = numpy.linspace(0,cpt_BRO['dataframe']["porePressureU2"].values[0],len(local_depth))
-               pore_pressure = numpy.append(local_pore_pressure,cpt_BRO['dataframe']["porePressureU2"].values)
-           #Enrich the Penetration Length
-           depth = numpy.append(local_depth, cpt_BRO['dataframe']['depth'].values)
-           coneResistance = numpy.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
-           frictionRatio = numpy.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
-           localFriction =numpy.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
+        :param cpt_BRO: BRO cpt dataset
+        :param length_of_average_points: (optional) Number of samples over which the average is made
+        :return: depth, tip resistance, friction number, friction, pore water pressure
+        """
+
+        import numpy as np
+
+        starting_depth = 0
+        pore_pressure = None
+        if float(cpt_BRO['predrilled_z']) != 0.:
+            # if there is pre-dill add the average values to the pre-dill
+
+            # check the size. size of the file should be bigger than length_of_average_points
+            if len(cpt_BRO['dataframe'].coneResistance) <= length_of_average_points:
+                raise Exception('CPT Length should exceed ' + str(length_of_average_points) + ' points')
+
+            # Set the discretisation
+            dicretisation = np.average(np.diff(cpt_BRO['dataframe']['depth'].values))
+
+            # find the average
+            average_cone_res = np.average(cpt_BRO['dataframe'].coneResistance[:length_of_average_points])
+            average_fr_ratio = np.average(cpt_BRO['dataframe'].frictionRatio[:length_of_average_points])
+            average_loc_fr = np.average(cpt_BRO['dataframe'].localFriction[:length_of_average_points])
+
+            # Define all in the lists
+            local_depth = np.arange(starting_depth, float(cpt_BRO['predrilled_z']), dicretisation)
+            local_cone_res = np.repeat(average_cone_res,len(local_depth))
+            local_fr_ratio = np.repeat(average_fr_ratio,len(local_depth))
+            local_loc_fr = np.repeat(average_loc_fr    ,len(local_depth))
+
+            # if there is pore water pressure
+            if "porePressureU2" in cpt_BRO["dataframe"]:
+                local_pore_pressure = np.linspace(0, cpt_BRO['dataframe']["porePressureU2"].values[0], len(local_depth))
+                pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe']["porePressureU2"].values)
+
+            # Enrich the Penetration Length
+            depth = np.append(local_depth, cpt_BRO['dataframe']['depth'].values)
+            coneResistance = np.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
+            frictionRatio = np.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
+            localFriction = np.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
+
         else:
-           # No predrill existing
-           depth = cpt_BRO['dataframe'].depth.values
-           coneResistance = cpt_BRO['dataframe'].coneResistance.values
-           frictionRatio = cpt_BRO['dataframe'].frictionRatio.values
-           localFriction = cpt_BRO['dataframe'].localFriction.values
-           if "porePressureU2" in cpt_BRO["dataframe"]:
-               pore_pressure = cpt_BRO['dataframe']["porePressureU2"].values
-        return   depth , coneResistance , frictionRatio , localFriction  , pore_pressure
+            # No predrill existing: just parsing data
+            depth = cpt_BRO['dataframe'].depth.values
+            coneResistance = cpt_BRO['dataframe'].coneResistance.values
+            frictionRatio = cpt_BRO['dataframe'].frictionRatio.values
+            localFriction = cpt_BRO['dataframe'].localFriction.values
+
+            # if there is pore water pressure
+            if "porePressureU2" in cpt_BRO["dataframe"]:
+                pore_pressure = cpt_BRO['dataframe']["porePressureU2"].values
+
+        return depth, coneResistance, frictionRatio, localFriction, pore_pressure
 
     def lithology_calc(self):
         r"""
