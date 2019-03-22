@@ -50,6 +50,7 @@ dependencies:
   - pandas=0.24.1=py36ha925a31_0
   - pefile=2018.8.8=py_0
   - pip=19.0.3=py36_0
+  - proj4=5.2.0=ha925a31_1
   - pybtex=0.22.2=py36_0
   - pybtex-docutils=0.2.1=py36_1000
   - pycparser=2.19=py36_1
@@ -57,7 +58,7 @@ dependencies:
   - pygments=2.3.1=py_0
   - pyopenssl=19.0.0=py36_0
   - pyparsing=2.3.1=py36_0
-  - pyproj=1.9.6=py36h9c430a6_1000
+  - pyproj=1.9.6=py36h6782396_0
   - pyqt=5.9.2=py36h6538335_2
   - pyshp=2.1.0=py_0
   - pysocks=1.6.8=py36_1002
