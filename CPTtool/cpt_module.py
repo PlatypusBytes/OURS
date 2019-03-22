@@ -255,8 +255,11 @@ class CPT:
             local_loc_fr = np.repeat(average_loc_fr    ,len(local_depth))
 
             # if there is pore water pressure
+            # Here the endpoint is False so that for the final of local_pore_pressure I don't end up with the same value
+            # as the first in the Pore Pressure array.
             if "porePressureU2" in cpt_BRO["dataframe"]:
-                local_pore_pressure = np.linspace(0, cpt_BRO['dataframe']["porePressureU2"].values[0], len(local_depth))
+                local_pore_pressure = np.linspace(0, cpt_BRO['dataframe']["porePressureU2"].values[0], len(local_depth)
+                                                  ,endpoint=False)
                 pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe']["porePressureU2"].values)
 
             # Enrich the Penetration Length
