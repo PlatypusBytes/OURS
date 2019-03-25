@@ -39,7 +39,7 @@ class TestCptModule(unittest.TestCase):
                     "dataframe": df}
 
         # Run the function to be checked
-        self.cpt.parse_bro(cpt_data, minimum_lenght=0.01, minimum_samples=1)
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         # Check the equality with the pre-given lists
         np.testing.assert_array_equal(self.cpt.tip, [2000., 2000., 2000., 1000., 2000., 3000.])
@@ -80,7 +80,7 @@ class TestCptModule(unittest.TestCase):
         pore_pressure = [0, step * 1000, 2 * step * 1000, 1 * 1000, 2 * 1000, 3 * 1000]
 
         # run the function to be checked
-        self.cpt.parse_bro(cpt_data, minimum_lenght=0.01, minimum_samples=1)
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         # Check the equality with the pre-defined values
         np.testing.assert_array_equal(self.cpt.water, pore_pressure)
@@ -111,7 +111,7 @@ class TestCptModule(unittest.TestCase):
                     "dataframe": df}
 
         # run the fuction
-        aux = self.cpt.parse_bro(cpt_data, minimum_lenght=10, minimum_samples=1)
+        aux = self.cpt.parse_bro(cpt_data, minimum_length=10, minimum_samples=1)
 
         # check if the returned message is the appropriate
         self.assertTrue('File cpt_name has a length smaller than 10' == aux)
@@ -135,7 +135,7 @@ class TestCptModule(unittest.TestCase):
                     "dataframe": df}
 
         # run the fuction
-        aux = self.cpt.parse_bro(cpt_data, minimum_lenght=1, minimum_samples=10)
+        aux = self.cpt.parse_bro(cpt_data, minimum_length=1, minimum_samples=10)
 
         # check if the returned message is the appropriate
         self.assertTrue( 'File cpt_name has a number of samples smaller than 10'== aux)
@@ -765,7 +765,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     'predrilled_z': 0.,
                     "dataframe": df}
-        self.cpt.parse_bro(cpt_data, minimum_lenght=0.01, minimum_samples=1)
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]])
         np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]])
@@ -792,7 +792,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     "dataframe": df,
                     'predrilled_z': 0.}
-        self.cpt.parse_bro(cpt_data, minimum_lenght=0.01, minimum_samples=1)
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]])
         np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]])
@@ -819,7 +819,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     "predrilled_z": 0.,
                     "dataframe": df}
-        self.cpt.parse_bro(cpt_data, minimum_lenght=0.01, minimum_samples=1)
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]][:-1])
         np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]][:-1])
