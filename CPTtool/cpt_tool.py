@@ -137,7 +137,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         # read data from BRO
         data_quality = cpt.parse_bro(cpt_BRO[idx_cpt])
         # check data quality from the BRO file
-        if data_quality != True:
+        if data_quality is not True:
             # If the quality is not good skip this cpt file
             log_file.error_message(data_quality)
             continue
@@ -196,7 +196,8 @@ def analysis(properties, methods_cpt, output, plots):
     for i in range(nb_points):
         # Define log file
         log_file = log_handler.LogFile(output, i)
-        log_file.info_message("Analysis started for coordinate point: (" + properties["Source_x"][i] + ", " + properties["Source_y"][i] + ")")
+        log_file.info_message("Analysis started for coordinate point: (" + properties["Source_x"][i] + ", "
+                              + properties["Source_y"][i] + ")")
 
         # read BRO data base
         inpt = {"BRO_data": properties["BRO_data"],
@@ -206,12 +207,14 @@ def analysis(properties, methods_cpt, output, plots):
         # check if cpts have data or are empty
         if all(v is None for v in cpts):
             log_file.error_message("No CPTS in this coordinate point")
-            log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", " + properties["Source_y"][i] + ")")
+            log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", "
+                                  + properties["Source_y"][i] + ")")
             log_file.close()
             continue
         # process cpts
         read_cpt(cpts, methods_cpt, output, properties, plots, i, log_file)
-        log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", " + properties["Source_y"][i] + ")")
+        log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", "
+                              + properties["Source_y"][i] + ")")
         log_file.close()
     return
 
@@ -231,4 +234,3 @@ if __name__ == "__main__":
 
     # do analysis
     analysis(props, methods, args.output, args.plots)
-

@@ -1,6 +1,4 @@
 from matplotlib import pyplot as plt
-from shapely.geometry.polygon import Polygon
-from descartes import PolygonPatch
 
 
 class Create_Shape_File:
@@ -32,7 +30,7 @@ class Create_Shape_File:
         Defines geometries for the soil types, following Robertson and Cabal :cite:`robertson_cabal_2014`.
         """
         import numpy as np
-        from shapely.geometry import Point, Polygon
+        from shapely.geometry import Polygon
 
         line1 = [[0.1, 1.],
                  [0.1, 10.]]
@@ -308,15 +306,23 @@ class Create_Shape_File:
                   [10., 1000.]]
 
         # soil types
-        self.soil_type_1 = np.concatenate((np.array(line1), np.array(line3), np.array(line4), np.array(line5), np.array(line6), np.array(line2)), axis=0)
-        self.soil_type_2 = np.concatenate((np.array(line6), np.array(line13), np.array(line17), np.array(line16)[::-1]), axis=0)
-        self.soil_type_3 = np.concatenate((np.array(line5)[::-1], np.array(line11), np.array(line14), np.array(line15), np.array(line13)[::-1]), axis=0)
-        self.soil_type_4 = np.concatenate((np.array(line4)[::-1], np.array(line9), np.array(line12), np.array(line11)[::-1]), axis=0)
-        self.soil_type_5 = np.concatenate((np.array(line3[::-1]), np.array(line7), np.array(line8), np.array(line10), np.array(line9)[::-1]), axis=0)
-        self.soil_type_6 = np.concatenate((np.array(line18), np.array(line19), np.array(line20), np.array(line21), np.array(line8)[::-1]), axis=0)
+        self.soil_type_1 = np.concatenate((np.array(line1), np.array(line3), np.array(line4), np.array(line5),
+                                           np.array(line6), np.array(line2)), axis=0)
+        self.soil_type_2 = np.concatenate((np.array(line6), np.array(line13), np.array(line17),
+                                           np.array(line16)[::-1]), axis=0)
+        self.soil_type_3 = np.concatenate((np.array(line5)[::-1], np.array(line11), np.array(line14),
+                                           np.array(line15), np.array(line13)[::-1]), axis=0)
+        self.soil_type_4 = np.concatenate((np.array(line4)[::-1], np.array(line9), np.array(line12),
+                                           np.array(line11)[::-1]), axis=0)
+        self.soil_type_5 = np.concatenate((np.array(line3[::-1]), np.array(line7), np.array(line8),
+                                           np.array(line10), np.array(line9)[::-1]), axis=0)
+        self.soil_type_6 = np.concatenate((np.array(line18), np.array(line19), np.array(line20),
+                                           np.array(line21), np.array(line8)[::-1]), axis=0)
         self.soil_type_7 = np.concatenate((np.array(line22), np.array(line23), np.array(line19)[::-1]), axis=0)
-        self.soil_type_8 = np.concatenate((np.array(line21), np.array(line25), np.array(line24)[::-1], np.array(line10)[::-1]), axis=0)
-        self.soil_type_9 = np.concatenate((np.array(line12)[::-1], np.array(line24), np.array(line27), np.array(line26)[::-1], np.array(line14)[::-1]), axis=0)
+        self.soil_type_8 = np.concatenate((np.array(line21), np.array(line25), np.array(line24)[::-1],
+                                           np.array(line10)[::-1]), axis=0)
+        self.soil_type_9 = np.concatenate((np.array(line12)[::-1], np.array(line24), np.array(line27),
+                                           np.array(line26)[::-1], np.array(line14)[::-1]), axis=0)
 
         # poligon
         coords = [(i[0], i[1]) for i in self.soil_type_1]
@@ -340,13 +346,11 @@ class Create_Shape_File:
 
         return
 
-
     def create_shape_file(self):
         import shapefile
         self.soil_types_robertson()
         polygons_list = [Rb.poligon_1, Rb.poligon_2, Rb.poligon_3, Rb.poligon_4, Rb.poligon_5, Rb.poligon_6,
                          Rb.poligon_7, Rb.poligon_8, Rb.poligon_9]
-
 
         w = shapefile.Writer('shapefiles/Robertson')
         w.field('name', 'C')
@@ -358,7 +362,6 @@ class Create_Shape_File:
             w.record('polygon' + str(counter))
             counter = counter + 1
         w.close()
-
         return
 
 
@@ -369,12 +372,10 @@ def plot_shape_file(path):
     print('number of shapes imported:', len(sf.shapes()))
 
     plt.figure()
-    ax = plt.axes()
     for shape in list(sf.iterShapes()):
         x_lon, y_lat = zip(*shape.points)
         plt.plot(x_lon, y_lat)
     plt.show()
     return
-
 
 # plot_shape_file('shapefiles/Robertson')

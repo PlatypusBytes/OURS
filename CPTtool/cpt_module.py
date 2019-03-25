@@ -257,28 +257,28 @@ class CPT:
             # Here the endpoint is False so that for the final of local_pore_pressure I don't end up with the same value
             # as the first in the Pore Pressure array.
             if "porePressureU2" in cpt_BRO["dataframe"]:
-                local_pore_pressure = np.linspace(0, cpt_BRO['dataframe']["porePressureU2"].values[0], len(local_depth)
-                                                  ,endpoint=False)
+                local_pore_pressure = np.linspace(0, cpt_BRO['dataframe']["porePressureU2"].values[0], len(local_depth),
+                                                  endpoint=False)
                 pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe']["porePressureU2"].values)
 
             # Enrich the Penetration Length
             depth = np.append(local_depth, cpt_BRO['dataframe']['depth'].values)
-            coneResistance = np.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
-            frictionRatio = np.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
-            localFriction = np.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
+            coneresistance = np.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
+            frictionratio = np.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
+            localfriction = np.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
 
         else:
             # No predrill existing: just parsing data
             depth = cpt_BRO['dataframe'].depth.values
-            coneResistance = cpt_BRO['dataframe'].coneResistance.values
-            frictionRatio = cpt_BRO['dataframe'].frictionRatio.values
-            localFriction = cpt_BRO['dataframe'].localFriction.values
+            coneresistance = cpt_BRO['dataframe'].coneResistance.values
+            frictionratio = cpt_BRO['dataframe'].frictionRatio.values
+            localfriction = cpt_BRO['dataframe'].localFriction.values
 
             # if there is pore water pressure
             if "porePressureU2" in cpt_BRO["dataframe"]:
                 pore_pressure = cpt_BRO['dataframe']["porePressureU2"].values
 
-        return depth, coneResistance, frictionRatio, localFriction, pore_pressure
+        return depth, coneresistance, frictionratio, localfriction, pore_pressure
 
     def lithology_calc(self):
         r"""
@@ -486,7 +486,8 @@ class CPT:
                 if itr >= max_ite:
                     n = np.ones(len(self.tip)) * 0.5
                     break
-                n1 = tools_utils.n_iter(n, self.tip, self.friction_nbr, self.effective_stress, self.total_stress, self.Pa)
+                n1 = tools_utils.n_iter(n, self.tip, self.friction_nbr, self.effective_stress, self.total_stress,
+                                        self.Pa)
                 error = np.linalg.norm(n1 - n) / np.linalg.norm(n1)
                 n = n1
                 itr += 1
@@ -608,7 +609,8 @@ class CPT:
             self.vs = 10.915 * self.qt ** 0.317 * self.IC ** 0.210 * self.depth ** 0.057 * 0.92
             self.G0 = self.rho * self.vs ** 2
         elif method == "Ahmed":
-            self.vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 *self.Fr * self.effective_stress / self.Pa * self.g / self.gamma) ** 0.5
+            self.vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 * self.Fr * self.effective_stress / self.Pa * self.g
+                                                          / self.gamma) ** 0.5
             self.G0 = self.rho * self.vs ** 2
         elif method == "all":  # compares all and assumes default
             self.vs_calc(method="Mayne")
@@ -679,7 +681,8 @@ class CPT:
                 elif method == "Robertson":
                     OCR[i] = 0.25 * self.Qtn[i] ** 1.25
                     # OCR[i] = 0.25 * ((self.qt[i] - self.total_stress[i]) / self.effective_stress[i]) ** 1.25
-                self.damping[i] = (0.8005 + 0.129 * Ip * OCR[i] ** -0.1069) * (self.effective_stress[i] / self.Pa) ** -0.2889
+                self.damping[i] = (0.8005 + 0.129 * Ip * OCR[i] ** -0.1069) * \
+                                  (self.effective_stress[i] / self.Pa) ** -0.2889
             # if sand:
             elif lit == "5" or lit == "6" or lit == "7":
                 self.damping[i] = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.effective_stress[i] / self.Pa) ** -0.08
@@ -729,22 +732,22 @@ class CPT:
         r"""
         Reorganises the lithology based on the minimum layer thickness.
         This function call the functions merging_label, merging_index , merging_depth , merging_thickness.
-        These functions merge the layers acoording to the min_layer_thick.
+        These functions merge the layers according to the min_layer_thick.
         For more information refer to those.
         Parameters
         ----------
-        :param min_layer_thick: Minimum layer thickness
-        :param idx: The indexes of all unmerged layers
-        :param local_z_ini : The depth of all umerged layers
-        :param local_thick: the thickness of the unmerged layers
-        :param new_thickness: merged thickness according to the min_layer_thick
+        :param min_layer_thick : Minimum layer thickness
+        :param idx : The indexes of all unmerged layers
+        :param local_z_ini : The depth of all unmerged layers
+        :param local_thick : the thickness of the unmerged layers
+        :param new_thickness : merged thickness according to the min_layer_thick
 
         """
         import numpy as np
 
         depth = self.depth
         lithology = self.lithology
-        #Find indeces of local unmerged layers
+        # Find indeces of local unmerged layers
         aux = ""
         idx = []
         for j, val in enumerate(lithology):
@@ -759,9 +762,9 @@ class CPT:
         #     else:
         #         local_IC.append(np.mean(self.IC[idx[i]:target_idx[i]]))
 
-        #Depth between local unmerged layers
+        # Depth between local unmerged layers
         local_z_ini = [depth[i] for i in idx]
-        #Thicknesses between local unmerged layers
+        # Thicknesses between local unmerged layers
         local_thick = np.append(np.diff(local_z_ini), depth[-1] - local_z_ini[-1])
         # Actual Merging
         new_thickness = self.merging_thickness(local_thick, min_layer_thick)
@@ -774,14 +777,15 @@ class CPT:
 
     def merging_label(self):
         r"""
-        Function that joins the lithology labels of each layer.
+        Function that joins the lithology labels of each merged layer.
         """
         new_label = []
         start = self.indx_json[:-1]
         finish = self.indx_json[1:]
         for i in range(len(start)):
             # sorted label list
-            label_list = sorted(set(self.lithology[start[i]:finish[i]]), key=lambda x: self.lithology[start[i]:finish[i]].index(x))
+            label_list = sorted(set(self.lithology[start[i]:finish[i]]),
+                                key=lambda x: self.lithology[start[i]:finish[i]].index(x))
             new_label.append(r'/'.join(label_list))
         return new_label
 
@@ -975,7 +979,8 @@ class CPT:
         x_data = [self.tip, self.friction_nbr, self.rho, self.G0, self.poisson, self.damping]
         y_data = self.depth
         l_name = ["Tip resistance", "Friction number", "Density", "Shear modulus", "Poisson ratio", "Damping"]
-        x_label = ["Tip resistance [kPa]", "Friction number [-]", r"Density [kg/m$^{3}$]", "Shear modulus [kPa]", "Poisson ratio [-]", "Damping [-]"]
+        x_label = ["Tip resistance [kPa]", "Friction number [-]", r"Density [kg/m$^{3}$]", "Shear modulus [kPa]",
+                   "Poisson ratio [-]", "Damping [-]"]
         y_label = "Depth [m]"
 
         # set the color list
@@ -1068,7 +1073,8 @@ class CPT:
         # create legend for Robertson
         for i, c in enumerate(color_litho):
             ax3.add_patch(patches.Rectangle(
-                (16, ax1.get_ylim()[1] + (ax1.get_ylim()[0] - ax1.get_ylim()[1]) * 0.0425 + (ax1.get_ylim()[0] - ax1.get_ylim()[1]) * 0.02 * i),
+                (16, ax1.get_ylim()[1] + (ax1.get_ylim()[0] - ax1.get_ylim()[1]) * 0.0425
+                 + (ax1.get_ylim()[0] - ax1.get_ylim()[1]) * 0.02 * i),
                 10.,
                 (ax1.get_ylim()[0] - ax1.get_ylim()[1]) * 0.015,
                 fill=True,

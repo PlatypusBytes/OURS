@@ -12,19 +12,25 @@ class Robertson:
     """
 
     def __init__(self):
+        # In this generic way from the input file an arbitrary amount of polygons can be parsed from a shape file.
         self.soil_types_list = []
         self.polygons = []
         return
 
-    def soil_types(self, path_shapefile=r"./shapefiles/" , model_name = 'Robertson'):
+    def soil_types(self, path_shapefile=r"./shapefiles/", model_name='Robertson'):
+        r"""
+        Function that read shapes from shape file and passes them as Polygons.
+
+        :param path_shapefile: Path to the shapefile
+        :param model_name: Name of model and shapefile
+        :return: list of the polygons defining the soil types
+        """
         import shapefile
         from shapely.geometry import Polygon
-        import os
-        import sys
 
         sf = shapefile.Reader(path_shapefile+model_name)
         list_of_polygons = []
-        for polygon in list(sf.iterShapes()) :
+        for polygon in list(sf.iterShapes()):
             list_of_polygons.append(Polygon(polygon.points))
         self.polygons = list_of_polygons
         return
