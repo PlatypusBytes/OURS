@@ -173,7 +173,7 @@ class CPT:
     #
     #     return True
 
-    def parse_bro(self, cpt, minimum_lenght=10, minimum_samples=10):
+    def parse_bro(self, cpt, minimum_length=10, minimum_samples=10):
         """
         Parse the BRO information into the object structure
 
@@ -192,8 +192,8 @@ class CPT:
         self.coord = [cpt['location_x'], cpt['location_y']]
 
         # check criteria of minimum length
-        if np.max(np.abs(cpt['dataframe'].depth.values)) < minimum_lenght:
-            message = "File " + cpt["id"] + " has a length smaller than " + str(minimum_lenght)
+        if np.max(np.abs(cpt['dataframe'].depth.values)) < minimum_length:
+            message = "File " + cpt["id"] + " has a length smaller than " + str(minimum_length)
             return message
 
         # check criteria of minimum samples
@@ -202,18 +202,18 @@ class CPT:
             return message
 
         # check if there is a pre_drill. if so pad the data
-        depth, coneResistance, frictionRatio, localFriction, pore_pressure = self.define_pre_drill(cpt)
+        depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt)
 
         # parse depth
         self.depth = depth
         # parse NAP depth
         self.NAP = cpt['offset_z'] - depth
         # parse tip resistance
-        self.tip = coneResistance * 1000.
+        self.tip = cone_resistance * 1000.
         # parse friction
-        self.friction = localFriction * 1000.
+        self.friction = local_friction * 1000.
         # parser friction number
-        self.friction_nbr = frictionRatio
+        self.friction_nbr = friction_ratio
         # default water is zero
         self.water = np.zeros(len(self.depth))
         # if water exists parse water
@@ -221,7 +221,7 @@ class CPT:
             self.water = pore_pressure * 1000.
         return True
 
-    def define_pre_drill(self, cpt_BRO, length_of_average_points=10):
+    def define_pre_drill(self, cpt_BRO):
         """
         Checks the existance of pre-drill.
         If predrill exists it add the average value of tip, friction and friction number to the pre-drill length.
@@ -229,12 +229,11 @@ class CPT:
         If pore water pressure is measured, the pwp is assumed to be zero at surface level.
 
         :param cpt_BRO: BRO cpt dataset
-        :param length_of_average_points: (optional) Number of samples over which the average is made
         :return: depth, tip resistance, friction number, friction, pore water pressure
         """
 
         import numpy as np
-
+        length_of_average_points = 3
         starting_depth = 0
         pore_pressure = None
         if float(cpt_BRO['predrilled_z']) != 0.:
@@ -250,9 +249,9 @@ class CPT:
 
             # Define all in the lists
             local_depth = np.arange(starting_depth, float(cpt_BRO['predrilled_z']), dicretisation)
-            local_cone_res = np.repeat(average_cone_res,len(local_depth))
-            local_fr_ratio = np.repeat(average_fr_ratio,len(local_depth))
-            local_loc_fr = np.repeat(average_loc_fr    ,len(local_depth))
+            local_cone_res = np.repeat(average_cone_res, len(local_depth))
+            local_fr_ratio = np.repeat(average_fr_ratio, len(local_depth))
+            local_loc_fr = np.repeat(average_loc_fr, len(local_depth))
 
             # if there is pore water pressure
             # Here the endpoint is False so that for the final of local_pore_pressure I don't end up with the same value
