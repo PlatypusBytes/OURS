@@ -9,7 +9,7 @@ from teamcity.unittestpy import TeamcityTestRunner
 sys.path.append('../')
 import unittest
 import cpt_tool
-
+import bro
 
 class TestCptTool(unittest.TestCase):
     def setUp(self):
@@ -24,6 +24,12 @@ class TestCptTool(unittest.TestCase):
     #     return
 
     def tearDown(self):
+        return
+
+
+
+class TestBroDb(unittest.TestCase):
+    def setUp(self):
         return
 
 
