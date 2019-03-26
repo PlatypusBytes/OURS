@@ -350,4 +350,4 @@ def read_bro(parameters):
 if __name__ == "__main__":
     input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
     cpts = read_bro(input)
-    print(len(cpts))
+    print(cpts)
