@@ -699,7 +699,7 @@ class CPT:
         r"""
         Poisson ratio. Following Mayne :cite:`mayne_2007`.
 
-        Poisson assumed 0.5 for soft layers and 0.2 for sandy layers.
+        Poisson assumed 0.495 for soft layers and 0.2 for sandy layers.
         """
         import numpy as np 		
 
@@ -709,7 +709,7 @@ class CPT:
         for i, lit in enumerate(self.lithology):
             # if soft layer
             if lit == "1" or lit == "2" or lit == "3":
-                self.poisson[i] = 0.5
+                self.poisson[i] = 0.495
             else:
                 self.poisson[i] = 0.2
         return
