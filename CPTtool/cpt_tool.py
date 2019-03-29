@@ -190,7 +190,7 @@ def analysis(properties, methods_cpt, output, plots):
     :return:
     """
     # number of points
-    nb_points = len(props["Source_x"])
+    nb_points = len(properties["Source_x"])
 
     # for each calculation point
     for i in range(nb_points):
