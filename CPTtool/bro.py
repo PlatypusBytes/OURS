@@ -318,7 +318,8 @@ def read_bro(parameters):
     x, y = parameters["Source_x"], parameters["Source_y"]
 
     if not exists(fn):
-        raise Exception("Cannot open provided BRO data file: {}".format(fn))
+        print("Cannot open provided BRO data file: {}".format(fn))
+        exit(2)
 
     # Check and use/create index
     datasize = stat(fn).st_size
