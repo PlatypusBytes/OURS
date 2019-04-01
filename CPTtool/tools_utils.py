@@ -128,3 +128,24 @@ def compute_probability(coord_cpt, coord_src, coord_rec):
         probs.append(weight * 100.)
 
     return probs
+
+
+def resource_path(file_name):
+    r""""
+    Define the relative path to the file
+
+    Used to account for the compiling location of the shapefile
+
+    Parameters
+    ----------
+    :param file_name: File name
+    :return: relative path to the file
+    """
+    import os
+    import sys
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, file_name)

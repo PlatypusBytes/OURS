@@ -25,10 +25,15 @@ class Robertson:
         :param model_name: Name of model and shapefile
         :return: list of the polygons defining the soil types
         """
+        import os
+        import tools_utils
         import shapefile
         from shapely.geometry import Polygon
 
-        sf = shapefile.Reader(path_shapefile+model_name)
+        # define the path for the shape file
+        path_shapefile = tools_utils.resource_path(os.path.join(path_shapefile, model_name))
+        # read shapefile
+        sf = shapefile.Reader(path_shapefile)
         list_of_polygons = []
         for polygon in list(sf.iterShapes()):
             list_of_polygons.append(Polygon(polygon.points))
