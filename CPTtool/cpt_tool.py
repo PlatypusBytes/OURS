@@ -1,6 +1,7 @@
 import argparse
 import log_handler
 import bro
+import sys
 
 
 def define_methods(input_file):
@@ -31,7 +32,7 @@ def define_methods(input_file):
     # check if input file exists
     if not os.path.isfile(input_file):
         print("File with methods definition does not exist")
-        exit(4)
+        sys.exit(4)
 
     # if the file is available
     with open(input_file, "r") as f:
@@ -41,20 +42,20 @@ def define_methods(input_file):
     for i in data.keys():
         if not any(i in k for k in keys):
             print("Error: Key " + i + " is not known. Keys must be: " + ', '.join(keys))
-            exit(5)
+            sys.exit(5)
 
     # check if the key-values are correct for gamma
     if not any(data["gamma"] in k for k in gamma_keys):
         print("Error: gamma key is not known. gamma keys must be: " + ', '.join(gamma_keys))
-        exit(5)
+        sys.exit(5)
     # check if the key-values are correct for vs
     if not any(data["vs"] in k for k in vs_keys):
         print("Error: gamma key is not known. vs keys must be: " + ', '.join(vs_keys))
-        exit(5)
+        sys.exit(5)
     # check if the key-values are correct for OCR
     if not any(data["OCR"] in k for k in OCR_keys):
         print("Error: gamma key is not known. OCR keys must be: " + ', '.join(OCR_keys))
-        exit(5)
+        sys.exit(5)
 
     methods = {"gamma": data["gamma"],
                "vs": data["vs"],
@@ -76,7 +77,7 @@ def read_json(input_file):
     # check if file exits
     if not os.path.isfile(input_file):
         print("Input JSON file does not exist")
-        exit(-3)
+        sys.exit(-3)
 
     # read file
     with open(input_file, "r") as f:
@@ -202,7 +203,7 @@ def analysis(properties, methods_cpt, output, plots):
         # read BRO data base
         inpt = {"BRO_data": properties["BRO_data"],
                 "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
-                "Radius": 500}
+                "Radius": 1e100}
         cpts = bro.read_bro(inpt)
         # check if cpts have data or are empty
         if all(v is None for v in cpts):

@@ -18,6 +18,7 @@ and creating the index will take 5-10min depending on disk performance.
 
 """
 
+import sys
 import mmap
 import logging
 from io import StringIO
@@ -319,7 +320,7 @@ def read_bro(parameters):
 
     if not exists(fn):
         print("Cannot open provided BRO data file: {}".format(fn))
-        exit(2)
+        sys.exit(2)
 
     # Check and use/create index
     datasize = stat(fn).st_size
