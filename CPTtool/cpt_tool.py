@@ -203,7 +203,7 @@ def analysis(properties, methods_cpt, output, plots):
         # read BRO data base
         inpt = {"BRO_data": properties["BRO_data"],
                 "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
-                "Radius": 1e100}
+                "Radius": 500}
         cpts = bro.read_bro(inpt)
         # check if cpts have data or are empty
         if all(v is None for v in cpts):
