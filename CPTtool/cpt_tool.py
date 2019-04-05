@@ -205,8 +205,12 @@ def analysis(properties, methods_cpt, output, plots):
                 "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
                 "Radius": 500}
         cpts = bro.read_bro(inpt)
+
+        # remove the nones from CPTs
+        cpts = list(filter(None, cpts))
+
         # check if cpts have data or are empty
-        if all(v is None for v in cpts):
+        if not cpts:
             log_file.error_message("No CPTS in this coordinate point")
             log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", "
                                   + properties["Source_y"][i] + ")")
