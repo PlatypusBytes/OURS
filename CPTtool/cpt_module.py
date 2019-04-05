@@ -210,8 +210,10 @@ class CPT:
         self.NAP = cpt['offset_z'] - depth
         # parse tip resistance
         self.tip = cone_resistance * 1000.
+        self.tip[self.tip < 0] = 0.
         # parse friction
         self.friction = local_friction * 1000.
+        self.friction[self.friction < 0] = 0.
         # parser friction number
         self.friction_nbr = friction_ratio
         # default water is zero
