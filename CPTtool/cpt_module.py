@@ -845,7 +845,8 @@ class CPT:
         :param jsn: Json data structure
         :param id: Scenario (index)
         """
-        import numpy as np 		
+        import numpy as np
+        import tools_utils
 
         # create data
         data = {"lithology": [],
@@ -862,27 +863,31 @@ class CPT:
 
         # populate structure
         for i in range(len(self.indx_json) - 1):
+            # lithology
             data["lithology"].append(str(self.lithology_json[i]))
+            # depth
             data["depth"].append(self.depth_json[i])
-            E = 2 * (1 + 0.3) * self.gamma[self.indx_json[i]:self.indx_json[i + 1]] * 100 * \
-                self.vs[self.indx_json[i]: self.indx_json[i + 1]]**2
-
-            data["E"].append(np.mean(E))
-            data["var_E"].append(np.std(E))
-
+            # Young modulus
+            E = 2 * self.G0[self.indx_json[i]:self.indx_json[i + 1]] * (1 + self.poisson[self.indx_json[i]:self.indx_json[i + 1]])
+            mean, std = tools_utils.log_normal_parameters(E)
+            data["E"].append(mean)
+            data["var_E"].append(std**2)
+            # poisson ratio
             poisson = self.poisson[self.indx_json[i]:self.indx_json[i + 1]]
-
-            data["v"].append(np.mean(poisson))
-            data["var_v"].append(np.std(poisson))
-
+            mean, std = tools_utils.log_normal_parameters(poisson)
+            data["v"].append(mean)
+            data["var_v"].append(std**2)
+            # density
             rho = self.rho[self.indx_json[i]:self.indx_json[i + 1]]
-            data["rho"].append(np.mean(rho))
-            data["var_rho"].append(np.std(rho))
-
+            mean, std = tools_utils.log_normal_parameters(rho)
+            data["rho"].append(mean)
+            data["var_rho"].append(std**2)
+            # damping
             # ToDo update damping
             damp = self.damping[self.indx_json[i]:self.indx_json[i + 1]]
-            data["damping"].append(np.mean(damp))
-            data["var_damping"].append(np.std(damp))
+            mean, std = tools_utils.log_normal_parameters(damp)
+            data["damping"].append(mean)
+            data["var_damping"].append(std**2)
 
         jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
         jsn["scenarios"][id].update({"coordinates": self.coord,
@@ -890,7 +895,6 @@ class CPT:
                                      "data": data})
 
         return
-
 
     def update_dump_json(self, jsn, input_dic, index):
         """

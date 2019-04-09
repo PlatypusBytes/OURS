@@ -668,6 +668,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.lithology_json = ['1.0', '1.0', '1.0', '1.0']
         self.cpt.depth_json = [0, 1, 2, 3]
         self.cpt.gamma = np.ones(5)
+        self.cpt.G0 = np.ones(5)
         self.cpt.vs = np.ones(5)
         self.cpt.poisson = np.full(5, 0.3)
         self.cpt.rho = np.full(5, 0.3)
@@ -681,7 +682,7 @@ class TestCptModule(unittest.TestCase):
         self.assertEqual(jsn['scenarios'][0]['data']['depth'], self.cpt.depth_json)
 
         # Check if they are equal with the analytical young's modulus
-        E = 2 * 1.3 * self.cpt.gamma * 100 / self.cpt.vs ** 2
+        E = 2 * self.cpt.G0 * (1 + self.cpt.poisson)
         self.assertEqual(jsn['scenarios'][0]['data']['E'], E.tolist()[:-1])
         self.assertEqual(jsn['scenarios'][0]['data']['v'][0], self.cpt.poisson[0])
         self.assertEqual(jsn['scenarios'][0]['data']['rho'][0], self.cpt.rho[0])

@@ -149,3 +149,23 @@ def resource_path(file_name):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, file_name)
+
+
+def log_normal_parameters(value):
+    r"""
+    Computes the mean and standard deviation following a lognormal distribution
+
+    :param value: array with values
+    :return: mean, standard deviation
+    """
+    import numpy as np
+
+    # compute mean and standard deviation in normal space
+    aux_mean = np.mean(np.log(value))
+    aux_std = np.std(np.log(value))
+
+    # compute mean and standard deviation in lognormal space
+    mean = np.exp(aux_mean + aux_std ** 2 / 2)
+    std = np.sqrt(np.exp(2 * aux_mean + aux_std ** 2) * (np.exp(aux_std ** 2) - 1))
+
+    return mean, std
