@@ -173,7 +173,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         scenario += 1
         # add to log file that the analysis is successful
         log_file.info_message("Analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
-    # save the resuts file
+    # save the results file
     cpt.update_dump_json(jsn, input_dictionary, index_coordinate)
     return
 

@@ -9,7 +9,7 @@ if it does not yet exist next to the XML file.
 
 The index is stored next to the file and stores the xml
 filesize to validate the xml database is the same. If not,
-we assumme the database is new and a new index will be created
+we assume the database is new and a new index will be created
 as well. The index itself is an array with columns that store
 the x y location of the CPT and the start/end bytes in the XML file.
 
@@ -308,7 +308,7 @@ def read_bro_xml(fn, indices):
 def read_bro(parameters):
     """Main function to read the BRO database.
 
-    :param parameters: Dict of input `parameters` containing filename, locationd and radius.
+    :param parameters: Dict of input `parameters` containing filename, location and radius.
     :type parameters: dict
     :return: List of parsed CPTs as dicts
     :rtype: list
