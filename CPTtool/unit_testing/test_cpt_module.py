@@ -8,7 +8,6 @@ import unittest
 import cpt_module
 import numpy as np
 import cpt_tool
-import tools_utils
 import pandas as pd
 import csv
 import os
@@ -731,25 +730,6 @@ class TestCptModule(unittest.TestCase):
 
         # Remove file from the directory
         os.remove("./results_0.json")
-        return
-
-    def test_compute_prob(self):
-        # Set the inputs
-        cpt_coord = np.array([[0, 10], [17, 19], [14, 22], [35, 10]])
-        source_coord = [5, 10]
-        receiver_coord = [30, 10]
-        prob = tools_utils.compute_probability(cpt_coord, source_coord, receiver_coord)
-        # Exact target results
-        exact = [0.306964061716986,
-                 0.263692716163477,
-                 0.254225518484290,
-                 0.175117703635247]
-
-        # Check if results are equal
-        self.assertAlmostEqual(prob[0], exact[0] * 100)
-        self.assertAlmostEqual(prob[1], exact[1] * 100)
-        self.assertAlmostEqual(prob[2], exact[2] * 100)
-        self.assertAlmostEqual(prob[3], exact[3] * 100)
         return
 
     def test_bro_parser_no_water(self):
