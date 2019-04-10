@@ -866,28 +866,28 @@ class CPT:
             # lithology
             data["lithology"].append(str(self.lithology_json[i]))
             # depth
-            data["depth"].append(self.depth_json[i])
+            data["depth"].append(np.round(self.depth_json[i], 2))
             # Young modulus
             E = 2 * self.G0[self.indx_json[i]:self.indx_json[i + 1]] * (1 + self.poisson[self.indx_json[i]:self.indx_json[i + 1]])
             mean, std = tools_utils.log_normal_parameters(E)
-            data["E"].append(mean)
-            data["var_E"].append(std**2)
+            data["E"].append(np.round(mean, 1))
+            data["var_E"].append(np.round(std**2, 1))
             # poisson ratio
             poisson = self.poisson[self.indx_json[i]:self.indx_json[i + 1]]
             mean, std = tools_utils.log_normal_parameters(poisson)
-            data["v"].append(mean)
-            data["var_v"].append(std**2)
+            data["v"].append(np.round(mean, 5))
+            data["var_v"].append(np.round(std**2, 5))
             # density
             rho = self.rho[self.indx_json[i]:self.indx_json[i + 1]]
             mean, std = tools_utils.log_normal_parameters(rho)
-            data["rho"].append(mean)
-            data["var_rho"].append(std**2)
+            data["rho"].append(np.round(mean, 2))
+            data["var_rho"].append(np.round(std**2, 2))
             # damping
             # ToDo update damping
             damp = self.damping[self.indx_json[i]:self.indx_json[i + 1]]
             mean, std = tools_utils.log_normal_parameters(damp)
-            data["damping"].append(mean)
-            data["var_damping"].append(std**2)
+            data["damping"].append(np.round(mean, 5))
+            data["var_damping"].append(np.round(std**2, 5))
 
         jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
         jsn["scenarios"][id].update({"coordinates": self.coord,
@@ -909,6 +909,7 @@ class CPT:
         """
         import os
         import json
+        import numpy as np
         import tools_utils
 
         # update the probability
@@ -919,7 +920,7 @@ class CPT:
 
         # update the json file
         for i in range(len(jsn["scenarios"])):
-            jsn["scenarios"][i]["probability"] = probs[i]
+            jsn["scenarios"][i]["probability"] = np.round(probs[i], 2)
 
         # write file
         with open(os.path.join(self.output_folder, "results_" + str(index) + ".json"), "w") as fo:
