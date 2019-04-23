@@ -605,10 +605,14 @@ class CPT:
         elif method == "Andrus":
             # vs: following Andrus (2007)
             self.vs = 2.27 * self.qt ** 0.412 * self.IC ** 0.989 * self.depth ** 0.033 * 1
+            # to avoid depth = 0 -> vs = 0
+            self.vs[0] = self.vs[1]
             self.G0 = self.rho * self.vs ** 2
         elif method == "Zang":
             # vs: following Zang & Tong (2017)
             self.vs = 10.915 * self.qt ** 0.317 * self.IC ** 0.210 * self.depth ** 0.057 * 0.92
+            # to avoid depth=0 -> vs = 0
+            self.vs[0] = self.vs[1]
             self.G0 = self.rho * self.vs ** 2
         elif method == "Ahmed":
             self.vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 * self.Fr * self.effective_stress / self.Pa * self.g
