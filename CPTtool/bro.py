@@ -188,14 +188,14 @@ def create_index(fn, ifn, datasize):
 
     ext = splitext(fn)[1]
 
-    # Setup progress
-    pbar = tqdm(total=datasize, unit_scale=1)
-
     # Memory map OS specifc options
     if name == 'nt':
         mm_options = {}
 
     if ext == ".xml":
+        # Setup progress
+        pbar = tqdm(total=datasize, unit_scale=1)
+
         with open(fn, "r") as f:
             len_ss = len(searchstring)
             # memory-map the file, size 0 means whole file
@@ -218,27 +218,41 @@ def create_index(fn, ifn, datasize):
                             locations.append((x, y, previ, i))
                     cpt_count += 1
 
-    # This won't work yet!
-    # TODO Implement zip streaming
+    # Stream through zipfile
     elif ext == ".zip":
+        buffersize = 2**24
+        position = 0
+        buffer = b""
+        logging.warning("Indexing ZIP file, this is experimental.")
         with ZipFile(fn) as zf:
+            # Setup progress
+            filesize = zf.getinfo("brocpt.xml").file_size
+            pbar = tqdm(total=filesize, unit_scale=1)
             with zf.open("brocpt.xml") as f:
-                with mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ) as mm:
-                    i = 0
-                    while i != -1:
-                        previ = i
-                        i = mm.find(searchstring, i + 1)
-                        data = mm[previ:i]
+                while f:
 
+                    i = buffer.find(searchstring, 1)
+
+                    # Nothing found
+                    if i == -1:
+                        chunk = f.read(buffersize)
+                        if len(chunk) == 0:  # EOF
+                            break
+                        buffer += chunk
+                    else:
+                        data = buffer[:i]  # up to found index is one feature
+                        buffer = buffer[i:]  # feature is removed from buffer
                         if cpt_count == 0:
                             header = data
                             footer = b"</gml:FeatureCollection>"
                         else:
                             tdata = header + data + footer
-                            if i != -1:
-                                (x, y) = parse_xml_location(tdata)
-                                locations.append((x, y, previ, i))
+                            pbar.update(len(data))
+
+                            (x, y) = parse_xml_location(tdata)
+                            locations.append((x, y, position, position + len(data)))
                         cpt_count += 1
+                        position += len(data)
     else:
         raise Exception("Wrong database format.")
 
@@ -291,17 +305,67 @@ def read_bro_xml(fn, indices):
 
     """
     cpts = []
-    with open(fn, "r") as f:
-        # memory-map the file, size 0 means whole file
-        mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
-        i = mm.find(searchstring, 0)
-        header = mm[0:i]
-        for (start, end) in indices:
-            data = mm[start:end]
+
+    ext = splitext(fn)[1]
+    if ext == ".xml":
+        with open(fn, "r") as f:
+            # memory-map the file, size 0 means whole file
+            mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+            i = mm.find(searchstring, 0)
+            header = mm[0:i]
+            for (start, end) in indices:
+                data = mm[start:end]
+                tdata = header + data + footer
+                cpt = parse_bro_xml(tdata)
+                cpts.append(cpt)
+            mm.close()
+
+    elif ext == ".zip":
+        logging.warning("Using the experimental ZIP reader.")
+
+        indices = sorted(indices, key=lambda x: x[0])
+        unique_chunks = set()
+        chunkindex = {}
+        buffersize = 2**24
+
+        for i, (start, end) in enumerate(indices):
+            chunkstart, chunkend = start // buffersize, end // buffersize
+            unique_chunks.add(chunkstart)
+            unique_chunks.add(chunkend)
+            # TODO check if chunks are always bigger than one feature
+            chunkindex[(i, chunkstart, chunkend)] = (start - chunkstart * buffersize, end - chunkend * buffersize)
+
+        chunk = 0
+        chunks = {}
+        with ZipFile(fn) as zf:
+            with zf.open("brocpt.xml") as f:
+                while f:
+                    buffer = f.read(buffersize)
+                    if len(buffer) == 0:
+                        break  # EOF
+
+                    if chunk == 0:
+                        i = buffer.find(searchstring)
+                        header = buffer[0:i]
+
+                    if chunk in unique_chunks:
+                        chunks[chunk] = buffer
+                        unique_chunks.remove(chunk)
+
+                    if len(unique_chunks) == 0:
+                        break
+
+                    chunk += 1
+
+        for (_, chunkstart, chunkend), (start, end) in chunkindex.items():
+            if chunkstart == chunkend:
+                data = chunks[chunkstart][start:end]
+            else:
+                data = chunks[chunkstart][start:] + chunks[chunkend][:end]
             tdata = header + data + footer
             cpt = parse_bro_xml(tdata)
             cpts.append(cpt)
-        mm.close()
+
     return cpts
 
 
@@ -350,6 +414,6 @@ def read_bro(parameters):
 
 
 if __name__ == "__main__":
-    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
+    input = {"BRO_data": "./bro/brocpt.zip", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
     cpts = read_bro(input)
     print(cpts)
