@@ -37,6 +37,13 @@ class TestBroDb(unittest.TestCase):
         self.assertEqual(len(cpts), 23)
         self.assertEqual(len(list(filter(lambda x: x is None, cpts))), 2)
 
+    def test_zipdatabase_read(self):
+        input = {"BRO_data": "../bro/brocpt.zip", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
+        cpts = bro.read_bro(input)
+
+        self.assertEqual(len(cpts), 23)
+        self.assertEqual(len(list(filter(lambda x: x is None, cpts))), 2)
+
 
 if __name__ == '__main__':  # pragma: no cover
     if is_running_under_teamcity():
