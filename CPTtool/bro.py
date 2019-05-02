@@ -324,6 +324,7 @@ def read_bro_xml(fn, indices):
         logging.warning("Using the experimental ZIP reader.")
 
         indices = sorted(indices, key=lambda x: x[0])
+        largest_index = indices[-1][-1]
         unique_chunks = set()
         chunkindex = {}
         buffersize = 2**24
@@ -338,9 +339,13 @@ def read_bro_xml(fn, indices):
         chunk = 0
         chunks = {}
         with ZipFile(fn) as zf:
+            filesize = zf.getinfo("brocpt.xml").file_size
+            logging.warning("Requires decompressing {:.1f}% of ZIP file ({:.2f}Gb)".format(largest_index/filesize*100, largest_index/1e9))
+            pbar = tqdm(total=largest_index, unit="b", unit_scale=1)
             with zf.open("brocpt.xml") as f:
                 while f:
                     buffer = f.read(buffersize)
+                    pbar.update(len(buffer))
                     if len(buffer) == 0:
                         break  # EOF
 
@@ -356,7 +361,7 @@ def read_bro_xml(fn, indices):
                         break
 
                     chunk += 1
-
+            pbar.close()
         for (_, chunkstart, chunkend), (start, end) in chunkindex.items():
             if chunkstart == chunkend:
                 data = chunks[chunkstart][start:end]
