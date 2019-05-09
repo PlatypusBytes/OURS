@@ -1,0 +1,15 @@
+{
+  "Name": "test",
+  "MaxCalcDist": "25.0",
+  "MaxCalcDepth": "30.0",
+  "MinLayerThickness": "0.5",
+  "SpectrumType": "1",
+  "LowFreq": "1",
+  "HighFreq": "63",
+  "CalcType": "1",
+  "Source_x": ["104882"],
+  "Source_y": ["478455"],
+  "Receiver_x": ["104883"],
+  "Receiver_y": ["478457"],
+  "BRO_data": "../bro/brocpt.zip"
+}
