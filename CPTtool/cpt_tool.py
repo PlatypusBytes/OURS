@@ -15,17 +15,19 @@ def define_methods(input_file):
     import json
 
     # possible keys:
-    keys = ["gamma", "vs", "OCR"]
+    keys = ["gamma", "vs", "OCR", "radius"]
     # possible key-values
     gamma_keys = ["Robertson", "Lengkeek", "all"]
     vs_keys = ["Robertson", "Mayne", "Andrus", "Zang", "Ahmed", "all"]
     OCR_keys = ["Mayne", "Robertson"]
+    rad = 500.
 
     # if no file is available: -> uses default values
     if not input_file:
         methods = {"gamma": gamma_keys[0],
                    "vs": vs_keys[0],
-                   "OCR": OCR_keys[0]
+                   "OCR": OCR_keys[0],
+                   "radius": rad,
                    }
         return methods
 
@@ -56,10 +58,16 @@ def define_methods(input_file):
     if not any(data["OCR"] in k for k in OCR_keys):
         print("Error: gamma key is not known. OCR keys must be: " + ', '.join(OCR_keys))
         sys.exit(5)
+    # check if radius is a float
+
+    if not isinstance(data["radius"], (int, float)):
+        print("Error: radius is not known. must be a float")
+        sys.exit(5)
 
     methods = {"gamma": data["gamma"],
                "vs": data["vs"],
-               "OCR": data["OCR"]
+               "OCR": data["OCR"],
+               "radius": float(data["radius"])
                }
     return methods
 
@@ -203,7 +211,7 @@ def analysis(properties, methods_cpt, output, plots):
         # read BRO data base
         inpt = {"BRO_data": properties["BRO_data"],
                 "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
-                "Radius": 500}
+                "Radius": float(methods_cpt["radius"])}
         cpts = bro.read_bro(inpt)
 
         # remove the nones from CPTs
