@@ -31,7 +31,8 @@ class Robertson:
         from shapely.geometry import Polygon
 
         # define the path for the shape file
-        path_shapefile = tools_utils.resource_path(os.path.join(path_shapefile, model_name))
+        path_shapefile = tools_utils.resource_path(os.path.join(os.path.join(os.path.dirname(__file__), path_shapefile), model_name))
+
         # read shapefile
         sf = shapefile.Reader(path_shapefile)
         list_of_polygons = []
