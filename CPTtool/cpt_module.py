@@ -595,12 +595,13 @@ class CPT:
             # vs: following Robertson and Cabal (2015)
             alpha_vs = 10 ** (0.55 * self.IC + 1.68)
             aux = alpha_vs * (self.qt - self.total_stress) / self.Pa
-            aux[aux < 0] = 0
+            aux[aux <= 0] = 0
             self.vs = aux**0.5
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
             self.vs = np.exp((self.gamma + 4.03) / 4.17) * (self.effective_stress / self.Pa) ** 0.25
+            self.vs[self.vs <= 0] = 0.1
             self.G0 = self.rho * self.vs ** 2
         elif method == "Andrus":
             # vs: following Andrus (2007)
@@ -617,6 +618,7 @@ class CPT:
         elif method == "Ahmed":
             self.vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 * self.Fr * self.effective_stress / self.Pa * self.g
                                                           / self.gamma) ** 0.5
+            self.vs[self.vs <= 0] = 0.1
             self.G0 = self.rho * self.vs ** 2
         elif method == "all":  # compares all and assumes default
             self.vs_calc(method="Mayne")
