@@ -19,7 +19,7 @@ class TestRobertson(TestCase):
         actual_list = [actual.poligon_1, actual.poligon_2, actual.poligon_3, actual.poligon_4, actual.poligon_5,
                        actual.poligon_6, actual.poligon_7, actual.poligon_8, actual.poligon_9]
         test = robertson.Robertson()
-        test.soil_types(path_shapefile=r'../shapefiles/')
+        test.soil_types()
         counter = 0
         for testpolygon in test.polygons:
             np.testing.assert_array_equal(testpolygon, actual_list[counter])
@@ -43,6 +43,7 @@ class TestRobertson(TestCase):
 
     def tearDown(self):
         return
+
 
 if __name__ == '__main__':  # pragma: no cover
     from teamcity import is_running_under_teamcity
