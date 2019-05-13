@@ -1,5 +1,5 @@
-cd ..\..\
+call cd ..\..\
 call starting_point.cmd
-cd .\CPTtool\integration_test
-CALL activate ours
-python -m unittest discover .\
+call cd .\CPTtool\integration_test
+call activate ours
+call python -m unittest discover .\
