@@ -694,18 +694,18 @@ class CPT:
             # Young modulus
             E = 2 * self.G0[self.indx_json[i]:self.indx_json[i + 1]] * (1 + self.poisson[self.indx_json[i]:self.indx_json[i + 1]])
             mean, std = tools_utils.log_normal_parameters(E)
-            data["E"].append(np.round(mean, 1))
-            data["var_E"].append(np.round(std**2, 1))
+            data["E"].append(int(np.round(mean)))
+            data["var_E"].append(int(np.round(std**2)))
             # poisson ratio
             poisson = self.poisson[self.indx_json[i]:self.indx_json[i + 1]]
             mean, std = tools_utils.log_normal_parameters(poisson)
-            data["v"].append(np.round(mean, 5))
-            data["var_v"].append(np.round(std**2, 5))
+            data["v"].append(np.round(mean, 2))
+            data["var_v"].append(np.round(std**2, 2))
             # density
             rho = self.rho[self.indx_json[i]:self.indx_json[i + 1]]
             mean, std = tools_utils.log_normal_parameters(rho)
-            data["rho"].append(np.round(mean, 2))
-            data["var_rho"].append(np.round(std**2, 2))
+            data["rho"].append(int(np.round(mean)))
+            data["var_rho"].append(int(np.round(std**2)))
             # damping
             # ToDo update damping
             damp = self.damping[self.indx_json[i]:self.indx_json[i + 1]]
