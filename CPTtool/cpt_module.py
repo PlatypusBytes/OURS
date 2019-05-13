@@ -935,38 +935,6 @@ class CPT:
         plt.savefig(os.path.join(self.output_folder, self.name) + "_lithology.png")
         plt.close()
 
-        # # plot in the robertson chart all the points
-        # import robertson
-        # classification = robertson.Robertson()
-        # classification.soil_types()
-        # plt.figure(num=1, figsize=(9, 6), dpi=80)
-        # plt.axes().set_position([0.11, 0.11, 0.85, 0.85])
-        # plt.plot(classification.soil_type_1[:, 0], classification.soil_type_1[:, 1], color='k', linewidth=1)
-        # plt.plot(classification.soil_type_2[:, 0], classification.soil_type_2[:, 1], color='k', linewidth=1)
-        # plt.plot(classification.soil_type_3[:, 0], classification.soil_type_3[:, 1], color='k', linewidth=1)
-        # plt.plot(classification.soil_type_4[:, 0], classification.soil_type_4[:, 1], color='k', linewidth=1)
-        # plt.plot(classification.soil_type_5[:, 0], classification.soil_type_5[:, 1], color='k', linewidth=1)
-        # plt.plot(classification.soil_type_6[:, 0], classification.soil_type_6[:, 1], color='k', linewidth=1)
-        # plt.plot(classification.soil_type_7[:, 0], classification.soil_type_7[:, 1], color='k', linewidth=1)
-        # plt.plot(classification.soil_type_8[:, 0], classification.soil_type_8[:, 1], color='k', linewidth=1)
-        # plt.plot(classification.soil_type_9[:, 0], classification.soil_type_9[:, 1], color='k', linewidth=1)
-        # for i in range(len(self.litho_points)):
-        #     plt.plot(self.litho_points[i, 0], self.litho_points[i, 1], marker=".", markersize=4,
-        #              color=color_litho[litho[i] - 1], linestyle=None)
-        #
-        # plt.xlabel("Fr", fontsize=14)
-        # plt.ylabel("Qtn", fontsize=14)
-        # plt.xscale("log")
-        # plt.yscale("log")
-        # plt.xlim(0.1, 10)
-        # plt.ylim(1, 1000)
-        # plt.grid()
-        #
-        # # save the figure
-        # plt.savefig(os.path.join(output_f, self.name) + "_Robertson.png")
-        # plt.savefig(os.path.join(output_f, self.name) + "_Robertson.eps")
-        # plt.close()
-
         return
 
     def write_csv(self):

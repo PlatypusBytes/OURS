@@ -36,51 +36,6 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     n[n > 1.] = 1.
     return n
 
-#
-# def merge(min_thick, depth, lithology):
-#     """
-#     Merge of the CPT layers into a minimum thickness
-#
-#     :param min_thick: minimum layer thickness
-#     :param depth: CPT depth
-#     :param lithology: layer lithology
-#     :return: thickness, depth, lithology, indices
-#     """
-#     import numpy as np
-#
-#     # find location of the start of the soil types
-#     aux = ""
-#     idx = []
-#     # here the i is where I am in the Cpt , val is the value of the lithology which is a number coresponding to Robertson
-#     # if the previous layer is not the same as the next save the position and save the value for the next step
-#     for i, val in enumerate(lithology):
-#         if val != aux:
-#             aux = val
-#             idx.append(i)
-#     # retrieve the depths of the indexes found
-#     # z_ini - depth at the start of new layer
-#     z_ini = [depth[i] for i in idx]
-#     # thickness between those layers calculated
-#     thick = np.diff(z_ini)
-#     # soil type
-#     label = [lithology[i] for i in idx]
-#
-#     # merge the depths
-#     try:
-#         id = np.where(np.array(thick) <= min_thick)[0][0]
-#     except IndexError:
-#         return thick, z_ini, label
-#
-#     del z_ini[id + 1]
-#     # determine the biggest label
-#     if thick[id] >= thick[id + 1]:
-#         del label[id + 1]
-#     else:
-#         del label[id]
-#
-#     thick = np.diff(z_ini)
-#     return thick, z_ini, label
-
 
 def compute_probability(coord_cpt, coord_src, coord_rec):
     r"""
