@@ -10,9 +10,9 @@ class FunctionalTests(unittest.TestCase):
     def setUp(self):
 
         # reference results
-        self.data_ref = read_file(r'./results_REF.json')
+        self.data_ref = [r'./results_REF_0.json', r'./results_REF_1.json']
         # reference results Robertson
-        self.data_ref_rob = read_file(r'./results_REF_rob.json')
+        self.data_ref_rob = [r'./results_REF_rob_0.json', r'./results_REF_rob_1.json']
 
         return
 
@@ -21,13 +21,18 @@ class FunctionalTests(unittest.TestCase):
         # run xml
         props = cpt.read_json(r'./inputs/input_xml.json')
         methods = cpt.define_methods(r'./inputs/methods.json')
-        cpt.analysis(props, methods, "./results", True)
+        cpt.analysis(props, methods, "./results", False)
 
-        # read results
-        with open(r'./results/results_0.json', "r") as f:
-            data = json.load(f)
+        # for the points of analysis
+        for i, fil in enumerate(self.data_ref):
+            data_ref = read_file(fil)
 
-        self.assertTrue(self.data_ref == sort_dicts(data['scenarios']))
+            # read results
+            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
+                data = json.load(f)
+
+            self.assertTrue(data_ref == sort_dicts(data['scenarios']))
+
         return
 
     def test_xml_robertson(self):
@@ -35,13 +40,17 @@ class FunctionalTests(unittest.TestCase):
         # run xml
         props = cpt.read_json(r'./inputs/input_xml.json')
         methods = cpt.define_methods(r'./inputs/methods_robertson.json')
-        cpt.analysis(props, methods, "./results", True)
+        cpt.analysis(props, methods, "./results", False)
 
-        # read results
-        with open(r'./results/results_0.json', "r") as f:
-            data = json.load(f)
+        # for the points of analysis
+        for i, fil in enumerate(self.data_ref_rob):
+            data_ref = read_file(fil)
 
-        self.assertTrue(self.data_ref_rob == sort_dicts(data['scenarios']))
+            # read results
+            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
+                data = json.load(f)
+
+            self.assertTrue(data_ref == sort_dicts(data['scenarios']))
         return
 
     def test_zip(self):
@@ -49,13 +58,18 @@ class FunctionalTests(unittest.TestCase):
         # run zip
         props = cpt.read_json(r'./inputs/input_zip.json')
         methods = cpt.define_methods(r'./inputs/methods.json')
-        cpt.analysis(props, methods, "./results", True)
+        cpt.analysis(props, methods, "./results", False)
 
-        # read results
-        with open(r'./results/results_0.json', "r") as f:
-            data = json.load(f)
+        # for the points of analysis
+        for i, fil in enumerate(self.data_ref):
+            data_ref = read_file(fil)
 
-        self.assertTrue(self.data_ref == sort_dicts(data['scenarios']))
+            # read results
+            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
+                data = json.load(f)
+
+            self.assertTrue(data_ref == sort_dicts(data['scenarios']))
+
         return
 
     def test_zip_robertson(self):
@@ -63,13 +77,18 @@ class FunctionalTests(unittest.TestCase):
         # run zip
         props = cpt.read_json(r'./inputs/input_zip.json')
         methods = cpt.define_methods(r'./inputs/methods_robertson.json')
-        cpt.analysis(props, methods, "./results", True)
+        cpt.analysis(props, methods, "./results", False)
 
-        # read results
-        with open(r'./results/results_0.json', "r") as f:
-            data = json.load(f)
+        # for the points of analysis
+        for i, fil in enumerate(self.data_ref_rob):
+            data_ref = read_file(fil)
 
-        self.assertTrue(self.data_ref_rob == sort_dicts(data['scenarios']))
+            # read results
+            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
+                data = json.load(f)
+
+            self.assertTrue(data_ref == sort_dicts(data['scenarios']))
+
         return
 
     def tearDown(self):
