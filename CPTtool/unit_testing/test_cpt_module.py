@@ -670,8 +670,8 @@ class TestCptModule(unittest.TestCase):
         self.cpt.G0 = np.ones(5)
         self.cpt.vs = np.ones(5)
         self.cpt.poisson = np.full(5, 0.3)
-        self.cpt.rho = np.full(5, 0.3)
-        self.cpt.damping = np.full(5, 0.3)
+        self.cpt.rho = np.full(5, 3)
+        self.cpt.damping = np.full(5, 3)
         self.cpt.add_json(jsn, i)
 
         # check if coordinates have been added
@@ -682,14 +682,14 @@ class TestCptModule(unittest.TestCase):
 
         # Check if they are equal with the analytical young's modulus
         E = 2 * self.cpt.G0 * (1 + self.cpt.poisson)
-        self.assertEqual(jsn['scenarios'][0]['data']['E'], E.tolist()[:-1])
-        self.assertEqual(jsn['scenarios'][0]['data']['v'][0], self.cpt.poisson[0])
-        self.assertEqual(jsn['scenarios'][0]['data']['rho'][0], self.cpt.rho[0])
-        self.assertEqual(jsn['scenarios'][0]['data']['damping'][0], self.cpt.damping[0])
-        self.assertEqual(jsn['scenarios'][0]['data']['var_E'][0], 0)
-        self.assertEqual(jsn['scenarios'][0]['data']['var_v'][0], 0)
-        self.assertEqual(jsn['scenarios'][0]['data']['var_rho'][0], 0)
-        self.assertEqual(jsn['scenarios'][0]['data']['var_damping'][0], 0)
+        self.assertEqual(jsn['scenarios'][0]['data']['E'], list(map(int, np.round(E.tolist()[:-1]))))
+        self.assertEqual(jsn['scenarios'][0]['data']['v'], list(self.cpt.poisson[:-1]))
+        self.assertEqual(jsn['scenarios'][0]['data']['rho'], list(map(int, np.round(self.cpt.rho[:-1]))))
+        self.assertEqual(jsn['scenarios'][0]['data']['damping'],  list(self.cpt.damping[:-1]))
+        self.assertEqual(jsn['scenarios'][0]['data']['var_E'], [0, 0, 0, 0])
+        self.assertEqual(jsn['scenarios'][0]['data']['var_v'], [0, 0, 0, 0])
+        self.assertEqual(jsn['scenarios'][0]['data']['var_rho'], [0, 0, 0, 0])
+        self.assertEqual(jsn['scenarios'][0]['data']['var_damping'], [0, 0, 0, 0])
         return
 
     def test_lithology_calc(self):
