@@ -93,23 +93,6 @@ def read_json(input_file):
     return data
 
 
-# def set_key():
-#     """
-#     Define CPT key
-#
-#     Parameters
-#     ----------
-#     :return: key: Dictionary with the key for CPT interpretation
-#     """
-#
-#     key = {}
-#     labels = ['depth', 'tip', 'friction', 'friction_nb', 'water']
-#     dat = [1, 2, 3, 4, 6]
-#     for k in range(len(labels)):
-#         key.update({labels[k]: dat[k]})
-#     return key
-
-
 def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file,
              gamma_max=22, pwp_level=0):
     """
