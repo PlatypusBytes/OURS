@@ -413,7 +413,7 @@ class CPT:
             # vs: following Robertson and Cabal (2015)
             alpha_vs = 10 ** (0.55 * self.IC + 1.68)
             aux = alpha_vs * (self.qt - self.total_stress) / self.Pa
-            aux[aux <= 0] = 0
+            aux[aux <= 0] = 0.1
             self.vs = aux**0.5
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
