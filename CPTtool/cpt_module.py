@@ -89,12 +89,13 @@ class CPT:
         self.NAP = cpt['offset_z'] - depth
         # parse tip resistance
         self.tip = cone_resistance * 1000.
-        self.tip[self.tip < 0] = 0.
+        self.tip[self.tip <= 0] = 0.
         # parse friction
         self.friction = local_friction * 1000.
-        self.friction[self.friction < 0] = 0.
+        self.friction[self.friction <= 0] = 0.
         # parser friction number
         self.friction_nbr = friction_ratio
+        self.friction_nbr[self.friction_nbr <= 0] = 0.
         # default water is zero
         self.water = np.zeros(len(self.depth))
         # if water exists parse water
@@ -413,30 +414,28 @@ class CPT:
             # vs: following Robertson and Cabal (2015)
             alpha_vs = 10 ** (0.55 * self.IC + 1.68)
             aux = alpha_vs * (self.qt - self.total_stress) / self.Pa
-            aux[aux <= 0] = 0.1
+            aux[aux <= 0] = 0.
             self.vs = aux**0.5
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
             self.vs = np.exp((self.gamma + 4.03) / 4.17) * (self.effective_stress / self.Pa) ** 0.25
-            self.vs[self.vs <= 0] = 0.1
+            self.vs[self.vs <= 0] = 0.
             self.G0 = self.rho * self.vs ** 2
         elif method == "Andrus":
             # vs: following Andrus (2007)
             self.vs = 2.27 * self.qt ** 0.412 * self.IC ** 0.989 * self.depth ** 0.033 * 1
-            # to avoid depth = 0 -> vs = 0
-            self.vs[self.vs <= 0] = 0.1
+            self.vs[self.vs <= 0] = 0.
             self.G0 = self.rho * self.vs ** 2
         elif method == "Zang":
             # vs: following Zang & Tong (2017)
             self.vs = 10.915 * self.qt ** 0.317 * self.IC ** 0.210 * self.depth ** 0.057 * 0.92
-            # to avoid depth=0 -> vs = 0
-            self.vs[self.vs <= 0] = 0.1
+            self.vs[self.vs <= 0] = 0.
             self.G0 = self.rho * self.vs ** 2
         elif method == "Ahmed":
             self.vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 * self.Fr * self.effective_stress / self.Pa * self.g
                                                           / self.gamma) ** 0.5
-            self.vs[self.vs <= 0] = 0.1
+            self.vs[self.vs <= 0] = 0.
             self.G0 = self.rho * self.vs ** 2
         elif method == "all":  # compares all and assumes default
             self.vs_calc(method="Mayne")
@@ -552,6 +551,7 @@ class CPT:
         # qt computed following Robertson & Cabal (2015)
         # qt = qc + u2 * (1 - a)
         self.qt = self.tip + self.water * (1. - self.a)
+        self.qt[self.qt <= 0] = 0
         return
 
     def merge_thickness(self, min_layer_thick):
