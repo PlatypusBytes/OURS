@@ -31,7 +31,8 @@ class FunctionalTests(unittest.TestCase):
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
 
-            self.assertTrue(data_ref == sort_dicts(data['scenarios']))
+            for k in range(len(data_ref)):
+                self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
 
         return
 
@@ -50,7 +51,8 @@ class FunctionalTests(unittest.TestCase):
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
 
-            self.assertTrue(data_ref == sort_dicts(data['scenarios']))
+            for k in range(len(data_ref)):
+                self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
         return
 
     def test_zip(self):
@@ -68,7 +70,8 @@ class FunctionalTests(unittest.TestCase):
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
 
-            self.assertTrue(data_ref == sort_dicts(data['scenarios']))
+            for k in range(len(data_ref)):
+                self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
 
         return
 
@@ -87,7 +90,18 @@ class FunctionalTests(unittest.TestCase):
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
 
-            self.assertTrue(data_ref == sort_dicts(data['scenarios']))
+            for k in range(len(data_ref)):
+                self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
+
+        return
+
+    def assert_dict_almost_equal(self, expected, actual):
+
+        for key in expected:
+            if isinstance(expected[key], dict):
+                self.assert_dict_almost_equal(expected[key], actual[key])
+            else:
+                self.assertAlmostEqual(expected[key], actual[key])
 
         return
 
