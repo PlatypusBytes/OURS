@@ -65,6 +65,19 @@ class CPT:
         for key in cpt["dataframe"]:
             cpt["dataframe"] = cpt["dataframe"].dropna(subset=[key])
 
+        # check if file contains data
+        if len(cpt["dataframe"].depth) == 0:
+            message = "File " + cpt["id"] + " contains no data"
+            return message
+
+        # check if data is different than zero:
+        keys = list(cpt['dataframe'])
+        for k in keys:
+            if all(cpt["dataframe"][k]) == 0:
+                message = "File " + cpt["id"] + " contains empty data"
+                return message
+
+
         # parse cpt file name
         self.name = cpt['id']
         # parse coordinates
@@ -79,6 +92,9 @@ class CPT:
         if len(cpt['dataframe'].depth.values) < minimum_samples:
             message = "File " + cpt["id"] + " has a number of samples smaller than " + str(minimum_samples)
             return message
+
+        # check data consistency: remove doubles depth
+        cpt["dataframe"] = cpt["dataframe"].drop_duplicates(subset='depth', keep="first")
 
         # check if there is a pre_drill. if so pad the data
         depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt)
@@ -105,7 +121,7 @@ class CPT:
 
     def define_pre_drill(self, cpt_BRO):
         """
-        Checks the existance of pre-drill.
+        Checks the existence of pre-drill.
         If predrill exists it add the average value of tip, friction and friction number to the pre-drill length.
         The average is computed over the lenght_of_average_points.
         If pore water pressure is measured, the pwp is assumed to be zero at surface level.
@@ -560,6 +576,7 @@ class CPT:
         This function call the functions merging_label, merging_index , merging_depth , merging_thickness.
         These functions merge the layers according to the min_layer_thick.
         For more information refer to those.
+
         Parameters
         ----------
         :param min_layer_thick : Minimum layer thickness
@@ -636,7 +653,7 @@ class CPT:
 
     def merging_thickness(self, local_thick, min_layer_thick):
         r"""
-         In this function the merging og the layers is achieved acoording to the min_layer thick.
+         In this function the merging og the layers is achieved according to the min_layer thick.
 
          .._element:
          .. figure:: ./_static/Merge_Flowchart.png
