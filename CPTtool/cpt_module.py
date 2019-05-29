@@ -71,7 +71,7 @@ class CPT:
             return message
 
         # check if data is different than zero:
-        keys = list(cpt['dataframe'])
+        keys = ['depth', 'coneResistance', 'localFriction', 'frictionRatio']
         for k in keys:
             if all(cpt["dataframe"][k]) == 0:
                 message = "File " + cpt["id"] + " contains empty data"
