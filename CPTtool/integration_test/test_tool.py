@@ -31,6 +31,7 @@ class FunctionalTests(unittest.TestCase):
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
 
+            # compare dics
             for k in range(len(data_ref)):
                 self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
 
@@ -51,6 +52,7 @@ class FunctionalTests(unittest.TestCase):
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
 
+            # compare dics
             for k in range(len(data_ref)):
                 self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
         return
@@ -70,6 +72,7 @@ class FunctionalTests(unittest.TestCase):
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
 
+            # compare dics
             for k in range(len(data_ref)):
                 self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
 
@@ -90,6 +93,7 @@ class FunctionalTests(unittest.TestCase):
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
 
+            # compare dics
             for k in range(len(data_ref)):
                 self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
 
