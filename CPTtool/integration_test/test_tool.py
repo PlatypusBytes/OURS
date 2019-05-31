@@ -1,5 +1,6 @@
 import sys
 sys.path.append(r'../')
+import numpy as np
 import cpt_tool as cpt
 import json
 import unittest
@@ -105,8 +106,13 @@ class FunctionalTests(unittest.TestCase):
             if isinstance(expected[key], dict):
                 self.assert_dict_almost_equal(expected[key], actual[key])
             else:
-                self.assertAlmostEqual(expected[key], actual[key])
-
+                if isinstance(expected[key], (int, float)):
+                    self.assertAlmostEqual(expected[key], actual[key])
+                elif all(isinstance(n, str) for n in expected[key]):
+                    # if elements are string
+                    self.assertAlmostEqual(expected[key], actual[key])
+                else:
+                    self.assertTrue(all(np.isclose(expected[key], actual[key], rtol=1e-10)))
         return
 
     def tearDown(self):
