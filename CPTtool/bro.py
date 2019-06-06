@@ -119,7 +119,7 @@ def parse_bro_xml(xml):
         for element in cpt.iter(ns + "values"):
             # Load string data and parse as 2d array
             sar = StringIO(element.text.replace(";", "\n"))
-            ar = np.loadtxt(sar, delimiter=",")
+            ar = np.loadtxt(sar, delimiter=",", ndmin=2)
 
             # Check shape of array
             found_columns = ar.shape[1]
