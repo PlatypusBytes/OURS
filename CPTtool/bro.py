@@ -20,6 +20,7 @@ and creating the index will take 5-10min depending on disk performance.
 
 import sys
 import mmap
+import math
 import logging
 from io import StringIO
 import pickle
@@ -34,6 +35,8 @@ from scipy.spatial import cKDTree as KDTree
 from tqdm import tqdm
 import pandas as pd
 import pyproj
+from rtree import index
+from shapely.geometry import shape, Point
 
 # Constants for XML parsing
 searchstring = b"<gml:featureMember>"
@@ -293,6 +296,36 @@ def query_index(index, x, y, radius=1000.):
     return npindex[points, 2:4].astype(np.int64)
 
 
+def query_index_polygon(index, polygon_geometry):
+    """Query database for CPTs
+    within given polygon."""
+
+    # Setup KDTree based on points
+    npindex = np.array(index)
+    tree = KDTree(npindex[:, 0:2])
+
+    # Find center of polygon bounding box
+    # and circle encompasing bbox and thus polygon
+    polygon = shape(polygon_geometry)
+    minx, miny, maxx, maxy = polygon.bounds
+    xr, yr = (maxx - minx) / 2, (maxy - miny) / 2
+    radius = math.sqrt(xr ** 2 + yr ** 2)
+    x, y = minx + xr, miny + yr
+
+    # Find all points in circle and do
+    # intersect with actual polygon
+    indices = []
+    points_slice = tree.query_ball_point((x, y), radius)
+    points = npindex[points_slice, :]
+    for point in points:
+        x, y, start, end = point
+        p = Point(x, y)
+        if p.intersects(polygon):
+            indices.append((int(start), int(end)))
+
+    return indices
+
+
 def read_bro_xml(fn, indices):
     """Read XML file at specific indices and parse these.
 
@@ -304,6 +337,9 @@ def read_bro_xml(fn, indices):
     :rtype: list
 
     """
+    if len(indices) == 0:
+        return []
+
     cpts = []
 
     ext = splitext(fn)[1]
@@ -386,6 +422,7 @@ def read_bro(parameters):
     fn = parameters["BRO_data"]
     ifn = splitext(fn)[0] + ".idx"  # index
     x, y = parameters["Source_x"], parameters["Source_y"]
+    r = parameters["Radius"]
 
     if not exists(fn):
         print("Cannot open provided BRO data file: {}".format(fn))
@@ -395,15 +432,28 @@ def read_bro(parameters):
     datasize = stat(fn).st_size
     if exists(ifn):
         with open(ifn, "rb") as f:
-            (size, index) = pickle.load(f)
+            (size, bro_index) = pickle.load(f)
         if size != datasize:
             logging.warning("BRO datafile differs from index, recreating index.")
-            index = create_index(fn, ifn, datasize)
+            bro_index = create_index(fn, ifn, datasize)
     else:
-        index = create_index(fn, ifn, datasize)
+        bro_index = create_index(fn, ifn, datasize)
+
+    out = []
+
+    # Open GeoMorphological map and find intersecting areas
+    gm_index = index.Index('shapefiles/geomorph')  # created by data/prepare.py
+    geomorphs = list(gm_index.intersection((x-r, y-r, x+r, y+r), objects="raw"))
+    for gm_code, polygon in geomorphs:
+        indices = query_index_polygon(bro_index, polygon)
+        cpts = read_bro_xml(fn, indices)
+        for i, cpt in enumerate(cpts):
+            if cpt is not None:
+                cpts[i]["gm_code"] = gm_code
+        out.extend(cpts)
 
     # Find CPT indexes
-    indices = query_index(index, x, y, radius=parameters["Radius"])
+    indices = query_index(bro_index, x, y, radius=r)
     n_cpts = len(indices)
     if n_cpts == 0:
         logging.warning("Found no CPTs, try another location or increase the radius.")
@@ -413,9 +463,10 @@ def read_bro(parameters):
 
     # Open database and retrieve CPTs
     # TODO Open zipfile instead of large xml
-    cpts = read_bro_xml(fn, indices)
+    circle_cpts = read_bro_xml(fn, indices)
+    out.extend(circle_cpts)
 
-    return cpts
+    return out
 
 
 if __name__ == "__main__":
