@@ -193,7 +193,7 @@ def analysis(properties, methods_cpt, output, plots):
 
         # read BRO data base
         inpt = {"BRO_data": properties["BRO_data"],
-                "Source_x": properties["Source_x"][i], "Source_y": properties["Source_y"][i],
+                "Source_x": float(properties["Source_x"][i]), "Source_y": float(properties["Source_y"][i]),
                 "Radius": float(methods_cpt["radius"])}
         cpts = bro.read_bro(inpt)
 
