@@ -77,7 +77,6 @@ class CPT:
                 message = "File " + cpt["id"] + " contains empty data"
                 return message
 
-
         # parse cpt file name
         self.name = cpt['id']
         # parse coordinates
@@ -141,9 +140,9 @@ class CPT:
             dicretisation = np.average(np.diff(cpt_BRO['dataframe']['depth'].values))
 
             # find the average
-            average_cone_res = np.average(cpt_BRO['dataframe'].coneResistance[:length_of_average_points])
-            average_fr_ratio = np.average(cpt_BRO['dataframe'].frictionRatio[:length_of_average_points])
-            average_loc_fr = np.average(cpt_BRO['dataframe'].localFriction[:length_of_average_points])
+            average_cone_res = np.average(cpt_BRO['dataframe']['coneResistance'][:length_of_average_points])
+            average_fr_ratio = np.average(cpt_BRO['dataframe']['frictionRatio'][:length_of_average_points])
+            average_loc_fr = np.average(cpt_BRO['dataframe']['localFriction'][:length_of_average_points])
 
             # Define all in the lists
             local_depth = np.arange(starting_depth, float(cpt_BRO['predrilled_z']), dicretisation)
@@ -167,14 +166,26 @@ class CPT:
 
         else:
             # No predrill existing: just parsing data
-            depth = cpt_BRO['dataframe'].depth.values
-            coneresistance = cpt_BRO['dataframe'].coneResistance.values
-            frictionratio = cpt_BRO['dataframe'].frictionRatio.values
-            localfriction = cpt_BRO['dataframe'].localFriction.values
+            depth = cpt_BRO['dataframe']['depth'].values
+            coneresistance = cpt_BRO['dataframe']['coneResistance'].values
+            frictionratio = cpt_BRO['dataframe']['frictionRatio'].values
+            localfriction = cpt_BRO['dataframe']['localFriction'].values
+
+            # if there is pore water pressure
+            if "porePressureU2" in cpt_BRO['dataframe']:
+                pore_pressure = cpt_BRO['dataframe']['porePressureU2'].values
+
+        # correct for missing samples in the top of the CPT
+        if depth[0] > 0:
+            # add zero
+            depth = np.append(0, depth)
+            coneresistance = np.append(np.average(cpt_BRO['dataframe']['coneResistance'][:length_of_average_points]), coneresistance)
+            frictionratio = np.append(np.average(cpt_BRO['dataframe']['frictionRatio'][:length_of_average_points]), frictionratio)
+            localfriction = np.append(np.average(cpt_BRO['dataframe']['localFriction'][:length_of_average_points]), localfriction)
 
             # if there is pore water pressure
             if "porePressureU2" in cpt_BRO["dataframe"]:
-                pore_pressure = cpt_BRO['dataframe']["porePressureU2"].values
+                pore_pressure = np.append(np.average(cpt_BRO['dataframe']['porePressureU2'][:length_of_average_points]), pore_pressure)
 
         return depth, coneresistance, frictionratio, localfriction, pore_pressure
 
