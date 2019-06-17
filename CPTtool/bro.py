@@ -25,7 +25,7 @@ import logging
 from io import StringIO
 import pickle
 from os.path import exists, splitext
-from os import stat, name
+from os import stat, name, path
 from zipfile import ZipFile
 
 # External modules
@@ -37,6 +37,8 @@ import pandas as pd
 import pyproj
 from rtree import index
 from shapely.geometry import shape, Point
+
+import tools_utils
 
 # Constants for XML parsing
 searchstring = b"<gml:featureMember>"
@@ -442,7 +444,11 @@ def read_bro(parameters):
     out = []
 
     # Open GeoMorphological map and find intersecting areas
-    gm_index = index.Index('shapefiles/geomorph')  # created by data/prepare.py
+    # get folder
+
+    # define the path for the shape file
+    file_idx = tools_utils.resource_path(path.join(path.join(path.dirname(__file__), './shapefiles'), 'geomorph'))
+    gm_index = index.Index(file_idx)  # created by data/prepare.py
     geomorphs = list(gm_index.intersection((x-r, y-r, x+r, y+r), objects="raw"))
     for gm_code, polygon in geomorphs:
         indices = query_index_polygon(bro_index, polygon)
