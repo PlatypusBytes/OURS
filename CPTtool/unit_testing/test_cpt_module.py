@@ -748,12 +748,12 @@ class TestCptModule(unittest.TestCase):
                     "dataframe": df}
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
-        np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]])
-        np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]])
-        np.testing.assert_array_equal(self.cpt.friction_nbr, d["frictionRatio"])
-        np.testing.assert_array_equal(self.cpt.depth, d["depth"])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in d["depth"]])
-        np.testing.assert_array_equal(self.cpt.water, [0., 0.])
+        np.testing.assert_array_equal(self.cpt.tip, [1500, 1000, 2000])
+        np.testing.assert_array_equal(self.cpt.friction, [3500, 3000, 4000])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.275, 0.22, 0.33])
+        np.testing.assert_array_equal(self.cpt.depth, [0, 0.1, 0.2])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.1, 0.2]])
+        np.testing.assert_array_equal(self.cpt.water, [0., 0., 0.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         return
@@ -775,12 +775,12 @@ class TestCptModule(unittest.TestCase):
                     'predrilled_z': 0.}
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
-        np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]])
-        np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]])
-        np.testing.assert_array_equal(self.cpt.friction_nbr, d["frictionRatio"])
-        np.testing.assert_array_equal(self.cpt.depth, d["depth"])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in d["depth"]])
-        np.testing.assert_array_equal(self.cpt.water, [i * 1000 for i in d["porePressureU2"]])
+        np.testing.assert_array_equal(self.cpt.tip, [1500, 1000, 2000])
+        np.testing.assert_array_equal(self.cpt.friction, [3500, 3000, 4000])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.275, 0.22, 0.33])
+        np.testing.assert_array_equal(self.cpt.depth, [0, 0.1, 0.2])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.1, 0.2]])
+        np.testing.assert_array_equal(self.cpt.water, [i * 1000 for i in [0.75, 0.5, 1]])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         return
@@ -802,12 +802,12 @@ class TestCptModule(unittest.TestCase):
                     "dataframe": df}
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
-        np.testing.assert_array_equal(self.cpt.tip, [i * 1000 for i in d["coneResistance"]][:-1])
-        np.testing.assert_array_equal(self.cpt.friction, [i * 1000 for i in d["localFriction"]][:-1])
-        np.testing.assert_array_equal(self.cpt.friction_nbr, d["frictionRatio"][:-1])
-        np.testing.assert_array_equal(self.cpt.depth, d["depth"][:-1])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in d["depth"]][:-1])
-        np.testing.assert_array_equal(self.cpt.water, [i * 1000 for i in d["porePressureU2"]][:-1])
+        np.testing.assert_array_equal(self.cpt.tip, [1000, 1000])
+        np.testing.assert_array_equal(self.cpt.friction, [3000, 3000])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.22, 0.22])
+        np.testing.assert_array_equal(self.cpt.depth, [0, 0.1])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.1]])
+        np.testing.assert_array_equal(self.cpt.water, [i * 1000 for i in [0.5, 0.5]])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         return
