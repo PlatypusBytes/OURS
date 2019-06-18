@@ -248,12 +248,12 @@ class CPT:
         if method == "Robertson":
             aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
             aux[np.abs(aux) == np.inf] = gamma_limit / self.g
-            aux[aux < 0] = 0.
+            aux = tools_utils.ceil_value(aux, 0)
             self.gamma = aux * self.g
         elif method == "Lengkeek":
             aux = 19. - 4.12 * np.log10(5000. / self.qt) / np.log10(30. / self.friction_nbr)
             aux[np.abs(aux) == np.inf] = gamma_limit
-            aux[aux < 0] = 0.
+            aux = tools_utils.ceil_value(aux, 0)
             self.gamma = aux
         elif method == "all":  # if all, compares all the methods and plot
             self.gamma_calc(gamma_limit, method="Lengkeek")
