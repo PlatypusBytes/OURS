@@ -1,6 +1,11 @@
 """
 Tools for the cpt module
 """
+from itertools import groupby
+from operator import itemgetter
+import numpy as np
+import os
+import sys
 
 
 def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
@@ -15,7 +20,6 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     :param Pa: atmospheric pressure
     :return: updated n - stress exponent
     """
-    import numpy as np
 
     # convergence of n
     Cn = (Pa / np.array(sigma_eff)) ** n
@@ -56,7 +60,6 @@ def compute_probability(coord_cpt, coord_src, coord_rec):
     :param coord_rec: coordinates of the receiver
     :return: probs: probability of occurrence of the scenario
     """
-    import numpy as np
 
     # number of scenarios
     nb_scenarios = len(coord_cpt)
@@ -96,8 +99,7 @@ def resource_path(file_name):
     :param file_name: File name
     :return: relative path to the file
     """
-    import os
-    import sys
+
     try:
         base_path = sys._MEIPASS
     except AttributeError:
@@ -127,3 +129,29 @@ def log_normal_parameters(value):
     std = np.sqrt(np.exp(2 * aux_mean + aux_std ** 2) * (np.exp(aux_std ** 2) - 1))
 
     return mean, std
+
+
+def ceil_value(data, value):
+    """
+    Replaces the data values from data, that are are smaller of equal to value.
+    It replaces the data values with the first non-zero value of the dataset.
+
+    :param data:
+    :param value:
+    :return: data with the updated values
+    """
+    # collect indexes smaller than value
+    idx = [i for i, val in enumerate(data) if val <= value]
+
+    # get consecutive indexes on the list
+    indx_conseq = []
+    for k, g in groupby(enumerate(idx), lambda ix : ix[0] - ix[1]):
+        indx_conseq.append(list(map(itemgetter(1), g)))
+
+    # assigns the value of the first non-value
+    for i in indx_conseq:
+        print(i)
+        for j in i:
+            data[j] = data[i[-1] + 1]
+
+    return data

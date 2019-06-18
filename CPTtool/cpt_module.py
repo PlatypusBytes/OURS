@@ -1,3 +1,13 @@
+import os
+import numpy as np
+import robertson
+import tools_utils
+import json
+import matplotlib.pylab as plt
+import matplotlib.patches as patches
+from cycler import cycler
+
+
 class CPT:
     r"""
     CPT module
@@ -6,7 +16,6 @@ class CPT:
     """
 
     def __init__(self, out_fold):
-        import os
         # variables
         self.depth = []
         self.coord = []
@@ -59,7 +68,6 @@ class CPT:
         :param cpt: BRO cpt dataset
         :return:
         """
-        import numpy as np
 
         # remove NAN row from the dataframe
         for key in cpt["dataframe"]:
@@ -129,7 +137,6 @@ class CPT:
         :return: depth, tip resistance, friction number, friction, pore water pressure
         """
 
-        import numpy as np
         length_of_average_points = 3
         starting_depth = 0
         pore_pressure = None
@@ -195,7 +202,6 @@ class CPT:
 
         Computes the lithology following Robertson and Cabal :cite:`robertson_cabal_2014`.
         """
-        import robertson
 
         classification = robertson.Robertson()
         classification.soil_types()
@@ -235,7 +241,7 @@ class CPT:
         :param gamma_limit: Maximum value for gamma
         :param method: (optional) Method to compute unit weight. Default is Robertson
         """
-        import numpy as np
+
         np.seterr(divide="ignore")
 
         # calculate unit weight according to Robertson & Cabal 2015
@@ -280,7 +286,6 @@ class CPT:
         ----------
         :param z_pwp: Depth of pore water pressure in NAP
         """
-        import numpy as np
 
         # compute depth diff
         z = np.diff(np.abs((self.depth - self.depth[0])))
@@ -314,8 +319,6 @@ class CPT:
         ----------
         :param n_method: (optional) parameter *n* stress exponent. Default is n computed in an iterative way.
         """
-        import numpy as np
-        import tools_utils
 
         # normalisation of qc and friction into Qtn and Fr: following Robertson and Cabal (2014)
 
@@ -386,7 +389,6 @@ class CPT:
             I_{c} = \left[ \left(3.47 - \log\left(Q_{tn}\right) \right)^{2} + \left(\log\left(F_{r}\right) + 1.22 \right)^{2} \right]^{0.5}
 
         """
-        import numpy as np
 
         # IC: following Robertson and Cabal (2015)
         # compute IC
@@ -435,14 +437,13 @@ class CPT:
 
             v_{s} = 1000 \cdot e^{-0.887 \cdot I_{c}} \cdot \left( \left(1 + 0.443 \cdot F_{r} \right) \cdot \left(\frac{\sigma'_{v}}{p_{a}} \right) \cdot \left(\frac{\gamma_{w}}{\gamma} \right) \right)^{0.5}
         """
-        import numpy as np
 
         if method == "Robertson":
             # vs: following Robertson and Cabal (2015)
             alpha_vs = 10 ** (0.55 * self.IC + 1.68)
-            aux = alpha_vs * (self.qt - self.total_stress) / self.Pa
-            aux[aux <= 0] = 0.
-            self.vs = aux**0.5
+            vs = alpha_vs * (self.qt - self.total_stress) / self.Pa
+            vs = vs**0.5
+            self.vs = tools_utils.ceil_value(vs, 0)
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
@@ -451,18 +452,18 @@ class CPT:
             self.G0 = self.rho * self.vs ** 2
         elif method == "Andrus":
             # vs: following Andrus (2007)
-            self.vs = 2.27 * self.qt ** 0.412 * self.IC ** 0.989 * self.depth ** 0.033 * 1
-            self.vs[self.vs <= 0] = 0.
+            vs = 2.27 * self.qt ** 0.412 * self.IC ** 0.989 * self.depth ** 0.033 * 1
+            self.vs = tools_utils.ceil_value(vs, 0)
             self.G0 = self.rho * self.vs ** 2
         elif method == "Zang":
             # vs: following Zang & Tong (2017)
-            self.vs = 10.915 * self.qt ** 0.317 * self.IC ** 0.210 * self.depth ** 0.057 * 0.92
-            self.vs[self.vs <= 0] = 0.
+            vs = 10.915 * self.qt ** 0.317 * self.IC ** 0.210 * self.depth ** 0.057 * 0.92
+            self.vs = tools_utils.ceil_value(vs, 0)
             self.G0 = self.rho * self.vs ** 2
         elif method == "Ahmed":
-            self.vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 * self.Fr * self.effective_stress / self.Pa * self.g
+            vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 * self.Fr * self.effective_stress / self.Pa * self.g
                                                           / self.gamma) ** 0.5
-            self.vs[self.vs <= 0] = 0.
+            self.vs = tools_utils.ceil_value(vs, 0)
             self.G0 = self.rho * self.vs ** 2
         elif method == "all":  # compares all and assumes default
             self.vs_calc(method="Mayne")
@@ -517,7 +518,6 @@ class CPT:
         :param Ip: (optional) Plasticity index. Default is 40
         :param method: (optional) Method for calculation of OCR. Default is Mayne
         """
-        import numpy as np
 
         # ToDo missing frequency dependency
 
@@ -553,7 +553,6 @@ class CPT:
 
         Poisson assumed 0.495 for soft layers and 0.2 for sandy layers.
         """
-        import numpy as np 		
 
         # assign size to poisson
         self.poisson = np.zeros(len(self.lithology))
@@ -597,7 +596,6 @@ class CPT:
         :param new_thickness : merged thickness according to the min_layer_thick
 
         """
-        import numpy as np
 
         depth = self.depth
         lithology = self.lithology
@@ -657,7 +655,6 @@ class CPT:
         r"""
         Function that calculates the top level depth of each layer by summing the thicknesses.
         """
-        import numpy as np
         new_depth = np.append(self.depth[0], new_thickness)
         new_depth = np.cumsum(new_depth)
         return new_depth
@@ -697,8 +694,6 @@ class CPT:
         :param jsn: Json data structure
         :param id: Scenario (index)
         """
-        import numpy as np
-        import tools_utils
 
         # create data
         data = {"lithology": [],
@@ -759,10 +754,6 @@ class CPT:
         :param input_dic: dictionary with the input information
         :param index: index of the calculation point
         """
-        import os
-        import json
-        import numpy as np
-        import tools_utils
 
         # update the probability
         coord_source = [float(input_dic["Source_x"][index]), float(input_dic["Source_y"][index])]
@@ -790,10 +781,6 @@ class CPT:
         :param l_name: name of the different correlations within the dataset
         :param name: name for the output file
         """
-        import os
-        import numpy as np
-        import matplotlib.pylab as plt
-        from cycler import cycler
 
         # data
         y_data = self.depth
@@ -829,11 +816,6 @@ class CPT:
         ----------
         :param nb_plots: (optional) number of plots
         """
-        import os
-        import numpy as np 		
-        import matplotlib.pylab as plt
-        from cycler import cycler
-
         # data
         x_data = [self.tip, self.friction_nbr, self.rho, self.G0, self.poisson, self.damping]
         y_data = self.depth
@@ -871,10 +853,6 @@ class CPT:
         """
         Plot CPT lithology.
         """
-        import os
-        import numpy as np 		
-        import matplotlib.pylab as plt
-        import matplotlib.patches as patches
 
         # define figure
         f, (ax1, ax3) = plt.subplots(1, 2, figsize=(7, 10), sharey=True)
@@ -969,7 +947,6 @@ class CPT:
         """
         Write CSV file into output file.
         """
-        import os
 
         # write csv
         with open(os.path.join(self.output_folder, str(self.name) + ".csv"), "w") as fo:

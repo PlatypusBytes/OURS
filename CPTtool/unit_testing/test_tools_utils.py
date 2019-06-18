@@ -95,6 +95,51 @@ class TestUtils(TestCase):
                                                17.511770363525])
         return
 
+    def test_ceil_value_1(self):
+        r"""
+        Tests the data replacement
+        """
+        import tools_utils as tu
+
+        data = [0, 0, 20, 30, 40]
+
+        # compute probability
+        new_data = tu.ceil_value(data, 0)
+
+        # test
+        np.testing.assert_almost_equal(new_data, [20, 20, 20, 30, 40])
+        return
+
+    def test_ceil_value_2(self):
+        r"""
+        Tests the data replacement
+        """
+        import tools_utils as tu
+
+        data = [0, -10, 20, 30, 40]
+
+        # compute probability
+        new_data = tu.ceil_value(data, 0)
+
+        # test
+        np.testing.assert_almost_equal(new_data, [20, 20, 20, 30, 40])
+        return
+
+    def test_ceil_value_3(self):
+        r"""
+        Tests the data replacement
+        """
+        import tools_utils as tu
+
+        data = [0, 0, 20, 0, 40]
+
+        # compute probability
+        new_data = tu.ceil_value(data, 0)
+
+        # test
+        np.testing.assert_almost_equal(new_data, [20, 20, 20, 40, 40])
+        return
+
     def tearDown(self):
         return
 
