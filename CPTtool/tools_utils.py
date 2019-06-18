@@ -115,10 +115,6 @@ def log_normal_parameters(value):
     :param value: array with values
     :return: mean, standard deviation
     """
-    import numpy as np
-
-    # value cannot be <= 0 (due to log normal)
-    value[value <= 0] = 1e-5
 
     # compute mean and standard deviation in normal space
     aux_mean = np.mean(np.log(value))
