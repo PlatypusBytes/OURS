@@ -200,6 +200,9 @@ def analysis(properties, methods_cpt, output, plots):
         # remove the nones from CPTs
         cpts = list(filter(None, cpts))
 
+        # ToDo: selects only cpts without the gm_code (they are a repeat)
+        cpts = [c for c in cpts if 'gm_code' not in c.keys()]
+
         # check if cpts have data or are empty
         if not cpts:
             log_file.error_message("No CPTS in this coordinate point")
