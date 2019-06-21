@@ -24,21 +24,24 @@ def cpt_to_fem(input_json, cpt_input, output_folder):
 
     # write a file for each scenario
     for sce in range(len(cpt_data["scenarios"])):
-        output = {"MaxCalcDist": float(input_data["MaxCalcDist"]),
+        output = {"Name": cpt_data['scenarios'][sce]["Name"],
+                  "CalcType": 2,
+                  "MaxCalcDist": float(input_data["MaxCalcDist"]),
                   "MaxCalcDepth": float(input_data["MaxCalcDist"]),
                   "MinLayerThickness": float(input_data["MinLayerThickness"]),
                   "LowFreq": float(input_data["LowFreq"]),
                   "HighFreq": float(input_data["HighFreq"]),
                   "Ground": {"Lithology": cpt_data['scenarios'][sce]["data"]["lithology"],
-                             "Depth": [-i for i in cpt_data['scenarios'][sce]["data"]["depth"]],
-                             "E": cpt_data['scenarios'][sce]["data"]["E"],
-                             "v": cpt_data['scenarios'][sce]["data"]["v"],
-                             "rho": cpt_data['scenarios'][sce]["data"]["rho"],
-                             "damping": cpt_data['scenarios'][sce]["data"]["damping"],
-                             "var_E": cpt_data['scenarios'][sce]["data"]["var_E"],
-                             "var_v": cpt_data['scenarios'][sce]["data"]["var_v"],
-                             "var_rho": cpt_data['scenarios'][sce]["data"]["var_rho"],
-                             "var_damping": cpt_data['scenarios'][sce]["data"]["var_damping"],
+                             "Depth": [i for i in cpt_data['scenarios'][sce]["data"]["depth"]],
+                             "E": [float(i) for i in cpt_data['scenarios'][sce]["data"]["E"]],
+                             "v": [float(i) for i in cpt_data['scenarios'][sce]["data"]["v"]],
+                             "rho": [float(i) for i in cpt_data['scenarios'][sce]["data"]["rho"]],
+                             "damping": [float(i) for i in cpt_data['scenarios'][sce]["data"]["damping"]],
+                             "var_depth": [float(i) for i in cpt_data['scenarios'][sce]["data"]["var_depth"]],
+                             "var_E": [float(i) for i in cpt_data['scenarios'][sce]["data"]["var_E"]],
+                             "var_v": [float(i) for i in cpt_data['scenarios'][sce]["data"]["var_v"]],
+                             "var_rho": [float(i) for i in cpt_data['scenarios'][sce]["data"]["var_rho"]],
+                             "var_damping": [float(i) for i in cpt_data['scenarios'][sce]["data"]["var_damping"]],
                              }}
         # dump json file
         with open(os.path.join(output_folder, cpt_data['scenarios'][sce]["Name"].replace(" ", "_") + ".json"), "w") as fo:
