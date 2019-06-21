@@ -724,8 +724,8 @@ class CPT:
             # poisson ratio
             poisson = self.poisson[self.indx_json[i]:self.indx_json[i + 1]]
             mean, std = tools_utils.log_normal_parameters(poisson)
-            data["v"].append(np.round(mean, 2))
-            data["var_v"].append(np.round(std**2, 2))
+            data["v"].append(np.round(mean, 3))
+            data["var_v"].append(np.round(std**2, 3))
             # density
             rho = self.rho[self.indx_json[i]:self.indx_json[i + 1]]
             mean, std = tools_utils.log_normal_parameters(rho)
