@@ -442,13 +442,13 @@ class CPT:
             # vs: following Robertson and Cabal (2015)
             alpha_vs = 10 ** (0.55 * self.IC + 1.68)
             vs = alpha_vs * (self.qt - self.total_stress) / self.Pa
-            vs = vs**0.5
-            self.vs = tools_utils.ceil_value(vs, 0)
+            vs = tools_utils.ceil_value(vs, 0)
+            self.vs = vs ** 0.5
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
-            self.vs = np.exp((self.gamma + 4.03) / 4.17) * (self.effective_stress / self.Pa) ** 0.25
-            self.vs[self.vs <= 0] = 0.
+            vs = np.exp((self.gamma + 4.03) / 4.17) * (self.effective_stress / self.Pa) ** 0.25
+            self.vs = tools_utils.ceil_value(vs, 0)
             self.G0 = self.rho * self.vs ** 2
         elif method == "Andrus":
             # vs: following Andrus (2007)
