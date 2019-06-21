@@ -702,6 +702,7 @@ class CPT:
                 "v": [],
                 "rho": [],
                 "damping": [],
+                "var_depth": [],
                 "var_E": [],
                 "var_v": [],
                 "var_rho": [],
@@ -714,6 +715,7 @@ class CPT:
             data["lithology"].append(str(self.lithology_json[i]))
             # depth
             data["depth"].append(np.round(self.depth_json[i], 2))
+            data["var_depth"].append(0.0)
             # Young modulus
             E = 2 * self.G0[self.indx_json[i]:self.indx_json[i + 1]] * (1 + self.poisson[self.indx_json[i]:self.indx_json[i + 1]])
             mean, std = tools_utils.log_normal_parameters(E)
