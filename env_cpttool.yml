@@ -7,10 +7,11 @@ dependencies:
   - asn1crypto=0.24.0=py37_0
   - babel=2.7.0=py_0
   - blas=1.0=mkl
-  - ca-certificates=2019.6.16=hecc5488_0
+  - ca-certificates=2019.5.15=0
   - certifi=2019.6.16=py37_0
   - cffi=1.12.3=py37h7a1dbc1_0
   - chardet=3.0.4=py37_1
+  - coverage=4.5.3=py37he774522_0
   - cryptography=2.7=py37h7a1dbc1_0
   - cycler=0.10.0=py37_0
   - docutils=0.14=py37_0
@@ -38,7 +39,7 @@ dependencies:
   - mkl_random=1.0.2=py37h343c172_0
   - numpy=1.16.4=py37h19fb1c0_0
   - numpy-base=1.16.4=py37hc3f5095_0
-  - openssl=1.1.1c=hfa6e2cd_0
+  - openssl=1.1.1c=he774522_1
   - oset=0.1.3=py_1
   - packaging=19.0=py37_0
   - pandas=0.24.2=py37ha925a31_0
@@ -89,3 +90,4 @@ dependencies:
   - pip:
     - teamcity-messages==1.25
 prefix: C:\Users\zuada\AppData\Local\Continuum\anaconda3\envs\ours
+
