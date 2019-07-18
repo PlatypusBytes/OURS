@@ -197,11 +197,14 @@ def analysis(properties, methods_cpt, output, plots):
                 "Radius": float(methods_cpt["radius"])}
         cpts = bro.read_bro(inpt)
 
+        # ToDo: for the moment only uses cpt circle
+        cpts = cpts['circle']['data']
+
         # remove the nones from CPTs
         cpts = list(filter(None, cpts))
 
-        # ToDo: selects only cpts without the gm_code (they are a repeat)
-        cpts = [c for c in cpts if 'gm_code' not in c.keys()]
+        # # ToDo: selects only cpts without the gm_code (they are a repeat)
+        # cpts = [c for c in cpts if 'gm_code' not in c.keys()]
 
         # check if cpts have data or are empty
         if not cpts:
