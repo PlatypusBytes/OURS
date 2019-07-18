@@ -441,41 +441,62 @@ def read_bro(parameters):
     else:
         bro_index = create_index(fn, ifn, datasize)
 
-    out = []
+    out = {}
 
     # Open GeoMorphological map and find intersecting areas
-    # get folder
-
-    # define the path for the shape file
+    # define the path for the shape file index
+    out["polygons"] = {}
+    total_cpts = 0
     file_idx = tools_utils.resource_path(path.join(path.join(path.dirname(__file__), './shapefiles'), 'geomorph'))
-    gm_index = index.Index(file_idx)  # created by data/prepare.py
+    gm_index = index.Index(file_idx)  # created by shapefiles/gen_geomorph_idx.py
     geomorphs = list(gm_index.intersection((x-r, y-r, x+r, y+r), objects="raw"))
+    circle = Point(x, y).buffer(r, resolution=32)
     for gm_code, polygon in geomorphs:
         indices = query_index_polygon(bro_index, polygon)
-        cpts = read_bro_xml(fn, indices)
-        for i, cpt in enumerate(cpts):
-            if cpt is not None:
-                cpts[i]["gm_code"] = gm_code
-        out.extend(cpts)
+        poly = shape(polygon)
+        if circle.intersects(poly):
+            total_cpts += len(indices)
+            perc = circle.intersection(poly).area / circle.area
+            cpts = read_bro_xml(fn, indices)
+            if gm_code in out["polygons"]:
+                out["polygons"][gm_code]["data"].extend(cpts)
+            else:
+                out["polygons"][gm_code] = {"data": cpts, "perc": perc}
+    logging.warning("Found {} CPTs in intersecting polygons.".format(total_cpts))
 
-    # Find CPT indexes
+    out["polygons_nl"] = {}
+    total_cpts = 0
+    geomorphs_nl = list(gm_index.intersection(gm_index.bounds, objects="raw"))
+    for gm_code, polygon in geomorphs:
+        if gm_code in out["polygons"].keys():
+            indices = query_index_polygon(bro_index, polygon)
+            total_cpts += len(indices)
+            cpts = read_bro_xml(fn, indices)
+            if gm_code in out["polygons_nl"]:
+                out["polygons_nl"][gm_code]["data"].extend(cpts)
+                out["polygons_nl"][gm_code]["count"] + 1
+            else:
+                out["polygons_nl"][gm_code] = {"data": cpts, "count": 1}
+    logging.warning("Found {} CPTs in NL polygons.".format(total_cpts))
+
+    # Find CPT indexes in circle
     indices = query_index(bro_index, x, y, radius=r)
     n_cpts = len(indices)
     if n_cpts == 0:
         logging.warning("Found no CPTs, try another location or increase the radius.")
         return []
     else:
-        logging.info("Found {} CPTs".format(len(indices)))
+        logging.warning("Found {} CPTs in circle.".format(len(indices)))
 
     # Open database and retrieve CPTs
     # TODO Open zipfile instead of large xml
     circle_cpts = read_bro_xml(fn, indices)
-    out.extend(circle_cpts)
+    out["circle"] = {"data": circle_cpts}
 
     return out
 
 
 if __name__ == "__main__":
-    input = {"BRO_data": "./bro/brocpt.zip", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
+    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
     cpts = read_bro(input)
-    print(cpts)
+    print(cpts.keys())
