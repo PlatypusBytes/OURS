@@ -417,20 +417,23 @@ def read_bro(parameters):
 
     :param parameters: Dict of input `parameters` containing filename, location and radius.
     :type parameters: dict
-    :return: List of parsed CPTs as dicts
-    :rtype: list
+    :return: Dict with multiple groupings of parsed CPTs as dicts
+    :rtype: dict
 
     """
     fn = parameters["BRO_data"]
     ifn = splitext(fn)[0] + ".idx"  # index
     x, y = parameters["Source_x"], parameters["Source_y"]
     r = parameters["Radius"]
+    out = {}
 
     if not exists(fn):
         print("Cannot open provided BRO data file: {}".format(fn))
         sys.exit(2)
 
-    # Check and use/create index
+    # Check and use or create index
+    # we use the size of the several GB xml file as a validity check
+    # which we've saved in the index
     datasize = stat(fn).st_size
     if exists(ifn):
         with open(ifn, "rb") as f:
@@ -441,14 +444,15 @@ def read_bro(parameters):
     else:
         bro_index = create_index(fn, ifn, datasize)
 
-    out = {}
-
-    # Open GeoMorphological map and find intersecting areas
-    # define the path for the shape file index
+    # Polygon grouping method:
+    # Find all geomorphological polygons intersecting the circle with midpoint
+    # x, y and radius r, calculate percentage of overlap and retrieve all CPTs
+    # inside those polygons.
     out["polygons"] = {}
     total_cpts = 0
     file_idx = tools_utils.resource_path(path.join(path.join(path.dirname(__file__), './shapefiles'), 'geomorph'))
     gm_index = index.Index(file_idx)  # created by shapefiles/gen_geomorph_idx.py
+
     geomorphs = list(gm_index.intersection((x-r, y-r, x+r, y+r), objects="raw"))
     circle = Point(x, y).buffer(r, resolution=32)
     for gm_code, polygon in geomorphs:
@@ -464,8 +468,12 @@ def read_bro(parameters):
                 out["polygons"][gm_code] = {"data": cpts, "perc": perc}
     logging.warning("Found {} CPTs in intersecting polygons.".format(total_cpts))
 
+    # NL polygon grouping method:
+    # Same as above, but now also use all polygons with the same gm_code as
+    # those intersecting the circle.
     out["polygons_nl"] = {}
     total_cpts = 0
+
     geomorphs_nl = list(gm_index.intersection(gm_index.bounds, objects="raw"))
     for gm_code, polygon in geomorphs:
         if gm_code in out["polygons"].keys():
@@ -481,15 +489,7 @@ def read_bro(parameters):
 
     # Find CPT indexes in circle
     indices = query_index(bro_index, x, y, radius=r)
-    n_cpts = len(indices)
-    if n_cpts == 0:
-        logging.warning("Found no CPTs, try another location or increase the radius.")
-        return []
-    else:
-        logging.warning("Found {} CPTs in circle.".format(len(indices)))
-
-    # Open database and retrieve CPTs
-    # TODO Open zipfile instead of large xml
+    logging.warning("Found {} CPTs in circle.".format(len(indices)))
     circle_cpts = read_bro_xml(fn, indices)
     out["circle"] = {"data": circle_cpts}
 
