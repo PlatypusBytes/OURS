@@ -24,7 +24,7 @@ import math
 import logging
 from io import StringIO
 import pickle
-from os.path import exists, splitext
+from os.path import exists, splitext, join, dirname
 from os import stat, name, path
 from zipfile import ZipFile
 
@@ -450,7 +450,11 @@ def read_bro(parameters):
     # inside those polygons.
     out["polygons"] = {}
     total_cpts = 0
-    file_idx = tools_utils.resource_path(path.join(path.join(path.dirname(__file__), './shapefiles'), 'geomorph'))
+    file_idx = join(dirname(fn), 'geomorph')
+    idx_fn = join(dirname(fn), 'geomorph.idx')
+    if not exists(idx_fn):
+        print("Cannot open provided geomorphological data files (.dat & .idx): {}".format(idx_fn))
+        sys.exit(2)
     gm_index = index.Index(file_idx)  # created by shapefiles/gen_geomorph_idx.py
 
     geomorphs = list(gm_index.intersection((x-r, y-r, x+r, y+r), objects="raw"))
