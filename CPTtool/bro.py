@@ -479,8 +479,9 @@ def read_bro(parameters):
     total_cpts = 0
 
     geomorphs_nl = list(gm_index.intersection(gm_index.bounds, objects="raw"))
-    for gm_code, polygon in geomorphs:
-        if gm_code in out["polygons"].keys():
+    logging.info("Intersecting with {} geomorphological shapes.".format(len(geomorphs_nl)))
+    for gm_code, polygon in geomorphs_nl:
+        if gm_code in out["polygons"].keys():  # filter for geomorph codes intersecting circle
             indices = query_index_polygon(bro_index, polygon)
             total_cpts += len(indices)
             cpts = read_bro_xml(fn, indices)
