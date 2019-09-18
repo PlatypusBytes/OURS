@@ -64,10 +64,6 @@ class TestBroDb(unittest.TestCase):
         self.assertTrue(isinstance(cpts["polygons"][key]["perc"], float))
         self.assertTrue(100. >= cpts["polygons"][key]["perc"] > 0.)
 
-        self.assertEqual(len(cpts["polygons_nl"][key]["data"]), 23)
-        self.assertTrue("count" in cpts["polygons_nl"][key])
-        self.assertTrue(isinstance(cpts["polygons_nl"][key]["count"], int))
-        self.assertTrue(cpts["polygons_nl"][key]["count"] >= 1)
 
     def test_zipdatabase_read(self):
         input = {"BRO_data": "../bro/brocpt.zip", "Source_x": 82900, "Source_y": 443351, "Radius": 100}

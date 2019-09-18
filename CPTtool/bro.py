@@ -472,26 +472,6 @@ def read_bro(parameters):
                 out["polygons"][gm_code] = {"data": cpts, "perc": perc}
     logging.warning("Found {} CPTs in intersecting polygons.".format(total_cpts))
 
-    # NL polygon grouping method:
-    # Same as above, but now also use all polygons with the same gm_code as
-    # those intersecting the circle.
-    out["polygons_nl"] = {}
-    total_cpts = 0
-
-    geomorphs_nl = list(gm_index.intersection(gm_index.bounds, objects="raw"))
-    logging.info("Intersecting with {} geomorphological shapes.".format(len(geomorphs_nl)))
-    for gm_code, polygon in geomorphs_nl:
-        if gm_code in out["polygons"].keys():  # filter for geomorph codes intersecting circle
-            indices = query_index_polygon(bro_index, polygon)
-            total_cpts += len(indices)
-            cpts = read_bro_xml(fn, indices)
-            if gm_code in out["polygons_nl"]:
-                out["polygons_nl"][gm_code]["data"].extend(cpts)
-                out["polygons_nl"][gm_code]["count"] + 1
-            else:
-                out["polygons_nl"][gm_code] = {"data": cpts, "count": 1}
-    logging.warning("Found {} CPTs in NL polygons.".format(total_cpts))
-
     # Find CPT indexes in circle
     indices = query_index(bro_index, x, y, radius=r)
     logging.warning("Found {} CPTs in circle.".format(len(indices)))
