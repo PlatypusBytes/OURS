@@ -1,7 +1,5 @@
 # unit test for the cpt_module
-
 import sys
-
 # add the src folder to the path to search for files
 sys.path.append('../')
 import unittest
@@ -11,6 +9,7 @@ import cpt_tool
 import pandas as pd
 import csv
 import os
+
 
 class TestCptModule(unittest.TestCase):
     def setUp(self):
@@ -139,51 +138,6 @@ class TestCptModule(unittest.TestCase):
         # check if the returned message is the appropriate
         self.assertTrue( 'File cpt_name has a number of samples smaller than 10'== aux)
         return
-    #
-    # def test_read_gef(self):
-    #     gef_file = 'unit_testing_files/unit_testing.gef'
-    #     key_cpt = cpt_tool.set_key()
-    #     self.cpt.read_gef(gef_file, key_cpt)
-    #     test_name = 'UNIT_TESTING'
-    #     test_coord = [244319.00, 587520.00]
-    #
-    #     test_depth = range(20)
-    #     test_NAP = test_depth * np.full(20, -1) + np.full(20, -0.87)
-    #     test_tip = np.full(20, 1000)
-    #     test_friction = np.full(20, 2000)
-    #     test_friction_nbr = np.full(20, 5)
-    #     test_water = np.full(20, 3000)
-    #
-    #     np.testing.assert_array_equal(test_name, self.cpt.name)
-    #     np.testing.assert_array_equal(test_coord, self.cpt.coord)
-    #     np.testing.assert_array_equal(test_depth, self.cpt.depth)
-    #     np.testing.assert_array_equal(test_NAP, self.cpt.NAP)
-    #     np.testing.assert_array_equal(test_tip, self.cpt.tip)
-    #     np.testing.assert_array_equal(test_friction, self.cpt.friction)
-    #     np.testing.assert_array_equal(test_friction_nbr, self.cpt.friction_nbr)
-    #     np.testing.assert_array_equal(test_water, self.cpt.water)
-    #
-    #     # Exceptions tested
-    #     gef_file = 'unit_testing_files/Exception_NoNAP.gef'
-    #     self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-    #     gef_file = 'unit_testing_files/Exception_ZeroCoords.gef'
-    #     self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-    #     gef_file = 'unit_testing_files/Exception_NoCoord.gef'
-    #     self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-    #     gef_file = 'unit_testing_files/Exception_NoLength.gef'
-    #     self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-    #     gef_file = 'unit_testing_files/Exception_NoTip.gef'
-    #     self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-    #     gef_file = 'unit_testing_files/Exception_NoFriction.gef'
-    #     self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-    #     gef_file = 'unit_testing_files/Exception_NoFrictionNumber.gef'
-    #     self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-    #     gef_file = 'unit_testing_files/Exception_NoWater.gef'
-    #     self.assertFalse(self.cpt.read_gef(gef_file, key_cpt))
-    #     gef_file = 'unit_testing_files/Exception_9999.gef'
-    #     self.assertTrue(self.cpt.read_gef(gef_file, key_cpt))
-    #
-    #     return
 
     def test_rho_calculation(self):
         self.cpt.gamma = np.ones(10)
@@ -229,93 +183,6 @@ class TestCptModule(unittest.TestCase):
 
         import os.path
         self.assertTrue(os.path.isfile('UNIT_TEST_unit_weight.png'))
-        return
-
-    def test_merge_thickness_1(self):
-        # Set all the values
-        min_layer_thick = 0.5
-        self.cpt.IC = [3, 3, 3, 3, 3, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-        self.cpt.depth = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
-        self.cpt.lithology = ['0', '0', '0', '0', '0', '1', '2', '2', '2', '2', '2', '2']
-
-        # Run the function to be tested
-        self.cpt.merge_thickness(min_layer_thick)
-
-        # Set the target results
-        depth_test = [0.0, 0.5, 1.3]
-        test_lithology = ['0', r'1/2']
-        test_index = [0, 5, 11]
-
-        # Check if they are equal
-        np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
-        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
-        np.testing.assert_array_equal(test_index, self.cpt.indx_json)
-        return
-
-    def test_merge_thickness_2(self):
-
-        # set the input values for the test
-        min_layer_thick = 0.5
-        self.cpt.IC = [1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3]
-        self.cpt.depth = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
-        self.cpt.lithology = ['0', '0', '0', '0', '0', '1', '2', '2', '2', '2', '2', '2']
-
-        # Run the function that needs to be tested
-        self.cpt.merge_thickness(min_layer_thick)
-
-        # The target results of the test
-        depth_test = [0.0, 0.5, 1.3]
-        test_lithology = ['0', r'1/2']
-        test_index = [0, 5, 11]
-
-        # Check equality between target and calculated
-        np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
-        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
-        np.testing.assert_array_equal(test_index, self.cpt.indx_json)
-        return
-
-    def test_merge_thickness_3(self):
-        # set inputs for the function
-        min_layer_thick = 0.5
-        self.cpt.depth = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8,
-                          1.9, 2]
-        self.cpt.IC = [1, 1, 1, 1, 1, 1, 1, 0.9, 0.9, 0.9, 4, 4, 4, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5]
-        self.cpt.lithology = ['0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '2', '2', '2', '3', '3', '3', '3', '3',
-                              '3', '3', '3']
-
-        # Results expected from the function
-        depth_test = [0, 0.7, 1.3, 2.]
-        test_lithology = ['0', r'1/2', '3']
-        test_index = [0, 7, 13, 20]
-
-        # Calling the function
-        self.cpt.merge_thickness(min_layer_thick)
-
-        # Testing the equality of the function
-        np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
-        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
-        np.testing.assert_array_equal(test_index, self.cpt.indx_json)
-        return
-
-    def test_merge_thickness_4(self):
-        # Creating inputs for the function
-        min_layer_thick = 0.5
-        self.cpt.depth = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5]
-        self.cpt.IC = [4, 4, 4, 4, 4, 4, 4, 0.9, 0.9, 0.9, 1, 1, 1, 1, 1, 1]
-        self.cpt.lithology = ['0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '2', '2', '2', '3', '3', '3']
-
-        # Defining desired outputs
-        depth_test = [0, 0.7, 1.5]
-        test_lithology = ['0', r'1/2/3']
-        test_index = [0, 7, 15]
-
-        # Running the function
-        self.cpt.merge_thickness(min_layer_thick)
-
-        # Checking if it was successful
-        np.testing.assert_array_equal(depth_test, self.cpt.depth_json)
-        np.testing.assert_array_equal(test_lithology, self.cpt.lithology_json)
-        np.testing.assert_array_equal(test_index, self.cpt.indx_json)
         return
 
     def test_stress_calc(self):
