@@ -518,9 +518,6 @@ class CPT:
         :param Ip: (optional) Plasticity index. Default is 40
         :param method: (optional) Method for calculation of OCR. Default is Mayne
         """
-
-        # ToDo missing frequency dependency
-
         # assign size to damping
         self.damping = np.zeros(len(self.lithology)) + d_min
         OCR = np.zeros(len(self.lithology))
@@ -532,7 +529,6 @@ class CPT:
                     OCR[i] = 0.33 * (self.qt[i] - self.total_stress[i]) / self.effective_stress[i]
                 elif method == "Robertson":
                     OCR[i] = 0.25 * self.Qtn[i] ** 1.25
-                    # OCR[i] = 0.25 * ((self.qt[i] - self.total_stress[i]) / self.effective_stress[i]) ** 1.25
                 self.damping[i] = (0.8005 + 0.129 * Ip * OCR[i] ** -0.1069) * \
                                   (self.effective_stress[i] / self.Pa) ** -0.2889
             # if sand:
@@ -580,197 +576,189 @@ class CPT:
         self.qt[self.qt <= 0] = 0
         return
 
-    def merge_thickness(self, min_layer_thick):
-        r"""
-        Reorganises the lithology based on the minimum layer thickness.
-        This function call the functions merging_label, merging_index , merging_depth , merging_thickness.
-        These functions merge the layers according to the min_layer_thick.
-        For more information refer to those.
+    # def merge_thickness(self, min_layer_thick):
+    #     r"""
+    #     Reorganises the lithology based on the minimum layer thickness.
+    #     This function call the functions merging_label, merging_index , merging_depth , merging_thickness.
+    #     These functions merge the layers according to the min_layer_thick.
+    #     For more information refer to those.
+    #
+    #     Parameters
+    #     ----------
+    #     :param min_layer_thick : Minimum layer thickness
+    #     :param idx : The indexes of all unmerged layers
+    #     :param local_z_ini : The depth of all unmerged layers
+    #     :param local_thick : the thickness of the unmerged layers
+    #     :param new_thickness : merged thickness according to the min_layer_thick
+    #
+    #     """
+    #
+    #     depth = self.depth
+    #     lithology = self.lithology
+    #     # Find indices of local unmerged layers
+    #     aux = ""
+    #     idx = []
+    #     for j, val in enumerate(lithology):
+    #         if val != aux:
+    #             aux = val
+    #             idx.append(j)
+    #
+    #     # Depth between local unmerged layers
+    #     local_z_ini = [depth[i] for i in idx]
+    #     # Thicknesses between local unmerged layers
+    #     local_thick = np.append(np.diff(local_z_ini), depth[-1] - local_z_ini[-1])
+    #     # Actual Merging
+    #     new_thickness = self.merging_thickness(local_thick, min_layer_thick)
+    #
+    #     self.depth_json = self.merging_depth(new_thickness)
+    #     self.indx_json = self.merging_index()
+    #     self.lithology_json = self.merging_label()
+    #
+    #     return
+    #
+    # def merging_label(self):
+    #     r"""
+    #     Function that joins the lithology labels of each merged layer.
+    #     """
+    #     new_label = []
+    #     start = self.indx_json[:-1]
+    #     finish = self.indx_json[1:]
+    #     for i in range(len(start)):
+    #         # sorted label list
+    #         label_list = sorted(set(self.lithology[start[i]:finish[i]]),
+    #                             key=lambda x: self.lithology[start[i]:finish[i]].index(x))
+    #         new_label.append(r'/'.join(label_list))
+    #     return new_label
+    #
+    # def merging_index(self):
+    #     r"""
+    #     Function that produces the indexes of the merged layers by finding which depths are referred.
+    #     """
+    #     new_index = []
+    #     for i in range(len(self.depth)):
+    #         if self.depth[i] in self.depth_json:
+    #             new_index.append(i)
+    #     return new_index
+    #
+    # def merging_depth(self, new_thickness):
+    #     r"""
+    #     Function that calculates the top level depth of each layer by summing the thicknesses.
+    #     """
+    #     new_depth = np.append(self.depth[0], new_thickness)
+    #     new_depth = np.cumsum(new_depth)
+    #     return new_depth
+    #
+    # def merging_thickness(self, local_thick, min_layer_thick):
+    #     r"""
+    #      In this function the merging og the layers is achieved according to the min_layer thick.
+    #
+    #      .._element:
+    #      .. figure:: ./_static/Merge_Flowchart.png
+    #          :width: 350px
+    #          :align: center
+    #          :figclass: align-center
+    #
+    #
+    #      """
+    #     new_thickness = []
+    #     now_thickness = 0
+    #     counter = 0
+    #     while counter <= len(local_thick) - 1:
+    #         while now_thickness < min_layer_thick:
+    #             now_thickness += local_thick[counter]
+    #             counter += 1
+    #             if counter == len(local_thick) and now_thickness < min_layer_thick:
+    #                 new_thickness[-1] += now_thickness
+    #                 return new_thickness
+    #         new_thickness.append(now_thickness)
+    #         now_thickness = 0
+    #     return new_thickness
 
-        Parameters
-        ----------
-        :param min_layer_thick : Minimum layer thickness
-        :param idx : The indexes of all unmerged layers
-        :param local_z_ini : The depth of all unmerged layers
-        :param local_thick : the thickness of the unmerged layers
-        :param new_thickness : merged thickness according to the min_layer_thick
-
-        """
-
-        depth = self.depth
-        lithology = self.lithology
-        # Find indeces of local unmerged layers
-        aux = ""
-        idx = []
-        for j, val in enumerate(lithology):
-            if val != aux:
-                aux = val
-                idx.append(j)
-
-        # # IC mean calculation not used at this moment
-        # for i in range(len(idx)):
-        #     if i == len(idx)-1:
-        #         local_IC.append(np.mean(self.IC[idx[i]:]))
-        #     else:
-        #         local_IC.append(np.mean(self.IC[idx[i]:target_idx[i]]))
-
-        # Depth between local unmerged layers
-        local_z_ini = [depth[i] for i in idx]
-        # Thicknesses between local unmerged layers
-        local_thick = np.append(np.diff(local_z_ini), depth[-1] - local_z_ini[-1])
-        # Actual Merging
-        new_thickness = self.merging_thickness(local_thick, min_layer_thick)
-
-        self.depth_json = self.merging_depth(new_thickness)
-        self.indx_json = self.merging_index()
-        self.lithology_json = self.merging_label()
-
-        return
-
-    def merging_label(self):
-        r"""
-        Function that joins the lithology labels of each merged layer.
-        """
-        new_label = []
-        start = self.indx_json[:-1]
-        finish = self.indx_json[1:]
-        for i in range(len(start)):
-            # sorted label list
-            label_list = sorted(set(self.lithology[start[i]:finish[i]]),
-                                key=lambda x: self.lithology[start[i]:finish[i]].index(x))
-            new_label.append(r'/'.join(label_list))
-        return new_label
-
-    def merging_index(self):
-        r"""
-        Function that produces the indexes of the merged layers by finding which depths are referred.
-        """
-        new_index = []
-        for i in range(len(self.depth)):
-            if self.depth[i] in self.depth_json:
-                new_index.append(i)
-        return new_index
-
-    def merging_depth(self, new_thickness):
-        r"""
-        Function that calculates the top level depth of each layer by summing the thicknesses.
-        """
-        new_depth = np.append(self.depth[0], new_thickness)
-        new_depth = np.cumsum(new_depth)
-        return new_depth
-
-    def merging_thickness(self, local_thick, min_layer_thick):
-        r"""
-         In this function the merging og the layers is achieved according to the min_layer thick.
-
-         .._element:
-         .. figure:: ./_static/Merge_Flowchart.png
-             :width: 350px
-             :align: center
-             :figclass: align-center
-
-
-         """
-        new_thickness = []
-        now_thickness = 0
-        counter = 0
-        while counter <= len(local_thick) - 1:
-            while now_thickness < min_layer_thick:
-                now_thickness += local_thick[counter]
-                counter += 1
-                if counter == len(local_thick) and now_thickness < min_layer_thick:
-                    new_thickness[-1] += now_thickness
-                    return new_thickness
-            new_thickness.append(now_thickness)
-            now_thickness = 0
-        return new_thickness
-
-    def add_json(self, jsn, id):
-        """
-        Add to json file the results.
-
-        Parameters
-        ----------
-        :param jsn: Json data structure
-        :param id: Scenario (index)
-        """
-
-        # create data
-        data = {"lithology": [],
-                "depth": [],
-                "E": [],
-                "v": [],
-                "rho": [],
-                "damping": [],
-                "var_depth": [],
-                "var_E": [],
-                "var_v": [],
-                "var_rho": [],
-                "var_damping": [],
-                }
-
-        # populate structure
-        for i in range(len(self.indx_json) - 1):
-            # lithology
-            data["lithology"].append(str(self.lithology_json[i]))
-            # depth
-            data["depth"].append(np.round(self.depth_json[i], 2))
-            data["var_depth"].append(0.0)
-            # Young modulus
-            E = 2 * self.G0[self.indx_json[i]:self.indx_json[i + 1]] * (1 + self.poisson[self.indx_json[i]:self.indx_json[i + 1]])
-            mean, std = tools_utils.log_normal_parameters(E)
-            data["E"].append(int(np.round(mean)))
-            data["var_E"].append(int(np.round(std**2)))
-            # poisson ratio
-            poisson = self.poisson[self.indx_json[i]:self.indx_json[i + 1]]
-            mean, std = tools_utils.log_normal_parameters(poisson)
-            data["v"].append(np.round(mean, 3))
-            data["var_v"].append(np.round(std**2, 3))
-            # density
-            rho = self.rho[self.indx_json[i]:self.indx_json[i + 1]]
-            mean, std = tools_utils.log_normal_parameters(rho)
-            data["rho"].append(int(np.round(mean)))
-            data["var_rho"].append(int(np.round(std**2)))
-            # damping
-            # ToDo update damping
-            damp = self.damping[self.indx_json[i]:self.indx_json[i + 1]]
-            mean, std = tools_utils.log_normal_parameters(damp)
-            data["damping"].append(np.round(mean, 5))
-            data["var_damping"].append(np.round(std**2, 5))
-
-        jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
-        jsn["scenarios"][id].update({"coordinates": self.coord,
-                                     "probability": [],
-                                     "data": data})
-
-        return
-
-    def update_dump_json(self, jsn, input_dic, index):
-        """
-
-        Computes the probability of the scenario and dump json file into output file.
-
-        Parameters
-        ----------
-        :param jsn: json file with data structure
-        :param input_dic: dictionary with the input information
-        :param index: index of the calculation point
-        """
-
-        # update the probability
-        coord_source = [float(input_dic["Source_x"][index]), float(input_dic["Source_y"][index])]
-        coord_receiver = [float(input_dic["Receiver_x"][index]), float(input_dic["Receiver_y"][index])]
-        coord_cpts = [i['coordinates'] for i in jsn["scenarios"]]
-        probs = tools_utils.compute_probability(coord_cpts, coord_source, coord_receiver)
-
-        # update the json file
-        for i in range(len(jsn["scenarios"])):
-            jsn["scenarios"][i]["probability"] = np.round(probs[i], 2)
-
-        # write file
-        with open(os.path.join(self.output_folder, "results_" + str(index) + ".json"), "w") as fo:
-            json.dump(jsn, fo, indent=4)
-        return
+    # def add_json(self, jsn, id):
+    #     """
+    #     Add to json file the results.
+    #
+    #     Parameters
+    #     ----------
+    #     :param jsn: Json data structure
+    #     :param id: Scenario (index)
+    #     """
+    #
+    #     # create data
+    #     data = {"lithology": [],
+    #             "depth": [],
+    #             "E": [],
+    #             "v": [],
+    #             "rho": [],
+    #             "damping": [],
+    #             "var_depth": [],
+    #             "var_E": [],
+    #             "var_v": [],
+    #             "var_rho": [],
+    #             "var_damping": [],
+    #             }
+    #
+    #     # populate structure
+    #     for i in range(len(self.indx_json) - 1):
+    #         # lithology
+    #         data["lithology"].append(str(self.lithology_json[i]))
+    #         # depth
+    #         data["depth"].append(np.round(self.depth_json[i], 2))
+    #         data["var_depth"].append(0.0)
+    #         # Young modulus
+    #         E = 2. * self.G0[self.indx_json[i]:self.indx_json[i + 1]] * (1. + self.poisson[self.indx_json[i]:self.indx_json[i + 1]])
+    #         mean, std = tools_utils.log_normal_parameters(E)
+    #         data["E"].append(int(np.round(mean)))
+    #         data["var_E"].append(int(np.round(std**2)))
+    #         # poisson ratio
+    #         poisson = self.poisson[self.indx_json[i]:self.indx_json[i + 1]]
+    #         mean, std = tools_utils.log_normal_parameters(poisson)
+    #         data["v"].append(np.round(mean, 3))
+    #         data["var_v"].append(np.round(std**2, 3))
+    #         # density
+    #         rho = self.rho[self.indx_json[i]:self.indx_json[i + 1]]
+    #         mean, std = tools_utils.log_normal_parameters(rho)
+    #         data["rho"].append(int(np.round(mean)))
+    #         data["var_rho"].append(int(np.round(std**2)))
+    #         # damping
+    #         # ToDo update damping
+    #         damp = self.damping[self.indx_json[i]:self.indx_json[i + 1]]
+    #         mean, std = tools_utils.log_normal_parameters(damp)
+    #         data["damping"].append(np.round(mean, 5))
+    #         data["var_damping"].append(np.round(std**2, 5))
+    #
+    #     jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
+    #     jsn["scenarios"][id].update({"coordinates": self.coord,
+    #                                  "probability": [],
+    #                                  "data": data})
+    #
+    #     return
+    #
+    # def update_dump_json(self, jsn, input_dic, index):
+    #     """
+    #     Computes the probability of the scenario and dump json file into output file.
+    #
+    #     Parameters
+    #     ----------
+    #     :param jsn: json file with data structure
+    #     :param input_dic: dictionary with the input information
+    #     :param index: index of the calculation point
+    #     """
+    #
+    #     # update the probability
+    #     coord_source = [float(input_dic["Source_x"][index]), float(input_dic["Source_y"][index])]
+    #     coord_receiver = [float(input_dic["Receiver_x"][index]), float(input_dic["Receiver_y"][index])]
+    #     coord_cpts = [i['coordinates'] for i in jsn["scenarios"]]
+    #     probs = tools_utils.compute_probability(coord_cpts, coord_source, coord_receiver)
+    #
+    #     # update the json file
+    #     for i in range(len(jsn["scenarios"])):
+    #         jsn["scenarios"][i]["probability"] = np.round(probs[i], 2)
+    #
+    #     # write file
+    #     with open(os.path.join(self.output_folder, "results_" + str(index) + ".json"), "w") as fo:
+    #         json.dump(jsn, fo, indent=4)
+    #     return
 
     def plot_correlations(self, x_data, x_label, l_name, name):
         """
