@@ -38,7 +38,6 @@ import pyproj
 from rtree import index
 from shapely.geometry import shape, Point
 
-import tools_utils
 
 # Constants for XML parsing
 searchstring = b"<gml:featureMember>"
