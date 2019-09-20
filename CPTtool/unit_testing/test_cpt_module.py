@@ -525,40 +525,6 @@ class TestCptModule(unittest.TestCase):
         self.assertTrue(os.path.isfile('UNIT_TEST_Correlations.png'))
         return
 
-    def test_add_json(self):
-
-        jsn = {"scenarios": []}
-        i = 0
-        self.cpt.coord = [1, 2]
-        self.cpt.indx_json = range(5)
-        self.cpt.lithology_json = ['1.0', '1.0', '1.0', '1.0']
-        self.cpt.depth_json = [0, 1, 2, 3]
-        self.cpt.gamma = np.ones(5)
-        self.cpt.G0 = np.ones(5)
-        self.cpt.vs = np.ones(5)
-        self.cpt.poisson = np.full(5, 0.3)
-        self.cpt.rho = np.full(5, 3)
-        self.cpt.damping = np.full(5, 3)
-        self.cpt.add_json(jsn, i)
-
-        # check if coordinates have been added
-        self.assertEqual(jsn['scenarios'][0]['coordinates'][0], self.cpt.coord[0])
-        self.assertEqual(jsn['scenarios'][0]['coordinates'][1], self.cpt.coord[1])
-        self.assertEqual(jsn['scenarios'][0]['data']['lithology'], self.cpt.lithology_json)
-        self.assertEqual(jsn['scenarios'][0]['data']['depth'], self.cpt.depth_json)
-
-        # Check if they are equal with the analytical young's modulus
-        E = 2 * self.cpt.G0 * (1 + self.cpt.poisson)
-        self.assertEqual(jsn['scenarios'][0]['data']['E'], list(map(int, np.round(E.tolist()[:-1]))))
-        self.assertEqual(jsn['scenarios'][0]['data']['v'], list(self.cpt.poisson[:-1]))
-        self.assertEqual(jsn['scenarios'][0]['data']['rho'], list(map(int, np.round(self.cpt.rho[:-1]))))
-        self.assertEqual(jsn['scenarios'][0]['data']['damping'],  list(self.cpt.damping[:-1]))
-        self.assertEqual(jsn['scenarios'][0]['data']['var_E'], [0, 0, 0, 0])
-        self.assertEqual(jsn['scenarios'][0]['data']['var_v'], [0, 0, 0, 0])
-        self.assertEqual(jsn['scenarios'][0]['data']['var_rho'], [0, 0, 0, 0])
-        self.assertEqual(jsn['scenarios'][0]['data']['var_damping'], [0, 0, 0, 0])
-        return
-
     def test_lithology_calc(self):
         # Define the input
         self.cpt.tip = np.array([1])
@@ -574,29 +540,6 @@ class TestCptModule(unittest.TestCase):
 
         # Check if results are equal
         self.assertEqual(self.cpt.lithology, lithology_test)
-        return
-
-    def test_dump_json(self):
-        # Set the inputs for the json file
-        jsn = {"scenarios": []}
-        jsn["scenarios"].append({"coordinates": [1, 2]})
-        input_dic = {"Source_x": [1],
-                     "Source_y": [1],
-                     "Receiver_x": [1],
-                     "Receiver_y": [1],
-                     }
-
-        # Output the json file
-        self.cpt.update_dump_json(jsn, input_dic, 0)
-
-        # check if probability is 100
-        self.assertEqual(jsn['scenarios'][0]['probability'], 100)
-
-        # check if file has been created
-        self.assertTrue(os.path.isfile("./results_0.json"))
-
-        # Remove file from the directory
-        os.remove("./results_0.json")
         return
 
     def test_bro_parser_no_water(self):

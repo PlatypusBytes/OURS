@@ -5,6 +5,7 @@ import unittest
 # add the src folder to the path to search for files
 sys.path.append('../')
 import tools_utils as tu
+import os
 
 
 class TestUtils(TestCase):
@@ -228,6 +229,65 @@ class TestUtils(TestCase):
         np.testing.assert_array_equal(depth_test, depth_json)
         np.testing.assert_array_equal(test_lithology, lithology_json)
         np.testing.assert_array_equal(test_index, indx_json)
+        return
+
+    def test_add_json(self):
+
+        jsn = {"scenarios": []}
+        i = 0
+
+        data = {"IC": [0.1, 0.1, 0.1, 0.1],
+                "depth": np.linspace(0, 4, 5),
+                "gamma": np.ones(5),
+                "G0": np.ones(5),
+                "vs": np.ones(5),
+                "poisson": np.full(5, 0.3),
+                "rho": np.full(5, 3),
+                "damping": np.full(5, 3),
+        }
+
+        depth_json = [0, 1, 2, 3]
+        litho_json = ['1.0', '1.0', '1.0', '1.0']
+        indx_json = range(5)
+
+        jsn = tu.add_json(jsn, i, depth_json, indx_json, litho_json, data)
+
+        # check if coordinates have been added
+        self.assertEqual(jsn['scenarios'][0]['data']['lithology'], litho_json)
+        self.assertEqual(jsn['scenarios'][0]['data']['depth'], depth_json)
+
+        # Check if they are equal with the analytical young's modulus
+        E = 2 * data["G0"] * (1 + data["poisson"])
+        self.assertEqual(jsn['scenarios'][0]['data']['E'], list(map(int, np.round(E.tolist()[:-1]))))
+        self.assertEqual(jsn['scenarios'][0]['data']['v'], list(data["poisson"][:-1]))
+        self.assertEqual(jsn['scenarios'][0]['data']['rho'], list(map(int, np.round(data["rho"][:-1]))))
+        self.assertEqual(jsn['scenarios'][0]['data']['depth'], list(map(int, np.round(data["depth"][:-1]))))
+        self.assertEqual(jsn['scenarios'][0]['data']['damping'],  list(data["damping"][:-1]))
+        self.assertEqual(jsn['scenarios'][0]['data']['var_E'], [0, 0, 0, 0])
+        self.assertEqual(jsn['scenarios'][0]['data']['var_v'], [0, 0, 0, 0])
+        self.assertEqual(jsn['scenarios'][0]['data']['var_rho'], [0, 0, 0, 0])
+        self.assertEqual(jsn['scenarios'][0]['data']['var_damping'], [0, 0, 0, 0])
+        self.assertEqual(jsn['scenarios'][0]['data']['var_depth'], [0, 0, 0, 0])
+        return
+
+    def test_dump_json(self):
+        # Set the inputs for the json file
+        jsn = {"scenarios": []}
+        jsn["scenarios"].append({"coordinates": [1, 2]})
+        input_dic = {"Source_x": [1],
+                     "Source_y": [1],
+                     "Receiver_x": [1],
+                     "Receiver_y": [1],
+                     }
+
+        # Output the json file
+        tu.dump_json(jsn, 0, "./")
+
+        # check if file has been created
+        self.assertTrue(os.path.isfile("./results_0.json"))
+
+        # Remove file from the directory
+        os.remove("./results_0.json")
         return
 
     def tearDown(self):
