@@ -1,3 +1,4 @@
+import sys
 import os
 import re
 import datetime
@@ -50,7 +51,7 @@ def read_revision():
 def compile_code():
     os.system(r"RMDIR /S /Q .\dist")
     os.system(r"RMDIR /S /Q .\build")
-    os.system(r"pyinstaller --onefile main.spec")
+    os.system(os.path.join(sys.exec_prefix, "Scripts/pyinstaller.exe") + " --onefile main.spec")
     os.remove(r"./version.txt")
 
 
