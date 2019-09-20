@@ -377,7 +377,10 @@ def add_json(jsn, id, depth_json, indx_json, lithology_json, data_cpt):
         data["lithology"].append(str(lithology_json[i]))
         # depth: variance is the same as for IC
         data["depth"].append(np.round(depth_json[i], 2))
-        data["var_depth"].append(0.)
+        IC = data_cpt["IC"][indx_json[i]:indx_json[i + 1]]
+        mean, std = log_normal_parameters(IC)
+        new_std = (data_cpt["depth"][indx_json[i + 1]] - data_cpt["depth"][indx_json[i]]) / mean * std
+        data["var_depth"].append(np.round(new_std**2, 2))
         # Young modulus
         E = 2. * data_cpt["G0"][indx_json[i]:indx_json[i + 1]] * (1. + data_cpt["poisson"][indx_json[i]:indx_json[i + 1]])
         mean, std = log_normal_parameters(E)
