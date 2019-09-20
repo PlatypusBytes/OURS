@@ -6,6 +6,8 @@ from operator import itemgetter
 import numpy as np
 import os
 import sys
+import inv_dist
+import json
 
 
 def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
@@ -39,6 +41,85 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     n = 0.381 * IC + 0.05 * (sigma_eff / Pa) - 0.15
     n[n > 1.] = 1.
     return n
+
+
+def interpolation(data_cpt, coordinates, power=1):
+    """
+    Inverse distance weight interpolation
+
+    Perform the interpolation for the CPT attributes at the coordinates
+    If power = 0 the result is the mean value
+    If power > 0 the results is weighted with the distance
+
+    :param data_cpt: list of cpts objects
+    :param coordinates: coordinates for the interpolation point
+    :param power: (optional) power to be used for the interpolation. Default is 1
+    :return: results dictionary with the interpolated CPT at the requested location
+    """
+    # convert coordinates to float
+    coordinates = list(map(float, coordinates))
+
+    # result output dictionary
+    results = {}
+
+    # list of attributes to be interpolated
+    # attributes = ["lithology", "NAP", "G0",  "poisson", "rho", "damping"]
+    attributes = ["Qtn", "Fr", "G0", "poisson", "rho", "damping", "IC"]
+
+    # transform cpt data into a continuous list for all cpts
+    coords = []  # cpt coordinates
+    min_max_nap = []  # cpt min and max depths
+    data_training = np.empty(shape=[0, len(attributes)])  # training data. dimensions nb points x nb attributes
+    # for each cpt
+    for i in data_cpt:
+        # at each depth get the coordinates
+        for j in data_cpt[i].NAP:
+            coords.append([data_cpt[i].coord[0], data_cpt[i].coord[1], j])
+        # obtain the depths of the cpt
+        min_max_nap.append([data_cpt[i].coord[0], data_cpt[i].coord[1],
+                            min(data_cpt[i].NAP), max(data_cpt[i].NAP),
+                            np.mean(np.diff(data_cpt[i].NAP))])
+
+        # get atttributes to interpolate
+        training = []
+        for at in attributes:
+            training.append(getattr(data_cpt[i], at))
+        data_training = np.vstack((np.array(data_training), np.transpose(training)))
+
+    # interpolate the top and bottom depth at this point
+    interp_top = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power)
+    # create interpolation object
+    interp_top.interpolate(np.array(min_max_nap)[:, :2], np.array(min_max_nap)[:, 3])
+    # predict
+    interp_top.predict(np.array(coordinates).reshape(1, 2))
+    # interpolate the distances
+    interp_bot = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power)
+    # create interpolation object
+    interp_bot.interpolate(np.array(min_max_nap)[:, :2], np.array(min_max_nap)[:, 2])
+    # predict
+    interp_bot.predict(np.array(coordinates).reshape(1, 2))
+
+    # create depth vector
+    depth = np.linspace(interp_top.zn[0],
+                        interp_bot.zn[0],
+                        np.ceil((interp_bot.zn[0] - interp_top.zn[0]) / np.mean(np.array(min_max_nap)[:, 4])))
+    # coordinates for interpolation
+    c_out = [[coordinates[0], coordinates[1], i] for i in depth]
+
+    # for each attribute perform interpolation and assign it to the results dict
+    for i, at in enumerate(attributes):
+        interp = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power)
+        # create interpolation object
+        interp.interpolate(coords, np.array(data_training)[:, i])
+        # predict
+        interp.predict(np.array(c_out))
+        # assign to result
+        results.update({at: interp.zn})
+
+    # add depth to results
+    results.update({"NAP": depth})
+    results.update({"depth": np.abs(depth - depth[0])})
+    return results
 
 
 def compute_probability(coord_cpt, coord_src, coord_rec):
@@ -141,7 +222,7 @@ def ceil_value(data, value):
 
     # get consecutive indexes on the list
     indx_conseq = []
-    for k, g in groupby(enumerate(idx), lambda ix : ix[0] - ix[1]):
+    for k, g in groupby(enumerate(idx), lambda ix: ix[0] - ix[1]):
         indx_conseq.append(list(map(itemgetter(1), g)))
 
     # assigns the value of the first non-value
@@ -150,3 +231,192 @@ def ceil_value(data, value):
             data[j] = data[i[-1] + 1]
 
     return data
+
+
+def merge_thickness(cpt_data, min_layer_thick):
+    r"""
+    Reorganises the lithology based on the minimum layer thickness.
+    This function call the functions merging_label, merging_index , merging_depth , merging_thickness.
+    These functions merge the layers according to the min_layer_thick.
+    For more information refer to those.
+
+    Parameters
+    ----------
+    :param cpt_data : CPT data set
+    :param min_layer_thick : Minimum layer thickness
+    :return depth_json: depth merged
+    :return indx_json: index of the merged list
+    :return lithology_json: merged lithology
+
+    """
+    import robertson
+
+    # compute lithology of interpolated cpt
+    cpt_data["Qtn"][cpt_data["Qtn"] <= 1.] = 1.0
+    cpt_data["Qtn"][cpt_data["Qtn"] >= 1000.] = 1000.
+    cpt_data["Fr"][cpt_data["Fr"] <= 0.1] = 0.1
+    cpt_data["Fr"][cpt_data["Fr"] >= 10.] = 10.
+
+    classification = robertson.Robertson()
+    classification.soil_types()
+    lithology, _ = classification.lithology(cpt_data["Qtn"], cpt_data["Fr"])
+
+    depth = cpt_data["depth"]
+
+    # Find indices of local unmerged layers
+    aux = ""
+    idx = []
+    for j, val in enumerate(lithology):
+        if val != aux:
+            aux = val
+            idx.append(j)
+
+    # Depth between local unmerged layers
+    local_z_ini = [depth[i] for i in idx]
+    # Thicknesses between local unmerged layers
+    local_thick = np.append(np.diff(local_z_ini), depth[-1] - local_z_ini[-1])
+    # Actual Merging
+    new_thickness = merging_thickness(local_thick, min_layer_thick)
+
+    depth_json = merging_depth(depth, new_thickness)
+    indx_json = merging_index(depth, depth_json)
+    lithology_json = merging_label(indx_json, lithology)
+
+    return depth_json, indx_json, lithology_json
+
+
+def merging_label(indx_json, lithology):
+    r"""
+    Function that joins the lithology labels of each merged layer.
+    """
+    new_label = []
+    start = indx_json[:-1]
+    finish = indx_json[1:]
+    for i in range(len(start)):
+        # sorted label list
+        label_list = sorted(set(lithology[start[i]:finish[i]]),
+                            key=lambda x: lithology[start[i]:finish[i]].index(x))
+        new_label.append(r'/'.join(label_list))
+    return new_label
+
+
+def merging_index(depth, depth_json):
+    r"""
+    Function that produces the indexes of the merged layers by finding which depths are referred.
+    """
+    new_index = []
+    for i in range(len(depth)):
+        if depth[i] in depth_json:
+            new_index.append(i)
+    return new_index
+
+
+def merging_depth(depth, new_thickness):
+    r"""
+    Function that calculates the top level depth of each layer by summing the thicknesses.
+    """
+    new_depth = np.append(depth[0], new_thickness)
+    new_depth = np.cumsum(new_depth)
+    return new_depth
+
+
+def merging_thickness(local_thick, min_layer_thick):
+    r"""
+     In this function the merging og the layers is achieved according to the min_layer thick.
+
+     .._element:
+     .. figure:: ./_static/Merge_Flowchart.png
+         :width: 350px
+         :align: center
+         :figclass: align-center
+
+
+     """
+    new_thickness = []
+    now_thickness = 0
+    counter = 0
+    while counter <= len(local_thick) - 1:
+        while now_thickness < min_layer_thick:
+            now_thickness += local_thick[counter]
+            counter += 1
+            if counter == len(local_thick) and now_thickness < min_layer_thick:
+                new_thickness[-1] += now_thickness
+                return new_thickness
+        new_thickness.append(now_thickness)
+        now_thickness = 0
+    return new_thickness
+
+
+def add_json(jsn, id, depth_json, indx_json, lithology_json, data_cpt):
+    """
+    Add to json file the results.
+
+    Parameters
+    ----------
+    :param jsn: Json data structure
+    :param id: Scenario (index)
+    """
+
+    # create data
+    data = {"lithology": [],
+            "depth": [],
+            "E": [],
+            "v": [],
+            "rho": [],
+            "damping": [],
+            "var_depth": [],
+            "var_E": [],
+            "var_v": [],
+            "var_rho": [],
+            "var_damping": [],
+            }
+
+    # populate structure
+    for i in range(len(indx_json) - 1):
+        # lithology
+        data["lithology"].append(str(lithology_json[i]))
+        # depth: variance is the same as for IC
+        data["depth"].append(np.round(depth_json[i], 2))
+        data["var_depth"].append(0.)
+        # Young modulus
+        E = 2. * data_cpt["G0"][indx_json[i]:indx_json[i + 1]] * (1. + data_cpt["poisson"][indx_json[i]:indx_json[i + 1]])
+        mean, std = log_normal_parameters(E)
+        data["E"].append(int(np.round(mean)))
+        data["var_E"].append(int(np.round(std**2)))
+        # poisson ratio
+        poisson = data_cpt["poisson"][indx_json[i]:indx_json[i + 1]]
+        mean, std = log_normal_parameters(poisson)
+        data["v"].append(np.round(mean, 3))
+        data["var_v"].append(np.round(std**2, 3))
+        # density
+        rho = data_cpt["rho"][indx_json[i]:indx_json[i + 1]]
+        mean, std = log_normal_parameters(rho)
+        data["rho"].append(int(np.round(mean)))
+        data["var_rho"].append(int(np.round(std**2)))
+        # damping
+        damp = data_cpt["damping"][indx_json[i]:indx_json[i + 1]]
+        mean, std = log_normal_parameters(damp)
+        data["damping"].append(np.round(mean, 5))
+        data["var_damping"].append(np.round(std**2, 5))
+
+    jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
+    jsn["scenarios"][id].update({"data": data})
+
+    return jsn
+
+
+def dump_json(jsn, index, output_folder):
+    """
+    Computes the probability of the scenario and dump json file into output file.
+
+    Parameters
+    ----------
+    :param jsn: json file with data structure
+    :param input_dic: dictionary with the input information
+    :param index: index of the calculation point
+    """
+
+    # write file
+    with open(os.path.join(output_folder, "results_" + str(index) + ".json"), "w") as fo:
+        json.dump(jsn, fo, indent=2)
+    return

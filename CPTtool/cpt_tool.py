@@ -2,6 +2,7 @@ import argparse
 import log_handler
 import bro
 import sys
+import tools_utils
 
 
 def define_methods(input_file):
@@ -93,8 +94,8 @@ def read_json(input_file):
     return data
 
 
-def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file,
-             gamma_max=22, pwp_level=0):
+def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn,
+             scenario, p=1, gamma_max=22, pwp_level=0):
     """
     Read CPT
 
@@ -109,17 +110,22 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     :param make_plots: Bool to make plots
     :param index_coordinate: Index of the calculation coordinate point
     :param log_file: Log file for the analysis
+    :param jsn: dictionary with the scenarios
+    :param scenario: scenario number
+    :param p: (optional) power for the interpolation scheme
     :param gamma_max: (optional) maximum value specific weight soil
     :param pwp_level: (optional) pore water level in NAP
+    :return: return_cpt: list with the processed cpt objects
     """
 
     # read the cpt files
     import cpt_module
 
     # dictionary for the results
-    jsn = {"scenarios": []}
+    # jsn = {"scenarios": []}
+    results_cpt = {}
     # index for the scenarios. does not take into account the scenarios
-    scenario = 0
+    # scenario = 0
     for idx_cpt in range(len(cpt_BRO)):
         # add message to log file
         log_file.info_message("Reading CPT: " + cpt_BRO[idx_cpt]["id"])
@@ -151,22 +157,27 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         cpt.damp_calc(method=methods["OCR"])
         # compute Poisson ratio
         cpt.poisson_calc()
-        # merge the layers thickness
-        cpt.merge_thickness(float(input_dictionary["MinLayerThickness"]))
-        # add results to the dictionary
-        cpt.add_json(jsn, scenario)
         # make the plots (optional)
         if make_plots:
             cpt.write_csv()
             cpt.plot_cpt()
             cpt.plot_lithology()
         # increase index of the scenario
-        scenario += 1
+        # scenario += 1
+        results_cpt.update({cpt_BRO[idx_cpt]["id"]: cpt})
         # add to log file that the analysis is successful
         log_file.info_message("Analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
-    # save the results file
-    cpt.update_dump_json(jsn, input_dictionary, index_coordinate)
-    return
+
+    # perform interpolation
+    result_interp = tools_utils.interpolation(results_cpt, [input_dictionary['Receiver_x'][index_coordinate],
+                                                            input_dictionary['Receiver_y'][index_coordinate]],
+                                              power=p)
+
+    # merge the layers thickness
+    depth_json, indx_json, lithology_json = tools_utils.merge_thickness(result_interp, float(input_dictionary["MinLayerThickness"]))
+    # add results to the dictionary
+    jsn = tools_utils.add_json(jsn, scenario, depth_json, indx_json, lithology_json, result_interp)
+    return jsn
 
 
 def analysis(properties, methods_cpt, output, plots):
@@ -185,38 +196,92 @@ def analysis(properties, methods_cpt, output, plots):
     nb_points = len(properties["Source_x"])
 
     # for each calculation point
-    for i in range(nb_points):
+    for idx in range(nb_points):
+
+        # variables
+        jsn = {"scenarios": []}  # json dictionary
+        scenario = 0  # scenario number
+
         # Define log file
-        log_file = log_handler.LogFile(output, i)
-        log_file.info_message("Analysis started for coordinate point: (" + properties["Source_x"][i] + ", "
-                              + properties["Source_y"][i] + ")")
+        log_file = log_handler.LogFile(output, idx)
+        log_file.info_message("Analysis started for coordinate point: (" + properties["Source_x"][idx] + ", "
+                              + properties["Source_y"][idx] + ")")
 
         # read BRO data base
         inpt = {"BRO_data": properties["BRO_data"],
-                "Source_x": float(properties["Source_x"][i]), "Source_y": float(properties["Source_y"][i]),
+                "Source_x": float(properties["Source_x"][idx]), "Source_y": float(properties["Source_y"][idx]),
                 "Radius": float(methods_cpt["radius"])}
         cpts = bro.read_bro(inpt)
 
-        # ToDo: for the moment only uses cpt circle
-        cpts = cpts['circle']['data']
+        results = {}
+        # check points within polygons
+        cpts_polygons = {}
+        polygons_names = []
+        for zone in cpts['polygons']:
+            cpts_polygons.update({zone: {"data": list(filter(None, cpts['polygons'][zone]['data'])),
+                                         "perc": cpts['polygons'][zone]['perc']
+                                         }
+                                  })
 
-        # remove the nones from CPTs
-        cpts = list(filter(None, cpts))
+            for c in cpts_polygons[zone]["data"]:
+                polygons_names.append(c["id"])
 
-        # # ToDo: selects only cpts without the gm_code (they are a repeat)
-        # cpts = [c for c in cpts if 'gm_code' not in c.keys()]
+        # process cpts polygons
+        results.update({"polygons": {}})
+        for zone in cpts_polygons:
+            # remove the nones
+            data = list(filter(None, cpts['polygons'][zone]['data']))
+            if data:
+                jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario, p=1)
+                results["polygons"].update({zone: True})
+                prob = cpts['polygons'][zone]['perc']
+                jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
+                                                   "probability": round(prob, 1)})
+                scenario += 1
 
-        # check if cpts have data or are empty
-        if not cpts:
-            log_file.error_message("No CPTS in this coordinate point")
-            log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", "
-                                  + properties["Source_y"][i] + ")")
+        # check points within circle
+        cpts_circle = list(filter(None, cpts['circle']['data']))
+        # get cpts that are not in polygons
+        circle_names = []
+        circle_idx = []
+        for j, c in enumerate(cpts_circle):
+            circle_names.append(c["id"])
+            circle_idx.append(j)
+
+        circle_names = [c["id"] for c in cpts_circle]
+        # process only the ones that are not part of polygons
+        names_diff = list(set(circle_names) - set(polygons_names))
+        # get the indexes of the circle cpts to be processed
+        circle_idx = [circle_names.index(n) for n in names_diff]
+        cpts_circle = [cpts_circle[j] for j in circle_idx]
+
+        # remove the nones
+        data = list(filter(None, cpts_circle))
+
+        # get indexes of
+        results.update({"circle": []})
+        if data:
+            jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario, p=0)
+            results["circle"] = True
+            prob = [cpts['polygons'][zone]['perc'] for zone in cpts['polygons']]
+            jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
+                                               "probability": round(1. - sum(prob), 1)})
+            scenario += 1
+
+        # check if cpts have data or are all empty: this mean that this point has no data
+        if not results["circle"] and not results["polygons"]:
+            log_file.error_message("No data in this coordinate point")
+            log_file.info_message("Analysis finished for coordinate point: (" + str(properties["Source_x"][idx]) + ", "
+                                  + str(properties["Source_y"][idx]) + ")")
             log_file.close()
             continue
-        # process cpts
-        read_cpt(cpts, methods_cpt, output, properties, plots, i, log_file)
-        log_file.info_message("Analysis finished for coordinate point: (" + properties["Source_x"][i] + ", "
-                              + properties["Source_y"][i] + ")")
+
+        # dump json
+        tools_utils.dump_json(jsn, idx, output)
+
+        # processed cpts
+        log_file.info_message("Analysis finished for coordinate point: (" + str(properties["Source_x"][idx]) + ", "
+                              + str(properties["Source_y"][idx]) + ")")
         log_file.close()
     return
 
