@@ -59,6 +59,6 @@ class InverseDistance:
         weights = self.training_data[idx.ravel()].reshape(idx.shape)
 
         # interpolate
-        self.zn = np.sum(weights / dist ** self.power, axis=1) / np.sum(1. / dist, axis=1)
+        self.zn = np.sum(weights / dist ** self.power, axis=1) / np.sum(1. / dist ** self.power, axis=1)
 
         return
