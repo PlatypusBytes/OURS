@@ -122,53 +122,6 @@ def interpolation(data_cpt, coordinates, power=1):
     return results
 
 
-def compute_probability(coord_cpt, coord_src, coord_rec):
-    r"""
-    Compute the probability for each scenario following the following formula:
-
-    .. math::
-
-        w_{i} = \frac{1 - \frac{R_{S,i} \cdot \left(R_{S,i} + R_{R,i} \right)}
-                               {\sum_{i=1}^{n}R_{S,i} \cdot \left(R_{S,i} + R_{R,i} \right)}}{n - 1}
-
-
-    where :math:`w_i` is the probability associated with the *i* scenario, :math:`R_{S,i}` the distance between the CPT
-    and the source location, :math:`R_{R,i}` the distance between the CPT and the receiver location, and *n* is the
-    number of scenarios/CPTs.
-
-    :param coord_cpt: list of coordinates of the CPTs
-    :param coord_src: coordinates of the source
-    :param coord_rec: coordinates of the receiver
-    :return: probs: probability of occurrence of the scenario
-    """
-
-    # number of scenarios
-    nb_scenarios = len(coord_cpt)
-
-    distance_to_source = []
-    distance_to_receiver = []
-
-    # if there if only one scenario: prob = 100
-    if nb_scenarios == 1:
-        return [100.]
-
-    # iterate around json
-    for i in range(nb_scenarios):
-        distance_to_source.append(np.sqrt((coord_cpt[i][0] - coord_src[0])**2 +
-                                          (coord_cpt[i][1] - coord_src[1])**2))
-        distance_to_receiver.append(np.sqrt((coord_cpt[i][0] - coord_rec[0])**2 +
-                                            (coord_cpt[i][1] - coord_rec[1])**2))
-
-    sum_weights = np.sum([distance_to_source[i] * (distance_to_source[i] + distance_to_receiver[i]) for i in range(nb_scenarios)])
-
-    probs = []
-    for i in range(nb_scenarios):
-        weight = (1 - (distance_to_source[i] * (distance_to_source[i] + distance_to_receiver[i])) / sum_weights) / (nb_scenarios - 1)
-        probs.append(weight * 100.)
-
-    return probs
-
-
 def resource_path(file_name):
     r""""
     Define the relative path to the file
