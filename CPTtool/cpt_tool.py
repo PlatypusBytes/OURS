@@ -121,10 +121,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     import cpt_module
 
     # dictionary for the results
-    # jsn = {"scenarios": []}
     results_cpt = {}
-    # index for the scenarios. does not take into account the scenarios
-    # scenario = 0
     for idx_cpt in range(len(cpt_BRO)):
         # add message to log file
         log_file.info_message("Reading CPT: " + cpt_BRO[idx_cpt]["id"])
@@ -161,8 +158,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
             cpt.write_csv()
             cpt.plot_cpt()
             cpt.plot_lithology()
-        # increase index of the scenario
-        # scenario += 1
+        # update scenario
         results_cpt.update({cpt_BRO[idx_cpt]["id"]: cpt})
         # add to log file that the analysis is successful
         log_file.info_message("Analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
@@ -192,6 +188,8 @@ def analysis(properties, methods_cpt, output, plots):
     """
     # number of points
     nb_points = len(properties["Source_x"])
+    # probability of scenarios
+    prob = []
 
     # for each calculation point
     for idx in range(nb_points):
@@ -232,9 +230,9 @@ def analysis(properties, methods_cpt, output, plots):
             if data:
                 jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
                 results["polygons"].update({zone: True})
-                prob = cpts['polygons'][zone]['perc']
+                prob.append(round(cpts['polygons'][zone]['perc'], 2))
                 jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
-                                                   "probability": round(prob, 1)})
+                                                   "probability": prob[-1]})
                 scenario += 1
 
         # check points within circle
@@ -261,9 +259,8 @@ def analysis(properties, methods_cpt, output, plots):
         if data:
             jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
             results["circle"] = True
-            prob = [cpts['polygons'][zone]['perc'] for zone in cpts['polygons']]
             jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
-                                               "probability": round(1. - sum(prob), 1)})
+                                               "probability": round(1. - sum(prob), 2)})
             scenario += 1
 
         # check if cpts have data or are all empty: this mean that this point has no data
