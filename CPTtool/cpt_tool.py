@@ -95,7 +95,7 @@ def read_json(input_file):
 
 
 def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn,
-             scenario, p=1, gamma_max=22, pwp_level=0):
+             scenario, gamma_max=22, pwp_level=0):
     """
     Read CPT
 
@@ -112,7 +112,6 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     :param log_file: Log file for the analysis
     :param jsn: dictionary with the scenarios
     :param scenario: scenario number
-    :param p: (optional) power for the interpolation scheme
     :param gamma_max: (optional) maximum value specific weight soil
     :param pwp_level: (optional) pore water level in NAP
     :return: return_cpt: list with the processed cpt objects
@@ -170,8 +169,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
 
     # perform interpolation
     result_interp = tools_utils.interpolation(results_cpt, [input_dictionary['Receiver_x'][index_coordinate],
-                                                            input_dictionary['Receiver_y'][index_coordinate]],
-                                              power=p)
+                                                            input_dictionary['Receiver_y'][index_coordinate]])
 
     # merge the layers thickness
     depth_json, indx_json, lithology_json = tools_utils.merge_thickness(result_interp, float(input_dictionary["MinLayerThickness"]))
@@ -232,7 +230,7 @@ def analysis(properties, methods_cpt, output, plots):
             # remove the nones
             data = list(filter(None, cpts['polygons'][zone]['data']))
             if data:
-                jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario, p=1)
+                jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
                 results["polygons"].update({zone: True})
                 prob = cpts['polygons'][zone]['perc']
                 jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
@@ -261,7 +259,7 @@ def analysis(properties, methods_cpt, output, plots):
         # get indexes of
         results.update({"circle": []})
         if data:
-            jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario, p=0)
+            jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
             results["circle"] = True
             prob = [cpts['polygons'][zone]['perc'] for zone in cpts['polygons']]
             jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],

@@ -63,8 +63,8 @@ def interpolation(data_cpt, coordinates, power=1):
     results = {}
 
     # list of attributes to be interpolated
-    # attributes = ["lithology", "NAP", "G0",  "poisson", "rho", "damping"]
     attributes = ["Qtn", "Fr", "G0", "poisson", "rho", "damping", "IC"]
+    attributes_var = ["Qtn_var", "Fr_var", "G0_var", "poisson_var", "rho_var", "damping_var", "IC_var"]
 
     # transform cpt data into a continuous list for all cpts
     coords = []  # cpt coordinates
@@ -114,7 +114,8 @@ def interpolation(data_cpt, coordinates, power=1):
         # predict
         interp.predict(np.array(c_out))
         # assign to result
-        results.update({at: interp.zn})
+        results.update({at: interp.zn,
+                        attributes_var[i]: interp.var})
 
     # add depth to results
     results.update({"NAP": depth})
@@ -140,25 +141,6 @@ def resource_path(file_name):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, file_name)
-
-
-def log_normal_parameters(value):
-    r"""
-    Computes the mean and standard deviation following a lognormal distribution
-
-    :param value: array with values
-    :return: mean, standard deviation
-    """
-
-    # compute mean and standard deviation in normal space
-    aux_mean = np.mean(np.log(value))
-    aux_std = np.std(np.log(value))
-
-    # compute mean and standard deviation in lognormal space
-    mean = np.exp(aux_mean + aux_std ** 2 / 2)
-    std = np.sqrt(np.exp(2 * aux_mean + aux_std ** 2) * (np.exp(aux_std ** 2) - 1))
-
-    return mean, std
 
 
 def ceil_value(data, value):
@@ -331,29 +313,39 @@ def add_json(jsn, id, depth_json, indx_json, lithology_json, data_cpt):
         # depth: variance is the same as for IC
         data["depth"].append(np.round(depth_json[i], 2))
         IC = data_cpt["IC"][indx_json[i]:indx_json[i + 1]]
-        mean, std = log_normal_parameters(IC)
-        new_std = (data_cpt["depth"][indx_json[i + 1]] - data_cpt["depth"][indx_json[i]]) / mean * std
-        data["var_depth"].append(np.round(new_std**2, 2))
-        # Young modulus
+        IC_var = data_cpt["IC_var"][indx_json[i]:indx_json[i + 1]]
+        mean = np.mean(IC)
+        var = np.mean(IC_var)
+        new_var = var * (data_cpt["depth"][indx_json[i + 1]] - data_cpt["depth"][indx_json[i]]) / mean
+        data["var_depth"].append(np.round(new_var, 2))
+        # Young modulus: variance same as G0. poisson is already accounted for in poisson
         E = 2. * data_cpt["G0"][indx_json[i]:indx_json[i + 1]] * (1. + data_cpt["poisson"][indx_json[i]:indx_json[i + 1]])
-        mean, std = log_normal_parameters(E)
+        E_var = data_cpt["G0_var"][indx_json[i]:indx_json[i + 1]] * E / data_cpt["G0"][indx_json[i]:indx_json[i + 1]]
+        mean = np.mean(E)
+        var = np.mean(E_var)
         data["E"].append(int(np.round(mean)))
-        data["var_E"].append(int(np.round(std**2)))
+        data["var_E"].append(int(np.round(var)))
         # poisson ratio
         poisson = data_cpt["poisson"][indx_json[i]:indx_json[i + 1]]
-        mean, std = log_normal_parameters(poisson)
+        poisson_var = data_cpt["poisson_var"][indx_json[i]:indx_json[i + 1]]
+        mean = np.mean(poisson)
+        var = np.mean(poisson_var)
         data["v"].append(np.round(mean, 3))
-        data["var_v"].append(np.round(std**2, 3))
+        data["var_v"].append(np.round(var, 3))
         # density
         rho = data_cpt["rho"][indx_json[i]:indx_json[i + 1]]
-        mean, std = log_normal_parameters(rho)
+        rho_var = data_cpt["rho_var"][indx_json[i]:indx_json[i + 1]]
+        mean = np.mean(rho)
+        var = np.mean(rho_var)
         data["rho"].append(int(np.round(mean)))
-        data["var_rho"].append(int(np.round(std**2)))
+        data["var_rho"].append(int(np.round(var)))
         # damping
         damp = data_cpt["damping"][indx_json[i]:indx_json[i + 1]]
-        mean, std = log_normal_parameters(damp)
+        damp_var = data_cpt["damping_var"][indx_json[i]:indx_json[i + 1]]
+        mean = np.mean(damp)
+        var = np.mean(damp_var)
         data["damping"].append(np.round(mean, 5))
-        data["var_damping"].append(np.round(std**2, 5))
+        data["var_damping"].append(np.round(var, 5))
 
     jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
     jsn["scenarios"][id].update({"data": data})

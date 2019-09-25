@@ -17,6 +17,7 @@ class InverseDistance:
         # define variables
         self.tree = []  # KDtree with nearest neighbors
         self.zn = []  # interpolation results
+        self.var = []  # interpolation variance
         self.training_data = []  # training data
         self.training_points = []  # training points
         # settings
@@ -47,6 +48,8 @@ class InverseDistance:
         """
         Perform interpolation with inverse distance method
 
+        The mean and  variance are computed based on :cite:`deutsch_2009`, :cite:`calle_1`, :cite:`calle_2`.
+
         :param prediction_points: prediction points
         :return:
         """
@@ -56,9 +59,18 @@ class InverseDistance:
         dist += self.tol  # to overcome division by zero
 
         # compute weights
-        weights = self.training_data[idx.ravel()].reshape(idx.shape)
+        data = self.training_data[idx.ravel()].reshape(idx.shape)
 
-        # interpolate
-        self.zn = np.sum(weights / dist ** self.power, axis=1) / np.sum(1. / dist ** self.power, axis=1)
+        # interpolate average
+        self.zn = np.sum(data / dist ** self.power, axis=1) / np.sum(1. / dist ** self.power, axis=1)
+
+        # compute weighted variance
+        for p in range(len(prediction_points)):
+            wei = (1. / dist[p]**self.power) / np.sum(1. / dist[p] ** self.power)
+            point_var = np.sum((data[p] - np.mean(data[p])) ** 2 * wei)
+            self.var.append(point_var)
+
+        # convert to np array
+        self.var = np.array(self.var)
 
         return
