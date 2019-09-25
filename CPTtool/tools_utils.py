@@ -323,8 +323,8 @@ def add_json(jsn, id, depth_json, indx_json, lithology_json, data_cpt):
         E_var = data_cpt["G0_var"][indx_json[i]:indx_json[i + 1]] * E / data_cpt["G0"][indx_json[i]:indx_json[i + 1]]
         mean = np.mean(E)
         var = np.mean(E_var)
-        data["E"].append(int(np.round(mean)))
-        data["var_E"].append(int(np.round(var)))
+        data["E"].append(np.round(mean))
+        data["var_E"].append(np.round(var))
         # poisson ratio
         poisson = data_cpt["poisson"][indx_json[i]:indx_json[i + 1]]
         poisson_var = data_cpt["poisson_var"][indx_json[i]:indx_json[i + 1]]
@@ -337,8 +337,8 @@ def add_json(jsn, id, depth_json, indx_json, lithology_json, data_cpt):
         rho_var = data_cpt["rho_var"][indx_json[i]:indx_json[i + 1]]
         mean = np.mean(rho)
         var = np.mean(rho_var)
-        data["rho"].append(int(np.round(mean)))
-        data["var_rho"].append(int(np.round(var)))
+        data["rho"].append(np.round(mean))
+        data["var_rho"].append(np.round(var))
         # damping
         damp = data_cpt["damping"][indx_json[i]:indx_json[i + 1]]
         damp_var = data_cpt["damping_var"][indx_json[i]:indx_json[i + 1]]

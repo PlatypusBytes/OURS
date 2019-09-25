@@ -61,16 +61,19 @@ class InverseDistance:
         # compute weights
         data = self.training_data[idx.ravel()].reshape(idx.shape)
 
-        # interpolate average
-        self.zn = np.sum(data / dist ** self.power, axis=1) / np.sum(1. / dist ** self.power, axis=1)
-
-        # compute weighted variance
+        # interpolate average and weighted variance
         for p in range(len(prediction_points)):
             wei = (1. / dist[p]**self.power) / np.sum(1. / dist[p] ** self.power)
+            point_mean = np.sum(data[p] * wei)
             point_var = np.sum((data[p] - np.mean(data[p])) ** 2 * wei)
+            self.zn.append(point_mean)
             self.var.append(point_var)
 
         # convert to np array
+        self.zn = np.array(self.zn)
         self.var = np.array(self.var)
 
+        # if only 1 datapoint is available (var = 0 for all points) -> var is nan
+        if all(self.var) == 0:
+            self.var = np.full(len(self.var), np.nan)
         return
