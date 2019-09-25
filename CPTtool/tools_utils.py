@@ -69,50 +69,53 @@ def interpolation(data_cpt, coordinates, power=1):
     # transform cpt data into a continuous list for all cpts
     coords = []  # cpt coordinates
     min_max_nap = []  # cpt min and max depths
-    data_training = np.empty(shape=[0, len(attributes)])  # training data. dimensions nb points x nb attributes
+    data_training = [] # np.empty(shape=[0, len(attributes)])  # training data. dimensions nb points x nb attributes
     # for each cpt
     for i in data_cpt:
         # at each depth get the coordinates
-        for j in data_cpt[i].NAP:
-            coords.append([data_cpt[i].coord[0], data_cpt[i].coord[1], j])
+        # for j in data_cpt[i].NAP:
+            # coords.append([data_cpt[i].coord[0], data_cpt[i].coord[1], j])
+        coords.append([data_cpt[i].coord[0], data_cpt[i].coord[1]])
         # obtain the depths of the cpt
         min_max_nap.append([data_cpt[i].coord[0], data_cpt[i].coord[1],
                             min(data_cpt[i].NAP), max(data_cpt[i].NAP),
                             np.mean(np.diff(data_cpt[i].NAP))])
 
-        # get atttributes to interpolate
+    # get atttributes to interpolate
+    for at in attributes:
         training = []
-        for at in attributes:
+        for i in data_cpt:
             training.append(getattr(data_cpt[i], at))
-        data_training = np.vstack((np.array(data_training), np.transpose(training)))
+        data_training.append(training)
 
     # interpolate the top and bottom depth at this point
     interp_top = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power)
     # create interpolation object
     interp_top.interpolate(np.array(min_max_nap)[:, :2], np.array(min_max_nap)[:, 3])
     # predict
-    interp_top.predict(np.array(coordinates).reshape(1, 2))
+    interp_top.predict(np.array(coordinates).reshape(1, 2), point=True)
     # interpolate the distances
     interp_bot = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power)
     # create interpolation object
     interp_bot.interpolate(np.array(min_max_nap)[:, :2], np.array(min_max_nap)[:, 2])
     # predict
-    interp_bot.predict(np.array(coordinates).reshape(1, 2))
+    interp_bot.predict(np.array(coordinates).reshape(1, 2), point=True)
 
     # create depth vector
     depth = np.linspace(interp_top.zn[0],
                         interp_bot.zn[0],
-                        np.ceil((interp_bot.zn[0] - interp_top.zn[0]) / np.mean(np.array(min_max_nap)[:, 4])))
+                        int(np.ceil((interp_bot.zn[0] - interp_top.zn[0]) / np.mean(np.array(min_max_nap)[:, 4])) + 1))
     # coordinates for interpolation
-    c_out = [[coordinates[0], coordinates[1], i] for i in depth]
+    # c_out = [[coordinates[0], coordinates[1], i] for i in depth]
+    c_out = [coordinates[0], coordinates[1]]
 
     # for each attribute perform interpolation and assign it to the results dict
     for i, at in enumerate(attributes):
         interp = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power)
         # create interpolation object
-        interp.interpolate(coords, np.array(data_training)[:, i])
+        interp.interpolate(coords, np.array(data_training[i]))
         # predict
-        interp.predict(np.array(c_out))
+        interp.predict(np.array(c_out).reshape(1, 2))
         # assign to result
         results.update({at: interp.zn,
                         attributes_var[i]: interp.var})

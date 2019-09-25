@@ -44,36 +44,45 @@ class InverseDistance:
 
         return
 
-    def predict(self, prediction_points):
+    def predict(self, prediction_point, point=False):
         """
         Perform interpolation with inverse distance method
 
         The mean and  variance are computed based on :cite:`deutsch_2009`, :cite:`calle_1`, :cite:`calle_2`.
 
-        :param prediction_points: prediction points
+        :param prediction_point: prediction points
+        :param point: (optional) boolean for the case of being a single point
         :return:
         """
 
         # get distances and indexes of the closest nb_points
-        dist, idx = self.tree.query(prediction_points, self.nb_near_points)
+        dist, idx = self.tree.query(prediction_point, self.nb_near_points)
         dist += self.tol  # to overcome division by zero
+        dist = np.array(dist).reshape(self.nb_near_points)
+        idx = np.array(idx).reshape(self.nb_near_points)
 
-        # compute weights
-        data = self.training_data[idx.ravel()].reshape(idx.shape)
+        # for every dataset
+        point_aver = []
+        point_var = []
+        for p in range(self.nb_near_points):
+            # compute the weighs
+            wei = (1. / dist[p]**self.power) / np.sum(1. / dist ** self.power)
+            point_aver.append(self.training_data[idx[p]] * wei)
 
-        # interpolate average and weighted variance
-        for p in range(len(prediction_points)):
-            wei = (1. / dist[p]**self.power) / np.sum(1. / dist[p] ** self.power)
-            point_mean = np.sum(data[p] * wei)
-            point_var = np.sum((data[p] - np.mean(data[p])) ** 2 * wei)
-            self.zn.append(point_mean)
-            self.var.append(point_var)
+        # if single point
+        if point:
+            self.zn = [np.sum(point_aver)]
+        else:
+            self.zn = np.sum(np.array(point_aver), axis=0)
 
-        # convert to np array
-        self.zn = np.array(self.zn)
-        self.var = np.array(self.var)
+        # compute variance
+        for p in range(self.nb_near_points):
+            # compute the weighs
+            wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
+            point_var.append((self.training_data[p] - self.zn) ** 2 * wei)
+        self.var = np.sum(np.array(point_var), axis=0)
 
-        # if only 1 datapoint is available (var = 0 for all points) -> var is nan
-        if all(self.var) == 0:
+        # # if only 1 data point is available (var = 0 for all points) -> var is nan
+        if np.max(self.var) <= 1e-24:
             self.var = np.full(len(self.var), np.nan)
         return

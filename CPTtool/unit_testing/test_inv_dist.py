@@ -25,7 +25,7 @@ class TestInverDist(TestCase):
         interp.predict(testing.reshape(1, 1))
 
         # testing
-        np.testing.assert_array_almost_equal(interp.zn[0], data[4])
+        np.testing.assert_array_almost_equal(interp.zn, data[4])
         return
 
     def test_data_2(self):
@@ -40,7 +40,7 @@ class TestInverDist(TestCase):
         interp.predict(testing.reshape(1, 1))
 
         # testing
-        np.testing.assert_array_almost_equal(interp.zn[0], data[6])
+        np.testing.assert_array_almost_equal(interp.zn, data[6])
         return
 
     def test_data_3(self):
@@ -52,17 +52,17 @@ class TestInverDist(TestCase):
         interp = inv_dist.InverseDistance(nb_points=len(data), pwr=pw)
         # create interpolation object
         interp.interpolate(position.reshape((len(position), 1)), data)
-        # predict
-        interp.predict(testing.reshape(10, 1))
 
         # for each testing point
         for i, t in enumerate(testing):
+            # predict
+            interp.predict(t.reshape(1, 1))
             # result
             dist = np.abs((position - t) + 1e-9)
             val = np.sum(data / (dist ** pw)) / np.sum(1 / (dist ** pw))
 
             # testing
-            np.testing.assert_array_almost_equal(interp.zn[i], val)
+            np.testing.assert_array_almost_equal(interp.zn, val)
         return
 
     def test_data_4(self):
@@ -74,17 +74,17 @@ class TestInverDist(TestCase):
         interp = inv_dist.InverseDistance(nb_points=len(data), pwr=pw)
         # create interpolation object
         interp.interpolate(position.reshape((len(position), 1)), data)
-        # predict
-        interp.predict(testing.reshape(10, 1))
 
         # for each testing point
         for i, t in enumerate(testing):
+            # predict
+            interp.predict(t.reshape(1, 1))
             # result
             dist = np.abs((position - t) + 1e-9)
             val = np.sum(data / (dist ** pw)) / np.sum(1 /(dist ** pw))
 
             # testing
-            np.testing.assert_array_almost_equal(interp.zn[i], val)
+            np.testing.assert_array_almost_equal(interp.zn, val)
         return
 
     def test_data_5(self):
@@ -100,7 +100,7 @@ class TestInverDist(TestCase):
         interp.predict(testing.reshape(1, 1))
 
         # testing
-        np.testing.assert_array_almost_equal(interp.zn[0], np.mean(data))
+        np.testing.assert_array_almost_equal(interp.zn, np.mean(data))
         return
 
     def tearDown(self):
