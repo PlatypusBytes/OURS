@@ -380,6 +380,63 @@ class TestUtils(TestCase):
         np.testing.assert_array_almost_equal(results["IC_var"], var)
         return
 
+    def test_interpolation_4(self):
+        """
+        Two points. interpolation is made for points with different lengths.
+        """
+        # create cpt object
+        cpt1 = Object()
+        cpt1.depth = np.linspace(0, 10, 10)
+        cpt1.NAP = np.linspace(0, -10, 10)
+        cpt1.tip = np.zeros(10)
+        cpt1.Qtn = np.ones(10)
+        cpt1.Fr = np.ones(10) * 2
+        cpt1.G0 = np.ones(10) * 10
+        cpt1.poisson = np.ones(10) * 0.12
+        cpt1.rho = np.ones(10)
+        cpt1.damping = np.ones(10) * 0.01
+        cpt1.IC = np.ones(10) * 0.25
+        cpt1.coord = [10, 20]
+
+        cpt2 = Object()
+        cpt2.depth = np.linspace(1, 11, 20)
+        cpt2.NAP = np.linspace(-1, -11, 20)
+        cpt2.tip = np.zeros(20) * 2
+        cpt2.Qtn = np.ones(20) * 2
+        cpt2.Fr = np.ones(20) * 2 * 2
+        cpt2.G0 = np.ones(20) * 10 * 2
+        cpt2.poisson = np.ones(20) * 0.12 * 2
+        cpt2.rho = np.ones(20) * 2
+        cpt2.damping = np.ones(20) * 0.01 * 2
+        cpt2.IC = np.ones(20) * 0.25 * 2
+        cpt2.coord = [20, 40]
+
+        coordinates = ['15', '30']
+
+        cpts_data = {"one": cpt1, "two": cpt2}
+        results = tu.interpolation(cpts_data, [coordinates[0], coordinates[1]])
+
+        # test interpolation
+        np.testing.assert_array_almost_equal(results["Qtn"], np.ones(14) * 1.5)
+        np.testing.assert_array_almost_equal(results["Fr"], np.ones(14) * 2 * 1.5)
+        np.testing.assert_array_almost_equal(results["G0"], np.ones(14) * 10 * 1.5)
+        np.testing.assert_array_almost_equal(results["poisson"], np.ones(14) * 0.12 * 1.5)
+        np.testing.assert_array_almost_equal(results["rho"], np.ones(14) * 1.5)
+        np.testing.assert_array_almost_equal(results["damping"], np.ones(14) * 0.01 * 1.5)
+        np.testing.assert_array_almost_equal(results["IC"], np.ones(14) * 0.25 * 1.5)
+        np.testing.assert_array_almost_equal(results["NAP"], np.linspace(-0.5, -10.5, 14))
+        np.testing.assert_array_almost_equal(results["depth"], np.linspace(0.5, 10.5, 14) - 0.5)
+        # test variance
+
+        np.testing.assert_array_almost_equal(results["Qtn_var"], np.ones(14) * np.var([cpt1.Qtn, cpt2.Qtn[:10]]))
+        np.testing.assert_array_almost_equal(results["Fr_var"], np.ones(14) * np.var([cpt1.Fr, cpt2.Fr[:10]]))
+        np.testing.assert_array_almost_equal(results["G0_var"], np.ones(14) * np.var([cpt1.G0, cpt2.G0[:10]]))
+        np.testing.assert_array_almost_equal(results["poisson_var"], np.ones(14) * np.var([cpt1.poisson, cpt2.poisson[:10]]))
+        np.testing.assert_array_almost_equal(results["rho_var"], np.ones(14) * np.var([cpt1.rho, cpt2.rho[:10]]))
+        np.testing.assert_array_almost_equal(results["damping_var"], np.ones(14) * np.var([cpt1.damping, cpt2.damping[:10]]))
+        np.testing.assert_array_almost_equal(results["IC_var"], np.ones(14) * np.var([cpt1.IC, cpt2.IC[:10]]))
+        return
+
     def tearDown(self):
         return
 

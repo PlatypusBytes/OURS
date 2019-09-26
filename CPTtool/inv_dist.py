@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.spatial import cKDTree
+from scipy.interpolate import interp1d
 
 
 class InverseDistance:
@@ -20,24 +21,30 @@ class InverseDistance:
         self.var = []  # interpolation variance
         self.training_data = []  # training data
         self.training_points = []  # training points
+        self.depth_data = []  # training points depth
+        self.depth_prediction = []  # interpolation depth
         # settings
         self.nb_near_points = nb_points
         self.power = pwr
         self.tol = tol
         return
 
-    def interpolate(self, training_points, training_data):
+    def interpolate(self, training_points, training_data, depth_points, depth):
         """
         Define the KDtree
 
         :param training_points: array with the training points
         :param training_data: data at the training points
+        :param depth_points: depth at the at the training points
+        :param depth: data at the interpolation points
         :return:
         """
 
         # assign to variables
         self.training_points = training_points  # training points
         self.training_data = training_data  # data at the training points
+        self.depth_data = depth_points  # depth from the training points
+        self.depth_prediction = depth  # depth for the interpolation points
 
         # compute Euclidean distance from grid to training
         self.tree = cKDTree(self.training_points)
@@ -63,23 +70,44 @@ class InverseDistance:
 
         # for every dataset
         point_aver = []
+        point_val = []
         point_var = []
+        point_depth = []
         for p in range(self.nb_near_points):
             # compute the weighs
             wei = (1. / dist[p]**self.power) / np.sum(1. / dist ** self.power)
             point_aver.append(self.training_data[idx[p]] * wei)
+            point_val.append(self.training_data[idx[p]])
+            point_depth.append(self.depth_data[idx[p]])
 
         # if single point
         if point:
             self.zn = [np.sum(point_aver)]
+        # if
         else:
-            self.zn = np.sum(np.array(point_aver), axis=0)
+            new = []
+            for i in range(len(self.depth_data)):
+                f = interp1d(point_depth[i], point_aver[i], fill_value="extrapolate")
+                new.append(f(self.depth_prediction))
+
+            self.zn = np.sum(np.array(new), axis=0)
 
         # compute variance
-        for p in range(self.nb_near_points):
-            # compute the weighs
-            wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
-            point_var.append((self.training_data[p] - self.zn) ** 2 * wei)
+        if point:
+            for p in range(self.nb_near_points):
+                # compute the weighs
+                wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
+                point_var.append((self.training_data[p] - self.zn) ** 2 * wei)
+        else:
+            for p in range(self.nb_near_points):
+                # compute the weighs
+                wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
+                new = []
+                for i in range(len(self.depth_data)):
+                    f = interp1d(point_depth[i], point_val[i], fill_value="extrapolate")
+                    new.append(f(self.depth_prediction))
+                point_var.append((new[p] - self.zn) ** 2 * wei)
+
         self.var = np.sum(np.array(point_var), axis=0)
 
         # # if only 1 data point is available (var = 0 for all points) -> var is nan
