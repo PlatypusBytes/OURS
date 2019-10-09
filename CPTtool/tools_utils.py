@@ -74,8 +74,6 @@ def interpolation(data_cpt, coordinates, power=1):
     # for each cpt
     for i in data_cpt:
         # at each depth get the coordinates
-        # for j in data_cpt[i].NAP:
-            # coords.append([data_cpt[i].coord[0], data_cpt[i].coord[1], j])
         coords.append([data_cpt[i].coord[0], data_cpt[i].coord[1]])
         # obtain the depths of the cpt
         min_max_nap.append([data_cpt[i].coord[0], data_cpt[i].coord[1],

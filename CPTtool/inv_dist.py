@@ -102,7 +102,7 @@ class InverseDistance:
             # compute mean
             new = []
             for i in range(self.nb_near_points):
-                f = interp1d(point_depth[i], point_val[i], fill_value=(point_val[p][-1], point_val[p][0]), bounds_error=False)
+                f = interp1d(point_depth[i], point_val[i], fill_value=(point_val[i][-1], point_val[i][0]), bounds_error=False)
                 new.append(f(self.depth_prediction))
 
             for p in range(self.nb_near_points):
