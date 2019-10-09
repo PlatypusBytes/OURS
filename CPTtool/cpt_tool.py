@@ -135,6 +135,8 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
             # If the quality is not good skip this cpt file
             log_file.error_message(data_quality)
             continue
+        # smooth data
+        cpt.smooth()
         # compute qc
         cpt.qt_calc()
         # compute unit weight

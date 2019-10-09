@@ -437,6 +437,18 @@ class TestUtils(TestCase):
         np.testing.assert_array_almost_equal(results["IC_var"], np.ones(14) * np.var([cpt1.IC, cpt2.IC[:10]]))
         return
 
+    def test_smooth_1(self):
+        x = np.linspace(0, 100, 100)
+        y = np.sin(x)
+        y_smooth = tu.smooth(y, window_len=3)
+
+        yy = np.zeros(100)
+        for i in range(100):
+            yy[i] = np.mean(y[i:i+3])
+
+        np.testing.assert_array_almost_equal(y_smooth[1:-1], yy[:-2])
+        return
+
     def tearDown(self):
         return
 

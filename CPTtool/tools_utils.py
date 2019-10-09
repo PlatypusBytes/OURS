@@ -370,3 +370,26 @@ def dump_json(jsn, index, output_folder):
     with open(os.path.join(output_folder, "results_" + str(index) + ".json"), "w") as fo:
         json.dump(jsn, fo, indent=2)
     return
+
+
+def smooth(sig, window_len=10):
+    r"""
+    Smooth signal
+
+    It uses a moving average with window to smooth the signal
+
+    :param sig: original signal
+    :param window_len: (optional) number of samples for the smoothing window: default 10
+    :return: smoothed signal
+    """
+
+    # if window length bigger that the size of the signal: window is the same size as the signal
+    if window_len > len(sig):
+        window_len = len(sig)
+
+    s = np.r_[2 * sig[0] - sig[window_len:1:-1], sig, 2 * sig[-1] - sig[-1:-window_len:-1]]
+    # constant window
+    w = np.ones(window_len)
+    # convolute signal
+    y = np.convolve(w / w.sum(), s, mode='same')
+    return y[window_len - 1:-window_len + 1]

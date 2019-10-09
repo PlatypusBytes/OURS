@@ -126,6 +126,20 @@ class CPT:
             self.water = pore_pressure * 1000.
         return True
 
+    def smooth(self, nb_points=5):
+        r"""
+        Smooth the cpt input data
+
+        :param nb_points: (optional) number of points for smoothing. default 5
+        :return:
+        """
+
+        self.tip = tools_utils.smooth(self.tip, window_len=nb_points)
+        self.friction = tools_utils.smooth(self.friction, window_len=nb_points)
+        self.friction_nbr = tools_utils.smooth(self.friction_nbr, window_len=nb_points)
+        self.water = tools_utils.smooth(self.water, window_len=nb_points)
+        return
+
     def define_pre_drill(self, cpt_BRO):
         """
         Checks the existence of pre-drill.
