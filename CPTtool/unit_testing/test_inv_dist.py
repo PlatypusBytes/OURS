@@ -24,8 +24,15 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 1), point=True)
 
-        # testing
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn[0], data[4])
+        # testing - var
+        dist = position - testing + 1e-9
+        var = []
+        for i in range(len(position)):
+            weight = (1. / dist[i]**1) / np.sum(1. / dist ** 1)
+            var.append((data[i] - data[4])**2 * weight)
+        np.testing.assert_array_almost_equal(interp.var[0], np.sum(var))
         return
 
     def test_data_2(self):
@@ -39,8 +46,15 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 1), point=True)
 
-        # testing
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn[0], data[6])
+        # testing - var
+        dist = position - testing + 1e-9
+        var = []
+        for i in range(len(position)):
+            weight = (1. / dist[i]**1) / np.sum(1. / dist ** 1)
+            var.append((data[i] - data[6])**2 * weight)
+        np.testing.assert_array_almost_equal(interp.var[0], np.sum(var))
         return
 
     def test_data_3(self):
@@ -61,8 +75,14 @@ class TestInverDist(TestCase):
             dist = np.abs((position - t) + 1e-9)
             val = np.sum(data / (dist ** pw)) / np.sum(1 / (dist ** pw))
 
-            # testing
+            # testing - mean
             np.testing.assert_array_almost_equal(interp.zn[0], val)
+            # testing - var
+            var = []
+            for k in range(len(position)):
+                weight = (1. / dist[k] ** pw) / np.sum(1. / dist ** pw)
+                var.append((data[k] - val) ** 2 * weight)
+            np.testing.assert_array_almost_equal(interp.var[0], np.sum(var))
         return
 
     def test_data_4(self):
@@ -81,10 +101,16 @@ class TestInverDist(TestCase):
             interp.predict(t.reshape(1, 1), point=True)
             # result
             dist = np.abs((position - t) + 1e-9)
-            val = np.sum(data / (dist ** pw)) / np.sum(1 /(dist ** pw))
+            val = np.sum(data / (dist ** pw)) / np.sum(1 / (dist ** pw))
 
-            # testing
+            # testing - mean
             np.testing.assert_array_almost_equal(interp.zn[0], val)
+            # testing - var
+            var = []
+            for k in range(len(position)):
+                weight = (1. / dist[k] ** pw) / np.sum(1. / dist ** pw)
+                var.append((data[k] - val) ** 2 * weight)
+            np.testing.assert_array_almost_equal(interp.var[0], np.sum(var))
         return
 
     def test_data_5(self):
@@ -99,8 +125,10 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 1), point=True)
 
-        # testing
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn[0], np.mean(data))
+        # testing - var
+        np.testing.assert_array_almost_equal(interp.var[0], np.var(data))
         return
 
     def test_data_6(self):
@@ -116,8 +144,18 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 2))
 
-        # testing
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn, np.ones(10) * 1.5)
+        # testing - var
+        dist = []
+        for i in position:
+            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
+        dist = np.array(dist)
+        var = []
+        for k in range(len(position)):
+            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
+            var.append((data[k] - np.ones(10) * 1.5) ** 2 * weight)
+        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
         return
 
     def test_data_7(self):
@@ -133,8 +171,18 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 2))
 
-        # testing
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn, np.ones(10) * 1.)
+        # testing - var
+        dist = []
+        for i in position:
+            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
+        dist = np.array(dist)
+        var = []
+        for k in range(len(position)):
+            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
+            var.append((data[k] - np.ones(10) * 1.) ** 2 * weight)
+        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
         return
 
     def test_data_8(self):
@@ -153,9 +201,20 @@ class TestInverDist(TestCase):
         # analytical result
         w1 = 1 / np.linalg.norm(position[0]-testing) ** 1
         w2 = 1 / np.linalg.norm(position[1]-testing) ** 1
-        solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
-        # testing
+        solution = (1. * w1 * np.ones(10) + 2. * w2 * np.ones(10)) / (w1 + w2)
+
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn, solution)
+        # testing - var
+        dist = []
+        for i in range(len(position)):
+            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
+        dist = np.array(dist)
+        var = []
+        for k in range(len(position)):
+            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
+            var.append((data[k] - solution) ** 2 * weight)
+        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
         return
 
     def test_data_9(self):
@@ -175,8 +234,19 @@ class TestInverDist(TestCase):
         w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
         w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
         solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
-        # testing
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn, solution)
+        # testing - var
+        dist = []
+        for i in range(len(position)):
+            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
+        dist = np.array(dist)
+        var = []
+        for k in range(len(position)):
+            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
+            var.append((data[k] - solution) ** 2 * weight)
+        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
+
         return
 
     def test_data_10(self):
@@ -196,8 +266,18 @@ class TestInverDist(TestCase):
         w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
         w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
         solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
-        # testing
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn, solution)
+        # testing - var
+        dist = []
+        for i in range(len(position)):
+            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
+        dist = np.array(dist)
+        var = []
+        for k in range(len(position)):
+            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
+            var.append((data[k] - solution) ** 2 * weight)
+        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
         return
 
     def test_data_11(self):
@@ -217,8 +297,18 @@ class TestInverDist(TestCase):
         w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
         w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
         solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
-        # testing
+        # testing - mean
         np.testing.assert_array_almost_equal(interp.zn, solution)
+        # testing - var
+        dist = []
+        for i in range(len(position)):
+            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
+        dist = np.array(dist)
+        var = []
+        for k in range(len(position)):
+            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
+            var.append((data[k] - solution) ** 2 * weight)
+        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
         return
 
     def tearDown(self):

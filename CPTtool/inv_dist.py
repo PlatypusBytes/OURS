@@ -97,15 +97,17 @@ class InverseDistance:
             for p in range(self.nb_near_points):
                 # compute the weighs
                 wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
-                point_var.append((self.training_data[p] - self.zn) ** 2 * wei)
+                point_var.append((point_val[p] - self.zn) ** 2 * wei)
         else:
+            # compute mean
+            new = []
+            for i in range(self.nb_near_points):
+                f = interp1d(point_depth[i], point_val[i], fill_value=(point_val[p][-1], point_val[p][0]), bounds_error=False)
+                new.append(f(self.depth_prediction))
+
             for p in range(self.nb_near_points):
                 # compute the weighs
                 wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
-                new = []
-                for i in range(len(self.depth_data)):
-                    f = interp1d(point_depth[i], point_val[i], fill_value=(point_val[p][-1], point_val[p][0]), bounds_error=False)
-                    new.append(f(self.depth_prediction))
                 point_var.append((new[p] - self.zn) ** 2 * wei)
 
         self.var = np.sum(np.array(point_var), axis=0)
