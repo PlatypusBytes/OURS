@@ -232,9 +232,9 @@ def analysis(properties, methods_cpt, output, plots):
             if data:
                 jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
                 results["polygons"].update({zone: True})
-                prob.append(round(cpts['polygons'][zone]['perc'], 2))
+                prob.append(cpts['polygons'][zone]['perc'])
                 jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
-                                                   "probability": prob[-1]})
+                                                   "probability": round(prob[-1], 2)})
                 scenario += 1
 
         # check points within circle
@@ -265,7 +265,7 @@ def analysis(properties, methods_cpt, output, plots):
             jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
                                                "probability": round(1. - sum(prob), 2)})
             scenario += 1
-        elif jsn:
+        elif jsn["scenarios"]:
             # if circle is empty and polygons exist: update probability of polygons
             for i in range(len(jsn["scenarios"])):
                 jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / sum(prob)
