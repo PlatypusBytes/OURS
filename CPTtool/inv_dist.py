@@ -55,7 +55,7 @@ class InverseDistance:
         """
         Perform interpolation with inverse distance method
 
-        The mean and  variance are computed based on :cite:`deutsch_2009`, :cite:`calle_1`, :cite:`calle_2`.
+        The mean and variance are computed based on :cite:`deutsch_2009`, :cite:`calle_1`, :cite:`calle_2`.
 
         :param prediction_point: prediction points
         :param point: (optional) boolean for the case of being a single point
@@ -86,8 +86,8 @@ class InverseDistance:
         # if
         else:
             new = []
-            for i in range(len(self.depth_data)):
-                f = interp1d(point_depth[i], point_aver[i], fill_value="extrapolate")
+            for i in range(self.nb_near_points):
+                f = interp1d(point_depth[i], point_aver[i], fill_value=(point_aver[i][-1], point_aver[i][0]), bounds_error=False)
                 new.append(f(self.depth_prediction))
 
             self.zn = np.sum(np.array(new), axis=0)
@@ -104,7 +104,7 @@ class InverseDistance:
                 wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
                 new = []
                 for i in range(len(self.depth_data)):
-                    f = interp1d(point_depth[i], point_val[i], fill_value="extrapolate")
+                    f = interp1d(point_depth[i], point_val[i], fill_value=(point_val[p][-1], point_val[p][0]), bounds_error=False)
                     new.append(f(self.depth_prediction))
                 point_var.append((new[p] - self.zn) ** 2 * wei)
 
