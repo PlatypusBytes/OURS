@@ -137,6 +137,90 @@ class TestInverDist(TestCase):
         np.testing.assert_array_almost_equal(interp.zn, np.ones(10) * 1.)
         return
 
+    def test_data_8(self):
+
+        position = np.array([[0, 0], [1, 1]])
+        data = [np.ones(10),
+                np.ones(10) * 2]
+        testing = np.array([0.5, 0.5])
+        # interpolate the top and bottom depth at this point
+        interp = inv_dist.InverseDistance(nb_points=len(data), pwr=1)
+        # create interpolation object
+        interp.interpolate(position.reshape((len(position), 2)), data, [np.linspace(0, 10, 10), np.linspace(0, 10, 10)], np.linspace(0, 10, 10))
+        # predict
+        interp.predict(testing.reshape(1, 2))
+
+        # analytical result
+        w1 = 1 / np.linalg.norm(position[0]-testing) ** 1
+        w2 = 1 / np.linalg.norm(position[1]-testing) ** 1
+        solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
+        # testing
+        np.testing.assert_array_almost_equal(interp.zn, solution)
+        return
+
+    def test_data_9(self):
+
+        position = np.array([[0, 0], [1, 1]])
+        data = [np.ones(10),
+                np.ones(10) * 2]
+        testing = np.array([0.9, 0.9])
+        # interpolate the top and bottom depth at this point
+        interp = inv_dist.InverseDistance(nb_points=len(data), pwr=1)
+        # create interpolation object
+        interp.interpolate(position.reshape((len(position), 2)), data, [np.linspace(0, 10, 10), np.linspace(0, 10, 10)], np.linspace(0, 10, 10))
+        # predict
+        interp.predict(testing.reshape(1, 2))
+
+        # analytical result
+        w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
+        w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
+        solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
+        # testing
+        np.testing.assert_array_almost_equal(interp.zn, solution)
+        return
+
+    def test_data_10(self):
+
+        position = np.array([[0, 0], [1, 1]])
+        data = [np.ones(10),
+                np.ones(10) * 2]
+        testing = np.array([1.5, 1.5])
+        # interpolate the top and bottom depth at this point
+        interp = inv_dist.InverseDistance(nb_points=len(data), pwr=1)
+        # create interpolation object
+        interp.interpolate(position.reshape((len(position), 2)), data, [np.linspace(0, 10, 10), np.linspace(0, 10, 10)], np.linspace(0, 10, 10))
+        # predict
+        interp.predict(testing.reshape(1, 2))
+
+        # analytical result
+        w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
+        w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
+        solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
+        # testing
+        np.testing.assert_array_almost_equal(interp.zn, solution)
+        return
+
+    def test_data_11(self):
+
+        position = np.array([[0, 0], [1, 1]])
+        data = [np.ones(10),
+                np.ones(10) * 2]
+        testing = np.array([1.5, 1.5])
+        # interpolate the top and bottom depth at this point
+        interp = inv_dist.InverseDistance(nb_points=len(data), pwr=1)
+        # create interpolation object
+        interp.interpolate(position.reshape((len(position), 2)), data, [np.linspace(2, 8, 10), np.linspace(0, 10, 10)], np.linspace(0, 10, 10))
+        # predict
+        interp.predict(testing.reshape(1, 2))
+
+        # analytical result
+        w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
+        w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
+        solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
+        # testing
+        np.testing.assert_array_almost_equal(interp.zn, solution)
+        return
+
     def tearDown(self):
         return
 
