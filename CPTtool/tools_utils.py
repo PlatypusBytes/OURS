@@ -319,35 +319,35 @@ def add_json(jsn, id, depth_json, indx_json, lithology_json, data_cpt):
         mean = np.mean(IC)
         var = np.mean(IC_var)
         new_var = var * (data_cpt["depth"][indx_json[i + 1]] - data_cpt["depth"][indx_json[i]]) / mean
-        data["var_depth"].append(np.round(new_var, 2))
+        data["var_depth"].append(np.round(np.sqrt(new_var) / mean, 3))
         # Young modulus: variance same as G0. poisson is already accounted for in poisson
         E = 2. * data_cpt["G0"][indx_json[i]:indx_json[i + 1]] * (1. + data_cpt["poisson"][indx_json[i]:indx_json[i + 1]])
         E_var = data_cpt["G0_var"][indx_json[i]:indx_json[i + 1]] * E / data_cpt["G0"][indx_json[i]:indx_json[i + 1]]
         mean = np.mean(E)
         var = np.mean(E_var)
         data["E"].append(np.round(mean))
-        data["var_E"].append(np.round(var))
+        data["var_E"].append(np.round(np.sqrt(var) / mean, 3))
         # poisson ratio
         poisson = data_cpt["poisson"][indx_json[i]:indx_json[i + 1]]
         poisson_var = data_cpt["poisson_var"][indx_json[i]:indx_json[i + 1]]
         mean = np.mean(poisson)
         var = np.mean(poisson_var)
         data["v"].append(np.round(mean, 3))
-        data["var_v"].append(np.round(var, 3))
+        data["var_v"].append(np.round(np.sqrt(var) / mean, 3))
         # density
         rho = data_cpt["rho"][indx_json[i]:indx_json[i + 1]]
         rho_var = data_cpt["rho_var"][indx_json[i]:indx_json[i + 1]]
         mean = np.mean(rho)
         var = np.mean(rho_var)
         data["rho"].append(np.round(mean))
-        data["var_rho"].append(np.round(var))
+        data["var_rho"].append(np.round(np.sqrt(var) / mean, 3))
         # damping
         damp = data_cpt["damping"][indx_json[i]:indx_json[i + 1]]
         damp_var = data_cpt["damping_var"][indx_json[i]:indx_json[i + 1]]
         mean = np.mean(damp)
         var = np.mean(damp_var)
         data["damping"].append(np.round(mean, 5))
-        data["var_damping"].append(np.round(var, 5))
+        data["var_damping"].append(np.round(np.sqrt(var) / mean, 3))
 
     jsn["scenarios"].append({"Name": "Scenario " + str(id + 1)})
     jsn["scenarios"][id].update({"data": data})
