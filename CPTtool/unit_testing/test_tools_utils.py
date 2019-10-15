@@ -187,7 +187,7 @@ class TestUtils(TestCase):
         self.assertEqual(jsn['scenarios'][0]['data']['var_v'], list(np.zeros(4)))
         self.assertEqual(jsn['scenarios'][0]['data']['var_rho'], list(np.zeros(4)))
         self.assertEqual(jsn['scenarios'][0]['data']['var_damping'], list(np.zeros(4)))
-        self.assertEqual(jsn['scenarios'][0]['data']['var_depth'], np.round(np.ones(4) * np.sqrt(10.) / data["IC"], 2).tolist())
+        self.assertEqual(jsn['scenarios'][0]['data']['var_depth'], np.round(np.ones(4) * np.sqrt(10.) / data["IC"], 3).tolist())
         return
 
     def test_dump_json(self):
