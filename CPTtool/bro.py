@@ -461,6 +461,8 @@ def read_bro(parameters):
     for gm_code, polygon in geomorphs:
         indices = query_index_polygon(bro_index, polygon)
         poly = shape(polygon)
+        if not poly.is_valid:
+            poly = poly.buffer(0.01)  # buffering reconstructs the geometry, often fixing invalidity
         if circle.intersects(poly):
             total_cpts += len(indices)
             perc = circle.intersection(poly).area / circle.area
@@ -481,6 +483,6 @@ def read_bro(parameters):
 
 
 if __name__ == "__main__":
-    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
+    input = {"BRO_data": "./bro/brocpt.xml", "Source_x": 65980, "Source_y": 395544, "Radius": 5500}
     cpts = read_bro(input)
     print(cpts.keys())
