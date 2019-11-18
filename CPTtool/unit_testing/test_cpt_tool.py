@@ -18,12 +18,40 @@ import log_handler
 
 class TestCptTool(unittest.TestCase):
     def setUp(self):
-        import os
-        os.mkdir('unit_testing_files\\results')
+        return
+
+    def test_define_methods_error(self):
+        with self.assertRaises(SystemExit):
+            cpt_tool.define_methods('fake_file.json')
+        return
+
+    def test_define_methods(self):
+        methods = cpt_tool.define_methods('unit_testing_files\\methods.json')
+        self.assertEqual(methods['gamma'], "Lengkeek")
+        self.assertEqual(methods['vs'], "Andrus")
+        self.assertEqual(methods['OCR'], "Mayne")
+        self.assertEqual(methods['radius'], 1e10)
+        return
+
+    def test_define_methods_no_keys_in_file(self):
+        with self.assertRaises(KeyError):
+            cpt_tool.define_methods('unit_testing_files\\methods_no_keys.json')
+
+        with self.assertRaises(KeyError):
+            cpt_tool.define_methods('unit_testing_files\\methods_gamma_missing.json')
+
+        with self.assertRaises(KeyError):
+            cpt_tool.define_methods('unit_testing_files\\methods_vs_missing.json')
+
+        with self.assertRaises(KeyError):
+            cpt_tool.define_methods('unit_testing_files\\methods_OCR_missing.json')
+
+        with self.assertRaises(SystemExit):
+            cpt_tool.define_methods('unit_testing_files\\methods_error_radius.json')
         return
 
     def test_read_json(self):
-        with self.assertRaises(SystemExit) as error:
+        with self.assertRaises(SystemExit):
             cpt_tool.read_json('fake_file.json')
 
         data = cpt_tool.read_json('unit_testing_files\\input_Ground.json')
@@ -174,7 +202,9 @@ class TestCptTool(unittest.TestCase):
 
     def tearDown(self):
         import shutil
-        shutil.rmtree('unit_testing_files\\results')
+        import os
+        if os.path.exists('unit_testing_files\\results'):
+            shutil.rmtree('unit_testing_files\\results')
         return
 
 
