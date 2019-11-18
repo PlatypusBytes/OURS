@@ -13,21 +13,23 @@ import json
 sys.path.append('../')
 import unittest
 import cpt_tool
-import cpt_module
 import bro
 import log_handler
 
 class TestCptTool(unittest.TestCase):
     def setUp(self):
+        import os
+        os.mkdir('unit_testing_files\\results')
         return
 
-    # def test_set_key(self):
-    #     local_labels = ['depth', 'tip', 'friction', 'friction_nb', 'water']
-    #     local_dat = [1, 2, 3, 4, 6]
-    #     key = cpt_tool.set_key()
-    #     for i in range(len(local_dat)):
-    #         np.testing.assert_equal(key[local_labels[i]],local_dat[i])
-    #     return
+    def test_read_json(self):
+        with self.assertRaises(SystemExit) as error:
+            cpt_tool.read_json('fake_file.json')
+
+        data = cpt_tool.read_json('unit_testing_files\\input_Ground.json')
+        self.assertTrue(data != {})
+        return
+
     def test_read_cpt(self):
         # inputs
         file_properties = 'unit_testing_files\\input_Ground.json'
@@ -65,7 +67,6 @@ class TestCptTool(unittest.TestCase):
         self.assertTrue('# Error # : File CPT000000067109 contains empty data\n' in logfilelines)
         self.assertTrue('# Error # : File CPT000000065555 contains empty data\n' in logfilelines)
         return
-
 
     def test_analysis_no_data(self):
         # inputs
