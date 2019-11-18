@@ -8,11 +8,14 @@ from os.path import join, dirname
 from rtree import index
 import json
 
+
 # add the src folder to the path to search for files
 sys.path.append('../')
 import unittest
 import cpt_tool
+import cpt_module
 import bro
+import log_handler
 
 class TestCptTool(unittest.TestCase):
     def setUp(self):
@@ -25,6 +28,44 @@ class TestCptTool(unittest.TestCase):
     #     for i in range(len(local_dat)):
     #         np.testing.assert_equal(key[local_labels[i]],local_dat[i])
     #     return
+    def test_read_cpt(self):
+        # inputs
+        file_properties = 'unit_testing_files\\input_Ground.json'
+        methods_cpt = {'gamma': 'Robertson',
+                       'vs': 'Robertson',
+                       'OCR': 'Mayne',
+                       'radius': 0.1}
+        output = 'unit_testing_files\\'
+        plots = False
+        with open(file_properties) as properties:
+            prop = json.load(properties)
+        properties.close()
+
+        # read BRO data base
+        inpt = {"BRO_data": prop["BRO_data"],
+                "Source_x": float(prop["Source_x"][0]), "Source_y": float(prop["Source_y"][0]),
+                "Radius": float(methods_cpt["radius"])}
+        cpt_BRO = bro.read_bro(inpt)
+
+        log_file = log_handler.LogFile(output, 0)
+        cpt_BRO['polygons']['2M81ykd']['data'][0]['dataframe'].depth = \
+            cpt_BRO['polygons']['2M81ykd']['data'][0]['dataframe'].depth.dropna().empty
+        cpt_BRO['polygons']['2M81ykd']['data'][1]['dataframe'].depth = \
+            cpt_BRO['polygons']['2M81ykd']['data'][1]['dataframe'].depth.dropna().empty
+        data = list(filter(None, cpt_BRO['polygons']['2M81ykd']['data']))
+
+        jsn = cpt_tool.read_cpt(data, methods_cpt, output,
+                          {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
+                           "MinLayerThickness": '0.5'}
+                          , plots, 0, log_file, {"scenarios": []}, 0)
+        log_file.close()
+        with open(output + 'log_file_0.txt') as logfile:
+            logfilelines = logfile.readlines()
+        logfile.close()
+        self.assertTrue('# Error # : File CPT000000067109 contains empty data\n' in logfilelines)
+        self.assertTrue('# Error # : File CPT000000065555 contains empty data\n' in logfilelines)
+        return
+
 
     def test_analysis_no_data(self):
         # inputs
@@ -60,14 +101,15 @@ class TestCptTool(unittest.TestCase):
         logfile.close()
 
     def test_analysis_cpt_results(self):
+        import os
         # inputs
         file_properties = 'unit_testing_files\\input_Ground.json'
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
                        'radius': 200}
-        output = 'unit_testing_files\\'
-        plots = False
+        output = 'unit_testing_files\\results'
+        plots = True
         with open(file_properties) as properties:
             prop = json.load(properties)
         properties.close()
@@ -83,7 +125,7 @@ class TestCptTool(unittest.TestCase):
                    'CPT000000065461']
 
         # read results
-        with open(output + 'log_file_0.txt') as logfile:
+        with open(output + '\\' + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
         logfile.close()
         countercpt = 0
@@ -102,14 +144,36 @@ class TestCptTool(unittest.TestCase):
                         self.assertTrue(line, '# Info # : Analysis succeeded for: ' + cptlist[countercpt])
                         countercpt = countercpt + 1
 
+        with open(output + '\\' + 'results_0.json') as jsonfile:
+            jsonresults = json.load(jsonfile)
+        jsonfile.close()
 
+        self.assertEqual(jsonresults['scenarios'][0]['probability'], 1.)
+        for i in cptlist:
+            self.assertTrue(os.path.exists(output + '\\' + i + '.csv'))
+            self.assertTrue(os.path.exists(output + '\\' + i + '_cpt.png'))
+            self.assertTrue(os.path.exists(output + '\\' + i + '_lithology.png'))
+        return
 
+    def test_analysis_only_circles(self):
+        # inputs
+        file_properties = 'unit_testing_files\\input_Ground_only_circle.json'
+        methods_cpt = {'gamma': 'Robertson',
+                       'vs': 'Robertson',
+                       'OCR': 'Mayne',
+                       'radius': 300}
+        output = 'unit_testing_files\\'
+        plots = False
+        with open(file_properties) as properties:
+            prop = json.load(properties)
+        properties.close()
 
-
-
-
+        # the function
+        cpt_tool.analysis(prop, methods_cpt, output, plots)
 
     def tearDown(self):
+        import shutil
+        shutil.rmtree('unit_testing_files\\results')
         return
 
 
