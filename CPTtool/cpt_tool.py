@@ -182,7 +182,7 @@ def analysis(properties, methods_cpt, output, plots):
 
     Extracts the CPT from the BRO PDOK database, based on coordinate location and processes the cpt
 
-    :param properties: JSON file with the properties of the analysis: location
+    :param properties: JSON file with the properties of the analysis: opened json file
     :param methods_cpt: methods to use for the CPT interpretation
     :param output: path for the output results
     :param plots: boolean create the plots
