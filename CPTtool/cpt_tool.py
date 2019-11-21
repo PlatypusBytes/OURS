@@ -165,14 +165,15 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         # add to log file that the analysis is successful
         log_file.info_message("Analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
 
-    # perform interpolation
-    result_interp = tools_utils.interpolation(results_cpt, [input_dictionary['Receiver_x'][index_coordinate],
-                                                            input_dictionary['Receiver_y'][index_coordinate]])
+    if results_cpt is not {}:
+        # perform interpolation
+        result_interp = tools_utils.interpolation(results_cpt, [input_dictionary['Receiver_x'][index_coordinate],
+                                                                input_dictionary['Receiver_y'][index_coordinate]])
 
-    # merge the layers thickness
-    depth_json, indx_json, lithology_json = tools_utils.merge_thickness(result_interp, float(input_dictionary["MinLayerThickness"]))
-    # add results to the dictionary
-    jsn = tools_utils.add_json(jsn, scenario, depth_json, indx_json, lithology_json, result_interp)
+        # merge the layers thickness
+        depth_json, indx_json, lithology_json = tools_utils.merge_thickness(result_interp, float(input_dictionary["MinLayerThickness"]))
+        # add results to the dictionary
+        jsn = tools_utils.add_json(jsn, scenario, depth_json, indx_json, lithology_json, result_interp)
     return jsn
 
 
@@ -246,7 +247,7 @@ def analysis(properties, methods_cpt, output, plots):
             circle_names.append(c["id"])
             circle_idx.append(j)
 
-        circle_names = [c["id"] for c in cpts_circle]
+        circle_names = [c["id"] for c in cpts_circle] #toDo delete duplicate code
         # process only the ones that are not part of polygons
         names_diff = list(set(circle_names) - set(polygons_names))
         # get the indexes of the circle cpts to be processed
