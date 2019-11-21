@@ -247,7 +247,6 @@ def analysis(properties, methods_cpt, output, plots):
             circle_names.append(c["id"])
             circle_idx.append(j)
 
-        circle_names = [c["id"] for c in cpts_circle] #toDo delete duplicate code
         # process only the ones that are not part of polygons
         names_diff = list(set(circle_names) - set(polygons_names))
         # get the indexes of the circle cpts to be processed
