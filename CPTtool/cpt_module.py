@@ -61,7 +61,7 @@ class CPT:
 
         return
 
-    def parse_bro(self, cpt, minimum_length=10, minimum_samples=10): #toDo change to minimum_length to 5
+    def parse_bro(self, cpt, minimum_length=5, minimum_samples=10):
         """
         Parse the BRO information into the object structure
 
