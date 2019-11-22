@@ -3,6 +3,7 @@ sys.path.append(r'../')
 import numpy as np
 import cpt_tool as cpt
 import json
+import os
 import unittest
 import shutil
 
@@ -31,6 +32,7 @@ class FunctionalTests(unittest.TestCase):
             # read results
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
+                f.close()
 
             # compare dics
             for k in range(len(data_ref)):
@@ -52,6 +54,7 @@ class FunctionalTests(unittest.TestCase):
             # read results
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
+                f.close()
 
             # compare dics
             for k in range(len(data_ref)):
@@ -72,6 +75,7 @@ class FunctionalTests(unittest.TestCase):
             # read results
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
+                f.close()
 
             # compare dics
             for k in range(len(data_ref)):
@@ -93,6 +97,7 @@ class FunctionalTests(unittest.TestCase):
             # read results
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
+                f.close()
 
             # compare dics
             for k in range(len(data_ref)):
@@ -117,7 +122,8 @@ class FunctionalTests(unittest.TestCase):
 
     def tearDown(self):
         # delete folders
-        shutil.rmtree('./results')
+        if os.path.exists('unit_testing_files\\results'):
+            shutil.rmtree('unit_testing_files\\results')
         return
 
 
@@ -141,6 +147,7 @@ def read_file(file):
     # reference results
     with open(file, "r") as f:
         data = json.load(f)
+        f.close()
 
     data = sort_dicts(data['scenarios'])
 

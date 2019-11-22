@@ -40,6 +40,7 @@ def define_methods(input_file):
     # if the file is available
     with open(input_file, "r") as f:
         data = json.load(f)
+    # todo Close this file f.close()
 
     # # checks if the keys are correct
     for i in data.keys():
@@ -92,6 +93,7 @@ def read_json(input_file):
     with open(input_file, "r") as f:
         data = json.load(f)
     return data
+    # todo close this file
 
 
 def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn,
@@ -269,8 +271,8 @@ def analysis(properties, methods_cpt, output, plots):
         elif jsn["scenarios"]:
             # if circle is empty and polygons exist: update probability of polygons
             for i in range(len(jsn["scenarios"])):
-                # the sum(prob) needs to be rounded as well because the individual propabilities are rounded
-                jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / round(sum(prob),2)
+                # todo the sum(prob) needs to be rounded as well because the individual propabilities are rounded
+                jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / sum(prob)
 
         # check if cpts have data or are all empty: this mean that this point has no data
         if not results["circle"] and not results["polygons"]:
