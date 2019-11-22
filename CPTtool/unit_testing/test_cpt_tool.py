@@ -64,8 +64,8 @@ class TestCptTool(unittest.TestCase):
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
-                       'radius': 0.1}
-        output = 'unit_testing_files\\'
+                       'radius': 100}
+        output = 'unit_testing_files\\results'
         plots = False
         with open(file_properties) as properties:
             prop = json.load(properties)
@@ -78,7 +78,7 @@ class TestCptTool(unittest.TestCase):
         cpt_BRO = bro.read_bro(inpt)
 
         log_file = log_handler.LogFile(output, 0)
-        cpt_BRO['polygons']['2M81ykd']['data'][0]['dataframe'].depth = \
+        cpt_BRO['polygons']['2M81ykd']['data'][0]['dataframe'].depth= \
             cpt_BRO['polygons']['2M81ykd']['data'][0]['dataframe'].depth.dropna().empty
         cpt_BRO['polygons']['2M81ykd']['data'][1]['dataframe'].depth = \
             cpt_BRO['polygons']['2M81ykd']['data'][1]['dataframe'].depth.dropna().empty
@@ -92,8 +92,8 @@ class TestCptTool(unittest.TestCase):
         with open(output + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
         logfile.close()
-        self.assertTrue('# Error # : File CPT000000067109 contains empty data\n' in logfilelines)
-        self.assertTrue('# Error # : File CPT000000065555 contains empty data\n' in logfilelines)
+        self.assertTrue('# Error # : File CPT000000000207 contains empty data\n' in logfilelines)
+        self.assertTrue('# Error # : File CPT000000000197 contains empty data\n' in logfilelines)
         return
 
     def test_analysis_no_data(self):
