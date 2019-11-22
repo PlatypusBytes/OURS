@@ -165,6 +165,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         # add to log file that the analysis is successful
         log_file.info_message("Analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
 
+    # Check if the data of all the cpts are empty. If they are skip processing them
     if results_cpt is not {}:
         # perform interpolation
         result_interp = tools_utils.interpolation(results_cpt, [input_dictionary['Receiver_x'][index_coordinate],
@@ -268,7 +269,8 @@ def analysis(properties, methods_cpt, output, plots):
         elif jsn["scenarios"]:
             # if circle is empty and polygons exist: update probability of polygons
             for i in range(len(jsn["scenarios"])):
-                jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / sum(prob)
+                # the sum(prob) needs to be rounded as well because the individual propabilities are rounded
+                jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / round(sum(prob),2)
 
         # check if cpts have data or are all empty: this mean that this point has no data
         if not results["circle"] and not results["polygons"]:

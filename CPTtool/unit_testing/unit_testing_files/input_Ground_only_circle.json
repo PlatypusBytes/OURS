@@ -7,9 +7,9 @@
    "LowFreq":"1",
    "HighFreq":"63",
    "CalcType":"1", 
-   "Source_x":["85000"],
-   "Source_y":["443400"],
-   "Receiver_x":["84360"],
-   "Receiver_y":["443400"],
-   "BRO_data":"../bro/brocpt.xml"
+   "Source_x":["92897"],
+   "Source_y":["435503"],
+   "Receiver_x":["92900"],
+   "Receiver_y":["435520"],
+   "BRO_data":"../bro/bro_test.xml"
 }

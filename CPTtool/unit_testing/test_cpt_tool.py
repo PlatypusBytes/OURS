@@ -129,14 +129,14 @@ class TestCptTool(unittest.TestCase):
                             '(' + str(prop["Source_x"][1]) + ',' + str(prop["Source_y"][1]) + ')' )
         logfile.close()
 
-    def test_analysis_cpt_results(self):
+    def test_analysis_only_circles(self):
         import os
         # inputs
-        file_properties = 'unit_testing_files\\input_Ground.json'
+        file_properties = 'unit_testing_files\\input_Ground_only_circle.json'
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
-                       'radius': 200}
+                       'radius': 100}
         output = 'unit_testing_files\\results'
         plots = True
         with open(file_properties) as properties:
@@ -146,18 +146,16 @@ class TestCptTool(unittest.TestCase):
         # the function
         cpt_tool.analysis(prop, methods_cpt, output, plots)
 
-        # list of cpts
-        cptlist = ['CPT000000067109', 'CPT000000065555', 'CPT000000065467', 'CPT000000018872', 'CPT000000067108',
-                   'CPT000000065554', 'CPT000000065465', 'CPT000000065466', 'CPT000000065464', 'CPT000000063883',
-                   'CPT000000070178', 'CPT000000063847', 'CPT000000063846', 'CPT000000063845', 'CPT000000065410',
-                   'CPT000000063882', 'CPT000000062446', 'CPT000000065463', 'CPT000000070146', 'CPT000000065462',
-                   'CPT000000065461']
+        # the results cpts
+        cpt_results = ['CPT000000000448', 'CPT000000000449']
 
         # read results
         with open(output + '\\' + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
         logfile.close()
         countercpt = 0
+
+        # check log file
         for counter, line in enumerate(logfilelines):
             if counter == 1:
                 self.assertTrue(line, '# Info # : Analysis started for coordinate point: ' +
@@ -168,37 +166,139 @@ class TestCptTool(unittest.TestCase):
                                     '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
                 else:
                     if (counter % 2) == 0:
-                        self.assertTrue(line, '# Info # : Reading CPT: ' + cptlist[countercpt])
+                        self.assertTrue(line, '# Info # : Reading CPT: ' + cpt_results[countercpt])
                     else:
-                        self.assertTrue(line, '# Info # : Analysis succeeded for: ' + cptlist[countercpt])
+                        self.assertTrue(line, '# Info # : Analysis succeeded for: ' + cpt_results[countercpt])
                         countercpt = countercpt + 1
 
+        # check json file
         with open(output + '\\' + 'results_0.json') as jsonfile:
             jsonresults = json.load(jsonfile)
         jsonfile.close()
 
         self.assertEqual(jsonresults['scenarios'][0]['probability'], 1.)
-        for i in cptlist:
+
+        # Check plots
+        for i in cpt_results:
             self.assertTrue(os.path.exists(output + '\\' + i + '.csv'))
             self.assertTrue(os.path.exists(output + '\\' + i + '_cpt.png'))
             self.assertTrue(os.path.exists(output + '\\' + i + '_lithology.png'))
         return
 
-    def test_analysis_only_circles(self):
+    def test_analysis_polygon_and_circle(self):
+        import os
         # inputs
-        file_properties = 'unit_testing_files\\input_Ground_only_circle.json'
+        file_properties = 'unit_testing_files\\input_Ground.json'
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
-                       'radius': 300}
-        output = 'unit_testing_files\\'
-        plots = False
+                       'radius': 100}
+        output = 'unit_testing_files\\results'
+        plots = True
         with open(file_properties) as properties:
             prop = json.load(properties)
         properties.close()
 
         # the function
         cpt_tool.analysis(prop, methods_cpt, output, plots)
+
+        # the results cpts
+        cpt_results = ['CPT000000000207', 'CPT000000000197', 'CPT000000000191', 'CPT000000000193', 'CPT000000000200',
+                       'CPT000000000388', 'CPT000000000201']
+
+        # read results
+        with open(output + '\\' + 'log_file_0.txt') as logfile:
+            logfilelines = logfile.readlines()
+        logfile.close()
+        countercpt = 0
+
+        # check log file
+        for counter, line in enumerate(logfilelines):
+            if counter == 1:
+                self.assertTrue(line, '# Info # : Analysis started for coordinate point: ' +
+                                '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
+            else:
+                if counter == len(logfilelines):
+                    self.assertTrue(line, '# Info # : Analysis finished for coordinate point: ' +
+                                    '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
+                else:
+                    if (counter % 2) == 0:
+                        self.assertTrue(line, '# Info # : Reading CPT: ' + cpt_results[countercpt])
+                    else:
+                        self.assertTrue(line, '# Info # : Analysis succeeded for: ' + cpt_results[countercpt])
+                        countercpt = countercpt + 1
+
+        # check json file
+        with open(output + '\\' + 'results_0.json') as jsonfile:
+            jsonresults = json.load(jsonfile)
+        jsonfile.close()
+
+        self.assertEqual(jsonresults['scenarios'][0]['probability'], 0.23)
+        self.assertEqual(jsonresults['scenarios'][1]['probability'], 0.77)
+
+        # Check plots
+        for i in cpt_results:
+            self.assertTrue(os.path.exists(output + '\\' + i + '.csv'))
+            self.assertTrue(os.path.exists(output + '\\' + i + '_cpt.png'))
+            self.assertTrue(os.path.exists(output + '\\' + i + '_lithology.png'))
+        return
+
+    def test_analysis_only_polygon(self):
+        import os
+        # inputs
+        file_properties = 'unit_testing_files\\input_Ground_only_polygon.json'
+        methods_cpt = {'gamma': 'Robertson',
+                       'vs': 'Robertson',
+                       'OCR': 'Mayne',
+                       'radius': 150}
+        output = 'unit_testing_files\\results'
+        plots = True
+        with open(file_properties) as properties:
+            prop = json.load(properties)
+        properties.close()
+
+        # the function
+        cpt_tool.analysis(prop, methods_cpt, output, plots)
+
+        # the results cpts
+        cpt_results = ['CPT000000000022', 'CPT000000000023', 'CPT000000000024', 'CPT000000000025', 'CPT000000000029',
+                       'CPT000000000030', 'CPT000000000026']
+
+        # read results
+        with open(output + '\\' + 'log_file_0.txt') as logfile:
+            logfilelines = logfile.readlines()
+        logfile.close()
+        countercpt = 0
+
+        # check log file
+        for counter, line in enumerate(logfilelines):
+            if counter == 1:
+                self.assertTrue(line, '# Info # : Analysis started for coordinate point: ' +
+                                '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
+            else:
+                if counter == len(logfilelines):
+                    self.assertTrue(line, '# Info # : Analysis finished for coordinate point: ' +
+                                    '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
+                else:
+                    if (counter % 2) == 0:
+                        self.assertTrue(line, '# Info # : Reading CPT: ' + cpt_results[countercpt])
+                    else:
+                        self.assertTrue(line, '# Info # : Analysis succeeded for: ' + cpt_results[countercpt])
+                        countercpt = countercpt + 1
+
+        # check json file
+        with open(output + '\\' + 'results_0.json') as jsonfile:
+            jsonresults = json.load(jsonfile)
+        jsonfile.close()
+
+        self.assertEqual(jsonresults['scenarios'][0]['probability'], 1.)
+
+        # Check plots
+        for i in cpt_results:
+            self.assertTrue(os.path.exists(output + '\\' + i + '.csv'))
+            self.assertTrue(os.path.exists(output + '\\' + i + '_cpt.png'))
+            self.assertTrue(os.path.exists(output + '\\' + i + '_lithology.png'))
+        return
 
     def tearDown(self):
         import shutil
