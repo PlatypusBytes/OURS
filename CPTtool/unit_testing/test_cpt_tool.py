@@ -108,7 +108,7 @@ class TestCptTool(unittest.TestCase):
         # inputs
         file_properties = 'unit_testing_files\\input_Ground_no_data.json'
         methods_cpt = {'radius': 200}
-        output = 'unit_testing_files\\'
+        output = 'unit_testing_files\\results'
         plots = False
         with open(file_properties) as properties:
             prop = json.load(properties)
@@ -118,7 +118,7 @@ class TestCptTool(unittest.TestCase):
         cpt_tool.analysis(prop, methods_cpt, output, plots)
 
         # test if files are filled in correctly
-        with open(output + 'log_file_0.txt') as logfile:
+        with open(output + '\\' + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
             self.assertTrue(logfilelines[0], '# Info # : Analysis started for coordinate point: ' +
                             '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
@@ -128,7 +128,7 @@ class TestCptTool(unittest.TestCase):
         logfile.close()
 
         # test if the second point log is created correctly
-        with open(output + 'log_file_1.txt') as logfile:
+        with open(output + '\\' + 'log_file_1.txt') as logfile:
             logfilelines = logfile.readlines()
             self.assertTrue(logfilelines[0], '# Info # : Analysis started for coordinate point: ' +
                             '(' + str(prop["Source_x"][1]) + ',' + str(prop["Source_y"][1]) + ')')
