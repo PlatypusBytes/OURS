@@ -25,6 +25,14 @@ class TestCptTool(unittest.TestCase):
             cpt_tool.define_methods('fake_file.json')
         return
 
+    def test_define_methods_no_file(self):
+        methods = cpt_tool.define_methods(None)
+        self.assertEqual(methods['gamma'], "Robertson")
+        self.assertEqual(methods['vs'], "Robertson")
+        self.assertEqual(methods['OCR'], "Mayne")
+        self.assertEqual(methods['radius'], 500)
+        return
+
     def test_define_methods(self):
         methods = cpt_tool.define_methods('unit_testing_files\\methods.json')
         self.assertEqual(methods['gamma'], "Lengkeek")
@@ -34,16 +42,16 @@ class TestCptTool(unittest.TestCase):
         return
 
     def test_define_methods_no_keys_in_file(self):
-        with self.assertRaises(KeyError):
+        with self.assertRaises(SystemExit):
             cpt_tool.define_methods('unit_testing_files\\methods_no_keys.json')
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(SystemExit):
             cpt_tool.define_methods('unit_testing_files\\methods_gamma_missing.json')
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(SystemExit):
             cpt_tool.define_methods('unit_testing_files\\methods_vs_missing.json')
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(SystemExit):
             cpt_tool.define_methods('unit_testing_files\\methods_OCR_missing.json')
 
         with self.assertRaises(SystemExit):
@@ -65,7 +73,7 @@ class TestCptTool(unittest.TestCase):
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
                        'radius': 100}
-        output = 'unit_testing_files\\results'
+        output = 'unit_testing_files\\results\\'
         plots = False
         with open(file_properties) as properties:
             prop = json.load(properties)
