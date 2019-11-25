@@ -194,11 +194,12 @@ def analysis(properties, methods_cpt, output, plots):
     """
     # number of points
     nb_points = len(properties["Source_x"])
-    # probability of scenarios
-    prob = []
 
     # for each calculation point
     for idx in range(nb_points):
+
+        # probability of scenarios
+        prob = []
 
         # variables
         jsn = {"scenarios": []}  # json dictionary
@@ -238,7 +239,7 @@ def analysis(properties, methods_cpt, output, plots):
                 results["polygons"].update({zone: True})
                 prob.append(cpts['polygons'][zone]['perc'])
                 jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
-                                                   "probability": round(prob[-1], 2)})
+                                                   "probability": prob[-1]})
                 scenario += 1
 
         # check points within circle
@@ -266,13 +267,12 @@ def analysis(properties, methods_cpt, output, plots):
             jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
             results["circle"] = True
             jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
-                                               "probability": round(1. - sum(prob), 2)})
+                                               "probability": 1. - sum(prob)})
             scenario += 1
         elif jsn["scenarios"]:
             # if circle is empty and polygons exist: update probability of polygons
-            prob_round = [round(i, 2) for i in prob]
             for i in range(len(jsn["scenarios"])):
-                jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / sum(prob_round)
+                jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / sum(prob)
 
         # check if cpts have data or are all empty: this mean that this point has no data
         if not results["circle"] and not results["polygons"]:
@@ -281,6 +281,10 @@ def analysis(properties, methods_cpt, output, plots):
                                   + str(properties["Source_y"][idx]) + ")")
             log_file.close()
             continue
+
+        # round probability to two decimals
+        for i in range(len(jsn["scenarios"])):
+            jsn["scenarios"][i]["probability"] = round(jsn["scenarios"][i]["probability"], 2)
 
         # dump json
         tools_utils.dump_json(jsn, idx, output)
