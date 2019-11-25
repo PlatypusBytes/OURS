@@ -270,9 +270,9 @@ def analysis(properties, methods_cpt, output, plots):
             scenario += 1
         elif jsn["scenarios"]:
             # if circle is empty and polygons exist: update probability of polygons
+            prob_round = [round(i, 2) for i in prob]
             for i in range(len(jsn["scenarios"])):
-                # todo the sum(prob) needs to be rounded as well because the individual propabilities are rounded
-                jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / sum(prob)
+                jsn["scenarios"][i]["probability"] = jsn["scenarios"][i]["probability"] / sum(prob_round)
 
         # check if cpts have data or are all empty: this mean that this point has no data
         if not results["circle"] and not results["polygons"]:
