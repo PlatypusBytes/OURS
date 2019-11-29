@@ -30,7 +30,7 @@ class TestCptTool(unittest.TestCase):
         self.assertEqual(methods['gamma'], "Robertson")
         self.assertEqual(methods['vs'], "Robertson")
         self.assertEqual(methods['OCR'], "Mayne")
-        self.assertEqual(methods['radius'], 500)
+        self.assertEqual(methods['radius'], 600)
         return
 
     def test_define_methods(self):
