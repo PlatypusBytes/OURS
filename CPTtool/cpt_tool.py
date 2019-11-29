@@ -21,7 +21,7 @@ def define_methods(input_file):
     gamma_keys = ["Robertson", "Lengkeek", "all"]
     vs_keys = ["Robertson", "Mayne", "Andrus", "Zang", "Ahmed", "all"]
     OCR_keys = ["Mayne", "Robertson"]
-    rad = 500.
+    rad = 600.
 
     # if no file is available: -> uses default values
     if not input_file:
