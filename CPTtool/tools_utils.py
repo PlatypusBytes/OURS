@@ -165,7 +165,11 @@ def ceil_value(data, value):
     # assigns the value of the first non-value
     for i in indx_conseq:
         for j in i:
-            data[j] = data[i[-1] + 1]
+            # if the sequence contains the last index of the data use the previous one
+            if i[-1] + 1 >= len(data):
+                data[j] = data[i[0] - 1]
+            else:
+                data[j] = data[i[-1] + 1]
 
     return data
 
