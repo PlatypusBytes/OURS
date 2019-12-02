@@ -93,7 +93,6 @@ def read_json(input_file):
     with open(input_file, "r") as f:
         data = json.load(f)
     return data
-    # todo close this file
 
 
 def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn,
@@ -122,6 +121,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     # read the cpt files
     import cpt_module
 
+    is_jsn_modified = False
     # dictionary for the results
     results_cpt = {}
     for idx_cpt in range(len(cpt_BRO)):
@@ -168,7 +168,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         log_file.info_message("Analysis succeeded for: " + cpt_BRO[idx_cpt]["id"])
 
     # Check if the data of all the cpts are empty. If they are skip processing them
-    if results_cpt is not {}:
+    if bool(results_cpt):
         # perform interpolation
         result_interp = tools_utils.interpolation(results_cpt, [input_dictionary['Receiver_x'][index_coordinate],
                                                                 input_dictionary['Receiver_y'][index_coordinate]])
@@ -177,7 +177,8 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         depth_json, indx_json, lithology_json = tools_utils.merge_thickness(result_interp, float(input_dictionary["MinLayerThickness"]))
         # add results to the dictionary
         jsn = tools_utils.add_json(jsn, scenario, depth_json, indx_json, lithology_json, result_interp)
-    return jsn
+        is_jsn_modified = True
+    return jsn, is_jsn_modified
 
 
 def analysis(properties, methods_cpt, output, plots):
@@ -235,12 +236,13 @@ def analysis(properties, methods_cpt, output, plots):
             # remove the nones
             data = list(filter(None, cpts['polygons'][zone]['data']))
             if data:
-                jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
-                results["polygons"].update({zone: True})
-                prob.append(cpts['polygons'][zone]['perc'])
-                jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
-                                                   "probability": prob[-1]})
-                scenario += 1
+                jsn, is_jsn_modified = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
+                if is_jsn_modified:
+                    results["polygons"].update({zone: True})
+                    prob.append(cpts['polygons'][zone]['perc'])
+                    jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
+                                                       "probability": prob[-1]})
+                    scenario += 1
 
         # check points within circle
         cpts_circle = list(filter(None, cpts['circle']['data']))

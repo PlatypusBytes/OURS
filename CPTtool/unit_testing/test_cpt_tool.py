@@ -92,7 +92,7 @@ class TestCptTool(unittest.TestCase):
             cpt_BRO['polygons']['2M81ykd']['data'][1]['dataframe'].depth.dropna().empty
         data = list(filter(None, cpt_BRO['polygons']['2M81ykd']['data']))
 
-        jsn = cpt_tool.read_cpt(data, methods_cpt, output,
+        jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, output,
                           {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
                            "MinLayerThickness": '0.5'}
                           , plots, 0, log_file, {"scenarios": []}, 0)
