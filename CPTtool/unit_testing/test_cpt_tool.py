@@ -77,7 +77,6 @@ class TestCptTool(unittest.TestCase):
         plots = False
         with open(file_properties) as properties:
             prop = json.load(properties)
-        properties.close()
 
         # read BRO data base
         inpt = {"BRO_data": prop["BRO_data"],
@@ -96,12 +95,10 @@ class TestCptTool(unittest.TestCase):
                           {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
                            "MinLayerThickness": '0.5'}
                           , plots, 0, log_file, {"scenarios": []}, 0)
-        log_file.close()
-        with open(output + 'log_file_0.txt') as logfile:
-            logfilelines = logfile.readlines()
-        logfile.close()
-        self.assertTrue('# Error # : File CPT000000000207 contains empty data\n' in logfilelines)
-        self.assertTrue('# Error # : File CPT000000000197 contains empty data\n' in logfilelines)
+
+        # check json file
+        self.assertTrue(is_jsn_modified)
+        self.assertTrue(bool(jsn))
         return
 
     def test_analysis_no_data(self):
@@ -112,7 +109,6 @@ class TestCptTool(unittest.TestCase):
         plots = False
         with open(file_properties) as properties:
             prop = json.load(properties)
-        properties.close()
 
         # the function
         cpt_tool.analysis(prop, methods_cpt, output, plots)
@@ -125,7 +121,6 @@ class TestCptTool(unittest.TestCase):
             self.assertTrue(logfilelines[1], '# Error # : No data in this coordinate point')
             self.assertTrue(logfilelines[2], '# Info # : Analysis finished for coordinate point: ' +
                             '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')' )
-        logfile.close()
 
         # test if the second point log is created correctly
         with open(output + '\\' + 'log_file_1.txt') as logfile:
@@ -135,7 +130,6 @@ class TestCptTool(unittest.TestCase):
             self.assertTrue(logfilelines[1], '# Error # : No data in this coordinate point')
             self.assertTrue(logfilelines[2], '# Info # : Analysis finished for coordinate point: ' +
                             '(' + str(prop["Source_x"][1]) + ',' + str(prop["Source_y"][1]) + ')' )
-        logfile.close()
 
     def test_analysis_only_circles(self):
         import os
@@ -149,7 +143,6 @@ class TestCptTool(unittest.TestCase):
         plots = True
         with open(file_properties) as properties:
             prop = json.load(properties)
-        properties.close()
 
         # the function
         cpt_tool.analysis(prop, methods_cpt, output, plots)
@@ -160,7 +153,6 @@ class TestCptTool(unittest.TestCase):
         # read results
         with open(output + '\\' + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
-        logfile.close()
         countercpt = 0
 
         # check log file
@@ -182,7 +174,6 @@ class TestCptTool(unittest.TestCase):
         # check json file
         with open(output + '\\' + 'results_0.json') as jsonfile:
             jsonresults = json.load(jsonfile)
-        jsonfile.close()
 
         self.assertEqual(jsonresults['scenarios'][0]['probability'], 1.)
 
@@ -205,7 +196,6 @@ class TestCptTool(unittest.TestCase):
         plots = True
         with open(file_properties) as properties:
             prop = json.load(properties)
-        properties.close()
 
         # the function
         cpt_tool.analysis(prop, methods_cpt, output, plots)
@@ -217,7 +207,6 @@ class TestCptTool(unittest.TestCase):
         # read results
         with open(output + '\\' + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
-        logfile.close()
         countercpt = 0
 
         # check log file
@@ -239,7 +228,6 @@ class TestCptTool(unittest.TestCase):
         # check json file
         with open(output + '\\' + 'results_0.json') as jsonfile:
             jsonresults = json.load(jsonfile)
-        jsonfile.close()
 
         self.assertEqual(jsonresults['scenarios'][0]['probability'], 0.23)
         self.assertEqual(jsonresults['scenarios'][1]['probability'], 0.77)
@@ -263,7 +251,6 @@ class TestCptTool(unittest.TestCase):
         plots = True
         with open(file_properties) as properties:
             prop = json.load(properties)
-        properties.close()
 
         # the function
         cpt_tool.analysis(prop, methods_cpt, output, plots)
@@ -275,7 +262,6 @@ class TestCptTool(unittest.TestCase):
         # read results
         with open(output + '\\' + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
-        logfile.close()
         countercpt = 0
 
         # check log file
@@ -297,7 +283,6 @@ class TestCptTool(unittest.TestCase):
         # check json file
         with open(output + '\\' + 'results_0.json') as jsonfile:
             jsonresults = json.load(jsonfile)
-        jsonfile.close()
 
         self.assertEqual(jsonresults['scenarios'][0]['probability'], 1.)
 

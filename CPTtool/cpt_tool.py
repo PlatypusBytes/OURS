@@ -266,11 +266,12 @@ def analysis(properties, methods_cpt, output, plots):
         results.update({"circle": []})
         if data:
             # if data exists in the circle
-            jsn = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
-            results["circle"] = True
-            jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
+            jsn, is_jsn_modified = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
+            if is_jsn_modified:
+                results["circle"] = True
+                jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
                                                "probability": 1. - sum(prob)})
-            scenario += 1
+                scenario += 1
         elif jsn["scenarios"]:
             # if circle is empty and polygons exist: update probability of polygons
             for i in range(len(jsn["scenarios"])):
