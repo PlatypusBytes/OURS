@@ -256,7 +256,7 @@ class CPT:
         :param method: (optional) Method to compute unit weight. Default is Robertson
         """
 
-        np.seterr(divide="ignore")
+        np.seterr(divide="ignore", over='print')
 
         # calculate unit weight according to Robertson & Cabal 2015
         if method == "Robertson":
@@ -266,7 +266,7 @@ class CPT:
             self.gamma = aux * self.g
         elif method == "Lengkeek":
             aux = 19. - 4.12 * np.log10(5000. / self.qt) / np.log10(30. / self.friction_nbr)
-            aux[np.abs(aux) == np.inf] = gamma_limit
+            aux[np.abs(aux) == np.inf] = gamma_limit  # should this be divided with self.g ?
             aux = tools_utils.ceil_value(aux, 0)
             self.gamma = aux
         elif method == "all":  # if all, compares all the methods and plot
