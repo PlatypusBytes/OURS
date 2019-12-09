@@ -106,6 +106,7 @@ class TestCptTool(unittest.TestCase):
         # In this test all the cpts do not have good quality data that means that no results will be returned.
         # So an empty json file with a False is_jsn_modified statement
         # inputs
+        import pandas as pd
         file_properties = 'unit_testing_files\\input_Ground.json'
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
