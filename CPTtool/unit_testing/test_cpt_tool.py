@@ -101,6 +101,52 @@ class TestCptTool(unittest.TestCase):
         self.assertTrue(bool(jsn))
         return
 
+
+    def test_read_cpt_empty(self):
+        # In this test all the cpts do not have good quality data that means that no results will be returned.
+        # So an empty json file with a False is_jsn_modified statement
+        # inputs
+        file_properties = 'unit_testing_files\\input_Ground.json'
+        methods_cpt = {'gamma': 'Robertson',
+                       'vs': 'Robertson',
+                       'OCR': 'Mayne',
+                       'radius': 100}
+        output = 'unit_testing_files\\results\\'
+        plots = False
+        with open(file_properties) as properties:
+            prop = json.load(properties)
+
+        inpt = {"BRO_data": prop["BRO_data"],
+                "Source_x": float(prop["Source_x"][0]), "Source_y": float(prop["Source_y"][0]),
+                "Radius": float(methods_cpt["radius"])}
+
+        log_file = log_handler.LogFile(output, 0)
+
+        d = {'depth': [0.1, 0.2],
+             'coneResistance': [1, 2],
+             'localFriction': [3, 4],
+             'porePressureU2': [0.5, 1],
+             'frictionRatio': [0.22, 0.33],
+             }
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    "dataframe": df,
+                    'predrilled_z': 0.}
+        data = [cpt_data]
+
+        jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, output,
+                          {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
+                           "MinLayerThickness": '0.5'}
+                          , plots, 0, log_file, {"scenarios": []}, 0)
+
+        # check json file
+        self.assertFalse(is_jsn_modified)
+        self.assertTrue(jsn == {'scenarios': []})
+        return
+
     def test_analysis_no_data(self):
         # inputs
         file_properties = 'unit_testing_files\\input_Ground_no_data.json'
