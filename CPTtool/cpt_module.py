@@ -562,7 +562,7 @@ class CPT:
         r"""
         Poisson ratio. Following Mayne :cite:`mayne_2007`.
 
-        Poisson assumed 0.495 for soft layers and 0.2 for sandy layers.
+        Poisson assumed 0.495 for soft layers, 0.2 for silty layers and 0.3 for sandy layers.
         """
 
         # assign size to poisson
@@ -572,8 +572,10 @@ class CPT:
             # if soft layer
             if lit == "1" or lit == "2" or lit == "3":
                 self.poisson[i] = 0.495
-            else:
+            elif lit == "4" or lit == "5":
                 self.poisson[i] = 0.2
+            else:
+                self.poisson[i] = 0.3
         return
 
     def qt_calc(self):
