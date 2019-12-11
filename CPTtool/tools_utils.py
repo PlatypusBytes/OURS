@@ -241,14 +241,15 @@ def merging_label(indx_json, lithology):
     return new_label
 
 
-def merging_index(depth, depth_json):
+def merging_index(depth, depth_json, tol=1e-12):
     r"""
     Function that produces the indexes of the merged layers by finding which depths are referred.
     """
     new_index = []
-    for i in range(len(depth)):
-        if depth[i] in depth_json:
-            new_index.append(i)
+
+    for i in range(len(depth_json)):
+        new_index.append(np.where(np.abs(depth_json[i] - np.array(depth)) <= tol)[0][0])
+
     return new_index
 
 
@@ -271,8 +272,8 @@ def merging_thickness(local_thick, min_layer_thick):
          :align: center
          :figclass: align-center
 
-
      """
+
     new_thickness = []
     now_thickness = 0
     counter = 0
@@ -280,7 +281,7 @@ def merging_thickness(local_thick, min_layer_thick):
         while now_thickness < min_layer_thick:
             now_thickness += local_thick[counter]
             counter += 1
-            if counter == len(local_thick) and now_thickness < min_layer_thick:
+            if int(counter) == len(local_thick) and now_thickness < min_layer_thick:
                 new_thickness[-1] += now_thickness
                 return new_thickness
         new_thickness.append(now_thickness)
