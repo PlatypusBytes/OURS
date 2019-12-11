@@ -355,7 +355,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.lithology = ["1", "1", "1"]
         self.cpt.effective_stress = np.ones(len(self.cpt.lithology))
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
-        self.cpt.qt = np.ones(len(self.cpt.lithology))
+        self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10
 
         # Define the target array
         test_damping = np.array([2, 2, 2]) / 100
@@ -373,7 +373,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.lithology = ["8", "8", "8"]
         self.cpt.effective_stress = np.ones(len(self.cpt.lithology))
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
-        self.cpt.qt = np.ones(len(self.cpt.lithology))
+        self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10
 
         # The target output
         test_damping = np.array([2, 2, 2]) / 100
@@ -391,7 +391,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.lithology = ["9", "9", "9"]
         self.cpt.effective_stress = np.ones(len(self.cpt.lithology))
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
-        self.cpt.qt = np.ones(len(self.cpt.lithology))
+        self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10
 
         # Define the output
         test_damping = np.array([2, 2, 2]) / 100
@@ -409,7 +409,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.lithology = ["5", "6", "6", "7"]
         self.cpt.effective_stress = np.ones(len(self.cpt.lithology))
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
-        self.cpt.qt = np.ones(len(self.cpt.lithology))
+        self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10
 
         # Calculate analytically for the type Meng
         Cu = 3
@@ -428,19 +428,20 @@ class TestCptModule(unittest.TestCase):
         # Define the inputs
         # all soil sand
         self.cpt.lithology = ["3", "4", "3", "4"]
-        self.cpt.qt = np.ones(len(self.cpt.lithology))
+        self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10
         self.cpt.Qtn = np.ones(len(self.cpt.lithology)) * 2
         self.cpt.effective_stress = np.ones(len(self.cpt.lithology))
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
-        self.cpt.qt = np.ones(len(self.cpt.lithology))
 
         # Calculate analyticaly damping Darendeli - OCR according to Mayne
         Cu = 3
         D50 = .025
         PI = 40
         OCR = 0.33 * (self.cpt.qt - self.cpt.total_stress) / self.cpt.effective_stress
+        freq = 1
         test_damping = (self.cpt.effective_stress / 100) ** (-0.2889) * \
-                       (0.8005 + 0.0129 * PI * OCR ** (-0.1069))  # * (1 + 0.2919 * np.log(freq))
+                       (0.8005 + 0.0129 * PI * OCR ** (-0.1069)) * (1 + 0.2919 * np.log(freq))
+        test_damping /= 100
 
         # Call the function to be tested
         self.cpt.damp_calc(Cu=Cu, D50=D50, Ip=PI, method="Mayne")
@@ -451,7 +452,8 @@ class TestCptModule(unittest.TestCase):
         # Calculated analyticaly damping Darendeli - OCR according to robertson
         OCR = 0.25 * (self.cpt.Qtn) ** 1.25
         test_damping = (self.cpt.effective_stress / 100) ** (-0.2889) * \
-                       (0.8005 + 0.0129 * PI * OCR ** (-0.1069))  # * (1 + 0.2919 * np.log(freq))
+                       (0.8005 + 0.0129 * PI * OCR ** (-0.1069)) * (1 + 0.2919 * np.log(freq))
+        test_damping /= 100
 
         self.cpt.damp_calc(Cu=Cu, D50=D50, Ip=PI, method="Robertson")
         return

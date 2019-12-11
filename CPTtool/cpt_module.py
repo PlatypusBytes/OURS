@@ -2,7 +2,6 @@ import os
 import numpy as np
 import robertson
 import tools_utils
-import json
 import matplotlib.pylab as plt
 import matplotlib.patches as patches
 from cycler import cycler
@@ -499,7 +498,7 @@ class CPT:
             self.plot_correlations([G0_1, G0_2, G0_3, G0_4, G0_5], "Shear modulus [kPa]", ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_modulus")
         return
 
-    def damp_calc(self, d_min=2, Cu=2., D50=0.2, Ip=40., method="Mayne", freq=30.):
+    def damp_calc(self, d_min=2, Cu=2., D50=0.2, Ip=40., method="Mayne", freq=1.):
         r"""
         Damping calculation.
 
@@ -531,7 +530,7 @@ class CPT:
         :param D50: (optional) Median grain size. Default is 0.2 mm
         :param Ip: (optional) Plasticity index. Default is 40
         :param method: (optional) Method for calculation of OCR. Default is Mayne
-        :param freq: (optional) Frequency. Default is 30 Hz
+        :param freq: (optional) Frequency. Default is 1 Hz
         """
 
         # assign size to damping
@@ -545,8 +544,8 @@ class CPT:
                     OCR[i] = 0.33 * (self.qt[i] - self.total_stress[i]) / self.effective_stress[i]
                 elif method == "Robertson":
                     OCR[i] = 0.25 * self.Qtn[i] ** 1.25
-                self.damping[i] = (0.8005 + 0.129 * Ip * OCR[i] ** -0.1069) * \
-                                  (self.effective_stress[i] / self.Pa) ** -0.2889 * (1 + 0.2919 * np.log(freq))
+                self.damping[i] = (0.8005 + 0.0129 * Ip * OCR[i] ** (-0.1069)) * \
+                                  (self.effective_stress[i] / self.Pa) ** (-0.2889) * (1 + 0.2919 * np.log(freq))
             # if sand:
             elif lit == "5" or lit == "6" or lit == "7":
                 self.damping[i] = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.effective_stress[i] / self.Pa) ** -0.08
