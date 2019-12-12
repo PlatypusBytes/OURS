@@ -34,7 +34,7 @@ class TestCDF(TestCase):
         y = 444543
         self.pwp.query(x, y)
 
-        self.assertAlmostEqual(-0.43, self.pwp.NAP_water_level)
+        self.assertAlmostEqual(-0.97, self.pwp.NAP_water_level)
         return
 
     def tearDown(self):
