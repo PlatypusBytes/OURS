@@ -5,5 +5,6 @@ os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_cpt
 os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_inv_dist.py")
 os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_robertson.py")
 os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_tools_utils.py")
+os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_netcdf.py")
 os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " report")
 os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " html")
