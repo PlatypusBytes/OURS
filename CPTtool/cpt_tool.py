@@ -270,7 +270,7 @@ def analysis(properties, methods_cpt, output, plots):
             if is_jsn_modified:
                 results["circle"] = True
                 jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
-                                               "probability": 1. - sum(prob)})
+                                                   "probability": 1. - sum(prob)})
                 scenario += 1
         elif jsn["scenarios"]:
             # if circle is empty and polygons exist: update probability of polygons

@@ -27,6 +27,7 @@ class InverseDistance:
         self.nb_near_points = nb_points
         self.power = pwr
         self.tol = tol
+        self.variance_default = 10.
         return
 
     def interpolate(self, training_points, training_data, depth_points, depth):
@@ -113,6 +114,6 @@ class InverseDistance:
         self.var = np.sum(np.array(point_var), axis=0)
 
         # # if only 1 data point is available (var = 0 for all points) -> var is nan
-        if np.max(self.var) <= 1e-24:
-            self.var = np.full(len(self.var), np.nan)
+        if self.nb_near_points == 1:
+            self.var = np.full(len(self.var), (self.variance_default * np.array(self.zn)) ** 2)
         return
