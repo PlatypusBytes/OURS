@@ -93,7 +93,7 @@ class TestCptTool(unittest.TestCase):
 
         jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, output,
                           {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
-                           "MinLayerThickness": '0.5'}
+                           "MinLayerThickness": '0.5', "BRO_data": prop["BRO_data"]}
                           , plots, 0, log_file, {"scenarios": []}, 0)
 
         # check json file
@@ -140,7 +140,7 @@ class TestCptTool(unittest.TestCase):
 
         jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, output,
                           {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
-                           "MinLayerThickness": '0.5'}
+                           "MinLayerThickness": '0.5', "BRO_data": prop["BRO_data"]}
                           , plots, 0, log_file, {"scenarios": []}, 0)
 
         # check json file

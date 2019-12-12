@@ -37,6 +37,7 @@ dependencies:
   - mkl=2019.4=245
   - mkl_fft=1.0.12=py37h14836fe_0
   - mkl_random=1.0.2=py37h343c172_0
+  - netcdf4=1.4.2=py37h9ba30bf_0
   - numpy=1.16.4=py37h19fb1c0_0
   - numpy-base=1.16.4=py37hc3f5095_0
   - openssl=1.1.1c=hfa6e2cd_0
