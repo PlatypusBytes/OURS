@@ -190,8 +190,8 @@ class TestCptModule(unittest.TestCase):
         self.cpt.depth = np.arange(0, 2, 0.1)
         self.cpt.gamma = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15]
         self.cpt.NAP = np.zeros(20)
-        z_pwp = 0
-        self.cpt.stress_calc(z_pwp)
+        self.pwp = 0
+        self.cpt.stress_calc()
 
         # The target list with the desired output
         effective_stress_test = [2., 4., 6., 8., 10., 12., 14., 16., 18., 20., 21.5, 23., 24.5, 26., 27.5, 29., 30.5,

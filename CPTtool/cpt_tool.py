@@ -96,7 +96,7 @@ def read_json(input_file):
 
 
 def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn,
-             scenario, gamma_max=22, pwp_level=0):
+             scenario, gamma_max=22):
     """
     Read CPT
 
@@ -114,7 +114,6 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     :param jsn: dictionary with the scenarios
     :param scenario: scenario number
     :param gamma_max: (optional) maximum value specific weight soil
-    :param pwp_level: (optional) pore water level in NAP
     :return: return_cpt: list with the processed cpt objects
     """
 
@@ -145,8 +144,10 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         cpt.gamma_calc(gamma_max, method=methods["gamma"])
         # compute density
         cpt.rho_calc()
+        # compute water pressure level
+        cpt.pwp_level_calc(input_dictionary['BRO_data'])
         # compute stresses: total, effective and porewater pressures
-        cpt.stress_calc(pwp_level)
+        cpt.stress_calc()
         # compute lithology
         cpt.lithology_calc()
         # compute IC

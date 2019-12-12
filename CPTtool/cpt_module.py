@@ -27,6 +27,7 @@ class CPT:
         self.rho = []
         self.total_stress = []
         self.effective_stress = []
+        self.pwp = []
         self.qt = []
         self.Qtn = []
         self.Fr = []
@@ -230,6 +231,21 @@ class CPT:
 
         return
 
+    def pwp_level_calc(self, path_bro):
+        """
+        Computes the estimated pwp level for the cpt coordinate
+
+        :param path_bro: path for the location of the netCDF file with expected water levels
+        :return:
+        """
+        import netcdf
+        pwp = netcdf.NetCDF()
+        pwp.read_cdffile(path_bro)
+        pwp.query(self.coord[0], self.coord[1])
+        self.pwp = pwp.NAP_water_level
+
+        return
+
     def gamma_calc(self, gamma_limit, method="Robertson"):
         r"""
         Computes unit weight.
@@ -291,13 +307,9 @@ class CPT:
         self.rho = self.gamma * 1000. / self.g
         return
 
-    def stress_calc(self, z_pwp):
+    def stress_calc(self):
         r"""
         Computes total and effective stress
-
-        Parameters
-        ----------
-        :param z_pwp: Depth of pore water pressure in NAP
         """
 
         # compute depth diff
@@ -307,7 +319,7 @@ class CPT:
         self.total_stress = np.cumsum(self.gamma * z) + self.depth[0] * np.mean(self.gamma[:10])
         # compute pwp
         # determine location of phreatic line: it cannot be above the CPT depth
-        z_aux = np.min([z_pwp, self.NAP[0] + self.depth[0]])
+        z_aux = np.min([self.pwp, self.NAP[0] + self.depth[0]])
         pwp = (z_aux - self.NAP) * self.g
         # no suction is allowed
         pwp[pwp <= 0] = 0
