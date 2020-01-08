@@ -302,12 +302,14 @@ def analysis(properties, methods_cpt, output, plots):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--json', help='input JSON file', required=True)
-    parser.add_argument('-o', '--output', help='location of the output folder', required=True)
+    parser.add_argument('-i', '--json', help='input JSON file', required=False)
+    parser.add_argument('-o', '--output', help='location of the output folder', required=False)
     parser.add_argument('-p', '--plots', help='make plots', required=False, default=False)
     parser.add_argument('-m', '--methods', help='define methods for CPT correlations', required=False, default=False)
     args = parser.parse_args()
 
+    # args.json = "../uit2353.json"
+    # args.output = "test"
     # reads input json file
     props = read_json(args.json)
     # define methods for the analysis of CPT
