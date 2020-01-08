@@ -3,10 +3,10 @@ import numpy as np
 import pyproj
 import tools_utils
 import os
+import logging
 
-crs = "4326"
-to_srs = pyproj.Proj(init='epsg:{}'.format(crs))
-
+to_srs = pyproj.Proj(init='epsg:4326')
+source_srs = pyproj.Proj(init='epsg:28992')
 
 class NetCDF:
 
@@ -26,17 +26,21 @@ class NetCDF:
 
         # define the path for the shape file
         cdf_file = os.path.join(os.path.split(bro)[0], r"peilgebieden_jp_250m.nc")
+
         # open file
         dataset = netCDF4.Dataset(cdf_file)
+
         # read coordinates
         lat = dataset.variables['lat'][:]
         lon = dataset.variables['lon'][:]
-        self.lat, self.lon = np.meshgrid(lat, lon)
-        self.lat = self.lat.ravel()
-        self.lon = self.lon.ravel()
-        # read data
-        self.data = dataset.variables["Band1"][:].ravel()
-        # close file
+        self.data = dataset.variables["Band1"][:]
+
+        # only use valid data
+        mlon, mlat = np.meshgrid(lon, lat)
+        self.lat = mlat[~self.data.mask]
+        self.lon = mlon[~self.data.mask]
+        self.data = self.data[~self.data.mask]
+
         dataset.close()
         return
 
@@ -49,19 +53,10 @@ class NetCDF:
         """
 
         # convert to coordinate system of netCDF
-        source_srs = pyproj.Proj('+init=epsg:28992'.format(crs))
-        x_lon, y_lat = pyproj.transform(source_srs, to_srs, Y, X)
+        x_lon, y_lat = pyproj.transform(source_srs, to_srs, X, Y)
 
-        # ignore errors
-        np.seterr(all='ignore')
-
-        # find index
-        id_min = np.sqrt((self.lat.ravel() - x_lon)**2 - (self.lon.ravel() - y_lat)**2).argsort()
-
-        # find the first numeric depth
-        for i in id_min:
-            if not str(self.data.ravel()[id_min][i]) == '--':
-                self.NAP_water_level = self.data[id_min][i]
-                break
-
+        # find nearest cell
+        id_min = ((self.lon - x_lon)**2 + (self.lat - y_lat)**2).argmin()
+        self.NAP_water_level = self.data[id_min]
+        logging.debug("For given x: {} (lon: {}) and y: {} (lat: {}), nearest point with data is {} {}".format(X, x_lon, Y, y_lat, self.lon[id_min], self.lat[id_min]))
         return
