@@ -45,7 +45,7 @@ footer = b"</gml:FeatureCollection>"
 
 columns = ["penetrationLength", "depth", "elapsedTime", "coneResistance", "correctedConeResistance", "netConeResistance", "magneticFieldStrengthX", "magneticFieldStrengthY", "magneticFieldStrengthZ", "magneticFieldStrengthTotal", "electricalConductivity",
            "inclinationEW", "inclinationNS", "inclinationX", "inclinationY", "inclinationResultant", "magneticInclination", "magneticDeclination", "localFriction", "poreRatio", "temperature", "porePressureU1", "porePressureU2", "porePressureU3", "frictionRatio"]
-req_columns = ["penetrationLength", "depth", "coneResistance", "localFriction", "frictionRatio"]
+req_columns = ["penetrationLength", "coneResistance", "localFriction", "frictionRatio"]
 
 ns = "{http://www.broservices.nl/xsd/cptcommon/1.1}"
 ns2 = "{http://www.broservices.nl/xsd/dscpt/1.1}"
@@ -58,12 +58,13 @@ to_epsg = "28992"
 to_srs = pyproj.Proj(init='epsg:{}'.format(to_epsg))
 
 
-def writexml(data, id="test"):
+def writexml(data, id="test", path="debug"):
     """Quick function to write xml in memory to disk.
-    :param data: XML bytes.
+    :param data: lxml etree root.
     :param id: Filename to use."""
-    with open("{}.xml".format(id), "wb") as f:
-        f.write(data)
+    with open("{}/{}.xml".format(path, id), "wb") as f:
+        s = etree.tostring(data, pretty_print=True)
+        f.write(s)
 
 
 def parse_bro_xml(xml):
@@ -115,7 +116,7 @@ def parse_bro_xml(xml):
     meta_usable = all([x is not None for x in data.values()])
     data_usable = all([col in avail_columns for col in req_columns])
     if not (meta_usable and data_usable):
-        logging.warning("CPT misses required data.")
+        logging.warning("CPT with id {} misses required data.".format(data["id"]))
         return None
 
     # Parse data array, replace nodata, filter and sort
@@ -126,9 +127,8 @@ def parse_bro_xml(xml):
             ar = np.loadtxt(sar, delimiter=",", ndmin=2)
 
             # Check shape of array
-            found_columns = ar.shape[1]
+            found_rows, found_columns = ar.shape
             if found_columns != len(columns):
-                writexml(xml, id=data["id"])
                 logging.warning("Data has the wrong size! {} columns instead of {}".format(found_columns, len(columns)))
                 return None
 
@@ -138,7 +138,7 @@ def parse_bro_xml(xml):
             ar[ar == nodata] = np.nan
             df = pd.DataFrame(ar, columns=columns)
             df = df[avail_columns]
-            df.sort_values(by=['depth'], inplace=True)
+            df.sort_values(by=['penetrationLength'], inplace=True)
 
         data["dataframe"] = df
 
@@ -170,9 +170,8 @@ def parse_xml_location(tdata):
         logging.warning("Reprojecting from epsg::{}".format(crs))
         source_srs = pyproj.Proj('+init=epsg:{}'.format(crs))
         x, y = pyproj.transform(source_srs, to_srs, y, x)
-        return x, y
-    else:
-        return x, y
+
+    return x, y
 
 
 def create_index(fn, ifn, datasize):
