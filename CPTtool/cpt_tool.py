@@ -146,7 +146,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         cpt.rho_calc()
         # compute water pressure level
         cpt.pwp_level_calc(input_dictionary['BRO_data'])
-        # compute stresses: total, effective and porewater pressures
+        # compute stresses: total, effective and pore water pressures
         cpt.stress_calc()
         # compute lithology
         cpt.lithology_calc()

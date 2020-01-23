@@ -277,12 +277,12 @@ class CPT:
         if method == "Robertson":
             aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
             aux[np.abs(aux) == np.inf] = gamma_limit / self.g
-            aux = tools_utils.ceil_value(aux, 0)
+            aux = tools_utils.ceil_value(aux, 10)
             self.gamma = aux * self.g
         elif method == "Lengkeek":
             aux = 19. - 4.12 * np.log10(5000. / self.qt) / np.log10(30. / self.friction_nbr)
             aux[np.abs(aux) == np.inf] = gamma_limit  # should this be divided with self.g ?
-            aux = tools_utils.ceil_value(aux, 0)
+            aux = tools_utils.ceil_value(aux, 10)
             self.gamma = aux
         elif method == "all":  # if all, compares all the methods and plot
             self.gamma_calc(gamma_limit, method="Lengkeek")
@@ -551,20 +551,20 @@ class CPT:
 
         for i, lit in enumerate(self.lithology):
             # if  clay
-            if lit == "3" or lit == "4":
+            if lit == "3" or lit == "4" or lit == "5":
                 if method == "Mayne":
                     OCR[i] = 0.33 * (self.qt[i] - self.total_stress[i]) / self.effective_stress[i]
                 elif method == "Robertson":
                     OCR[i] = 0.25 * self.Qtn[i] ** 1.25
                 self.damping[i] = (0.8005 + 0.0129 * Ip * OCR[i] ** (-0.1069)) * \
                                   (self.effective_stress[i] / self.Pa) ** (-0.2889) * (1 + 0.2919 * np.log(freq))
-            # if sand:
-            elif lit == "5" or lit == "6" or lit == "7":
-                self.damping[i] = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.effective_stress[i] / self.Pa) ** -0.08
-            # if peat:
-            elif lit == "2":
+            # if peat
+            elif lit == "1" or lit == "2":
                 # same as clay: OCR=1 IP=100
                 self.damping[i] = 2.512 * (self.effective_stress[i] / self.Pa) ** -0.2889
+            # if sand
+            else:
+                self.damping[i] = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.effective_stress[i] / self.Pa) ** -0.08
 
         # damping units -> dimensionless
         self.damping /= 100

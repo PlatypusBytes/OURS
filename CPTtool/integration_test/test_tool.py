@@ -12,9 +12,9 @@ class FunctionalTests(unittest.TestCase):
     def setUp(self):
 
         # reference results
-        self.data_ref = [r'./results_REF_0.json', r'./results_REF_1.json']
+        self.data_ref = [r'./results_REF_0.json', r'./results_REF_1.json', r'./results_REF_2.json']
         # reference results Robertson
-        self.data_ref_rob = [r'./results_REF_rob_0.json', r'./results_REF_rob_1.json']
+        self.data_ref_rob = [r'./results_REF_rob_0.json', r'./results_REF_rob_1.json', r'./results_REF_rob_2.json']
 
         return
 
