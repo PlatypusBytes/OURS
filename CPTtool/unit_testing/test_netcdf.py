@@ -18,15 +18,15 @@ class TestCDF(TestCase):
         y = 454045
         self.pwp.query(x, y)
 
-        self.assertAlmostEqual(-2, self.pwp.NAP_water_level)
+        self.assertAlmostEqual(-1.649999976158142, float(self.pwp.NAP_water_level))
         return
 
     def test_coord2(self):
-        x = 196703
+        x = 196704
         y = 478504
         self.pwp.query(x, y)
 
-        self.assertAlmostEqual(-1.73, self.pwp.NAP_water_level)
+        self.assertAlmostEqual( 2.6500000953674316, float(self.pwp.NAP_water_level))
         return
 
     def test_coord3(self):
@@ -34,7 +34,7 @@ class TestCDF(TestCase):
         y = 444543
         self.pwp.query(x, y)
 
-        self.assertAlmostEqual(-0.97, self.pwp.NAP_water_level)
+        self.assertAlmostEqual(-0.4300000071525574, float(self.pwp.NAP_water_level))
         return
 
     def tearDown(self):

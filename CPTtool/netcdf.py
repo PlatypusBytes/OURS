@@ -1,7 +1,6 @@
 import netCDF4
 import numpy as np
 import pyproj
-import tools_utils
 import os
 import logging
 
