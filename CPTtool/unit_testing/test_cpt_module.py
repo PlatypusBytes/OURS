@@ -21,7 +21,7 @@ class TestCptModule(unittest.TestCase):
     def test__pre_drill_with_predrill(self):
 
         # make a cpt with the pre_drill option
-        d = {'depth': [1.5, 2.0, 2.5],
+        d = {'penetrationLength': [1.5, 2.0, 2.5],
              'coneResistance': [1, 2, 3],
              'localFriction': [4, 5, 6],
              'frictionRatio': [0.22, 0.33, 0.44],
@@ -53,7 +53,7 @@ class TestCptModule(unittest.TestCase):
     def test__pre_drill_with_pore_pressure(self):
 
         # Set the values of the cpt
-        d = {'depth': [1.5, 2.0, 2.5],
+        d = {'penetrationLength': [1.5, 2.0, 2.5],
              'coneResistance': [1, 2, 3],
              'localFriction': [4, 5, 6],
              'frictionRatio': [0.22, 0.33, 0.44],
@@ -74,7 +74,7 @@ class TestCptModule(unittest.TestCase):
         # Define the stepping of the pore pressure
         # Then my target values
         # Finally multiply with 1000
-        step = 1/len(d['depth'])
+        step = 1/len(d['penetrationLength'])
         pore_pressure = [0, step * 1000, 2 * step * 1000, 1 * 1000, 2 * 1000, 3 * 1000]
 
         # run the function to be checked
@@ -95,7 +95,7 @@ class TestCptModule(unittest.TestCase):
 
         # Define the cpt values
         # here the points are only two so that will return an error message
-        d = {'depth': [1.5, 2.0],
+        d = {'penetrationLength': [1.5, 2.0],
              'coneResistance': [1, 2],
              'localFriction': [4, 5],
              'frictionRatio': [0.22, 0.33],
@@ -119,7 +119,7 @@ class TestCptModule(unittest.TestCase):
 
         # Define the cpt values
         # here the points are only two so that will return an error message
-        d = {'depth': [1.5, 2.0],
+        d = {'penetrationLength': [1.5, 2.0],
              'coneResistance': [1, 2],
              'localFriction': [4, 5],
              'frictionRatio': [0.22, 0.33],
@@ -546,7 +546,7 @@ class TestCptModule(unittest.TestCase):
 
     def test_bro_parser_no_water(self):
 
-        d = {'depth': [0.1, 0.2],
+        d = {'penetrationLength': [0.1, 0.2],
              'coneResistance': [1, 2],
              'localFriction': [3, 4],
              'frictionRatio': [0.22, 0.33],
@@ -572,7 +572,7 @@ class TestCptModule(unittest.TestCase):
 
     def test_bro_parser_water(self):
 
-        d = {'depth': [0.1, 0.2],
+        d = {'penetrationLength': [0.1, 0.2],
              'coneResistance': [1, 2],
              'localFriction': [3, 4],
              'porePressureU2': [0.5, 1],
@@ -599,7 +599,7 @@ class TestCptModule(unittest.TestCase):
 
     def test_bro_parser_nan(self):
 
-        d = {'depth': [0.1, 0.2],
+        d = {'penetrationLength': [0.1, 0.2],
              'coneResistance': [1, 2],
              'localFriction': [3, np.nan],
              'porePressureU2': [0.5, 1],

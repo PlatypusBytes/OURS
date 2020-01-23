@@ -74,12 +74,12 @@ class CPT:
             cpt["dataframe"] = cpt["dataframe"].dropna(subset=[key])
 
         # check if file contains data
-        if len(cpt["dataframe"].depth) == 0:
+        if len(cpt["dataframe"].penetrationLength) == 0:
             message = "File " + cpt["id"] + " contains no data"
             return message
 
         # check if data is different than zero:
-        keys = ['depth', 'coneResistance', 'localFriction', 'frictionRatio']
+        keys = ['penetrationLength', 'coneResistance', 'localFriction', 'frictionRatio']
         for k in keys:
             if all(cpt["dataframe"][k] == 0):
                 message = "File " + cpt["id"] + " contains empty data"
@@ -91,17 +91,17 @@ class CPT:
         self.coord = [cpt['location_x'], cpt['location_y']]
 
         # check criteria of minimum length
-        if np.max(np.abs(cpt['dataframe'].depth.values)) < minimum_length:
+        if np.max(np.abs(cpt['dataframe'].penetrationLength.values)) < minimum_length:
             message = "File " + cpt["id"] + " has a length smaller than " + str(minimum_length)
             return message
 
         # check criteria of minimum samples
-        if len(cpt['dataframe'].depth.values) < minimum_samples:
+        if len(cpt['dataframe'].penetrationLength.values) < minimum_samples:
             message = "File " + cpt["id"] + " has a number of samples smaller than " + str(minimum_samples)
             return message
 
         # check data consistency: remove doubles depth
-        cpt["dataframe"] = cpt["dataframe"].drop_duplicates(subset='depth', keep="first")
+        cpt["dataframe"] = cpt["dataframe"].drop_duplicates(subset='penetrationLength', keep="first")
 
         # check if there is a pre_drill. if so pad the data
         depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt)
@@ -158,7 +158,7 @@ class CPT:
             # if there is pre-dill add the average values to the pre-dill
 
             # Set the discretisation
-            dicretisation = np.average(np.diff(cpt_BRO['dataframe']['depth'].values))
+            dicretisation = np.average(np.diff(cpt_BRO['dataframe']['penetrationLength'].values))
 
             # find the average
             average_cone_res = np.average(cpt_BRO['dataframe']['coneResistance'][:length_of_average_points])
@@ -180,14 +180,14 @@ class CPT:
                 pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe']["porePressureU2"].values)
 
             # Enrich the Penetration Length
-            depth = np.append(local_depth, cpt_BRO['dataframe']['depth'].values)
+            depth = np.append(local_depth, cpt_BRO['dataframe']['penetrationLength'].values)
             coneresistance = np.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
             frictionratio = np.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
             localfriction = np.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
 
         else:
             # No predrill existing: just parsing data
-            depth = cpt_BRO['dataframe']['depth'].values
+            depth = cpt_BRO['dataframe']['penetrationLength'].values
             coneresistance = cpt_BRO['dataframe']['coneResistance'].values
             frictionratio = cpt_BRO['dataframe']['frictionRatio'].values
             localfriction = cpt_BRO['dataframe']['localFriction'].values
