@@ -358,7 +358,8 @@ class TestCptModule(unittest.TestCase):
         self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10
 
         # Define the target array
-        test_damping = np.array([2, 2, 2]) / 100
+        test_damping =  2.512 * (self.cpt.effective_stress / 100) ** -0.2889
+        test_damping /= 100
 
         # Running the function
         self.cpt.damp_calc()
@@ -376,10 +377,13 @@ class TestCptModule(unittest.TestCase):
         self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10
 
         # The target output
-        test_damping = np.array([2, 2, 2]) / 100
+        Cu = 2
+        D50 = 0.02
+        test_damping = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.cpt.effective_stress / 100) ** -0.08
+        test_damping /= 100
 
         # Run the function to be tested
-        self.cpt.damp_calc()
+        self.cpt.damp_calc(Cu=Cu, D50=D50)
 
         # Testing if the lists are equals
         np.testing.assert_array_equal(test_damping, self.cpt.damping)
@@ -396,8 +400,13 @@ class TestCptModule(unittest.TestCase):
         # Define the output
         test_damping = np.array([2, 2, 2]) / 100
 
+        Cu = 3
+        D50 = 0.025
+        test_damping = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.cpt.effective_stress / 100) ** -0.08
+        test_damping /= 100
+
         # Run the function to be tested
-        self.cpt.damp_calc()
+        self.cpt.damp_calc(Cu=Cu, D50=D50)
 
         # Testing if the list are equal
         np.testing.assert_array_equal(test_damping, self.cpt.damping)
@@ -406,7 +415,7 @@ class TestCptModule(unittest.TestCase):
     def test_damp_calc_4(self):
         # Define the inputs
         # all soil sand
-        self.cpt.lithology = ["5", "6", "6", "7"]
+        self.cpt.lithology = ["8", "6", "9", "7"]
         self.cpt.effective_stress = np.ones(len(self.cpt.lithology))
         self.cpt.total_stress = np.ones(len(self.cpt.lithology)) + 1
         self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10

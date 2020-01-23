@@ -122,7 +122,7 @@ class TestCptTool(unittest.TestCase):
 
         log_file = log_handler.LogFile(output, 0)
 
-        d = {'depth': [0.1, 0.2],
+        d = {'penetrationLength': [0.1, 0.2],
              'coneResistance': [1, 2],
              'localFriction': [3, 4],
              'porePressureU2': [0.5, 1],
@@ -138,9 +138,9 @@ class TestCptTool(unittest.TestCase):
         data = [cpt_data]
 
         jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, output,
-                          {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
-                           "MinLayerThickness": '0.5', "BRO_data": prop["BRO_data"]}
-                          , plots, 0, log_file, {"scenarios": []}, 0)
+                                                 {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
+                                                  "MinLayerThickness": '0.5', "BRO_data": prop["BRO_data"]},
+                                                 plots, 0, log_file, {"scenarios": []}, 0)
 
         # check json file
         self.assertFalse(is_jsn_modified)
