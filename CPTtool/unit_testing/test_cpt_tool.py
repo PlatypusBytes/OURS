@@ -101,7 +101,6 @@ class TestCptTool(unittest.TestCase):
         self.assertTrue(bool(jsn))
         return
 
-
     def test_read_cpt_empty(self):
         # In this test all the cpts do not have good quality data that means that no results will be returned.
         # So an empty json file with a False is_jsn_modified statement
@@ -370,7 +369,7 @@ class TestBroDb(unittest.TestCase):
         cpts = bro.read_bro(input)
 
         self.assertEqual(len(cpts["circle"]["data"]), 23)
-        self.assertEqual(len(list(filter(lambda x: x is None, cpts["circle"]["data"]))), 2)
+        self.assertEqual(len(list(filter(lambda x: x is None, cpts["circle"]["data"]))), 0)
 
     def test_database_read_polygons(self):
         input = {"BRO_data": "../bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
@@ -383,13 +382,12 @@ class TestBroDb(unittest.TestCase):
         self.assertTrue(isinstance(cpts["polygons"][key]["perc"], float))
         self.assertTrue(100. >= cpts["polygons"][key]["perc"] > 0.)
 
-
     def test_zipdatabase_read(self):
         input = {"BRO_data": "../bro/brocpt.zip", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
         cpts = bro.read_bro(input)
 
         self.assertEqual(len(cpts["circle"]["data"]), 23)
-        self.assertEqual(len(list(filter(lambda x: x is None, cpts["circle"]["data"]))), 2)
+        self.assertEqual(len(list(filter(lambda x: x is None, cpts["circle"]["data"]))), 0)
 
 
 if __name__ == '__main__':  # pragma: no cover
