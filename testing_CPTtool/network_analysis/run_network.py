@@ -1,4 +1,4 @@
-def test_network(bro_path, output_folder, summary_file):
+def test_network(bro_path, output_folder, summary_file, console):
     import sys
     sys.path.append(r"../../CPTtool")
     import os
@@ -11,7 +11,8 @@ def test_network(bro_path, output_folder, summary_file):
     # summary file
     fo = open(summary_file, "w")
     fo.write("Analysis started\n")
-
+    # open console file
+    sys.stdout = open(console, "w")
 
     # read coordinates
     with open("./coords_network.csv", "r") as f:
@@ -49,10 +50,11 @@ def test_network(bro_path, output_folder, summary_file):
         cpt_tool.analysis(properties, methods, os.path.join(output_folder, str(i) + "_" + str(c[0]) + "_" + str(c[1])), False)
         fo.write("Analysis done for index: " + str(i) + " coordinate: " + str(c[0]) + " " + str(c[1]) + "\n")
         fo.flush()
+        sys.stdout.flush()
 
     fo.write("Analysis finished\n")
     return
 
 
 if __name__ == "__main__":
-    test_network("../../bro_dataset/brocpt.xml", "./results", "summary.txt")
+    test_network("../../bro_dataset/brocpt.xml", "./results", "summary.txt", "console.txt")

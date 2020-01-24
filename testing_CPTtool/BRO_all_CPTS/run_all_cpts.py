@@ -1,4 +1,4 @@
-def test_all_cpts(bro_path, output_folder, file_summary):
+def test_all_cpts(bro_path, output_folder, file_summary, console):
     import sys
     sys.path.append(r"../../CPTtool")
     sys.path.append(r"../../CPTtool/shapefiles")
@@ -15,6 +15,8 @@ def test_all_cpts(bro_path, output_folder, file_summary):
 
     # open summary file
     fo = open(file_summary, "w")
+    # open console file
+    sys.stdout = open(console, "w")
 
     # define methods
     methods = {"gamma": "Robertson",
@@ -64,6 +66,7 @@ def test_all_cpts(bro_path, output_folder, file_summary):
             log_file = log_handler.LogFile(output_folder, i)
             cpt_tool.read_cpt(cpt, methods, output_folder, properties, False, 0, log_file, jsn, 0)
             log_file.close()
+            sys.stdout.flush()
         except Exception as e:
             print(e)
             print("ERROR on index " + str(i))
@@ -75,4 +78,4 @@ def test_all_cpts(bro_path, output_folder, file_summary):
 
 
 if __name__ == "__main__":
-    test_all_cpts("./bro_dataset", "./results", "./summary.txt")
+    test_all_cpts("./bro_dataset", "./results", "./summary.txt", "./console.txt")
