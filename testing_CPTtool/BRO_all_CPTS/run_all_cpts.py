@@ -47,6 +47,8 @@ def test_all_cpts(bro_path, output_folder, file_summary):
 
     # read all cpts single
     for j in range(len(idx_file[1])):
+        print(j)
+        jsn = {"scenarios": []}
         i = j
         try:
             indices = [idx_file[1][i][2:4]]
@@ -60,7 +62,7 @@ def test_all_cpts(bro_path, output_folder, file_summary):
 
             # process the file if not empty
             log_file = log_handler.LogFile(output_folder, i)
-            cpt_tool.read_cpt(cpt, methods, output_folder, properties, False, 0, log_file)
+            cpt_tool.read_cpt(cpt, methods, output_folder, properties, False, 0, log_file, jsn, 0)
             log_file.close()
         except Exception as e:
             print(e)
