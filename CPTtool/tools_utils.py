@@ -377,7 +377,7 @@ def dump_json(jsn, index, output_folder):
     return
 
 
-def smooth(sig, window_len=10):
+def smooth(sig, window_len=10, lim=None):
     r"""
     Smooth signal
 
@@ -385,6 +385,7 @@ def smooth(sig, window_len=10):
 
     :param sig: original signal
     :param window_len: (optional) number of samples for the smoothing window: default 10
+    :param lim: (optional) limit the minimum value of the array: default None: does not apply limit.
     :return: smoothed signal
     """
 
@@ -397,4 +398,7 @@ def smooth(sig, window_len=10):
     w = np.ones(window_len)
     # convolute signal
     y = np.convolve(w / w.sum(), s, mode='same')
+    # limit the value is exits
+    if lim is not None:
+        y[y < lim] = lim
     return y[window_len - 1:-window_len + 1]

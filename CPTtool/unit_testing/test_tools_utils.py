@@ -440,11 +440,25 @@ class TestUtils(TestCase):
     def test_smooth_1(self):
         x = np.linspace(0, 100, 100)
         y = np.sin(x)
-        y_smooth = tu.smooth(y, window_len=3)
+        y_smooth = tu.smooth(y, window_len=3, )
 
         yy = np.zeros(100)
         for i in range(100):
             yy[i] = np.mean(y[i:i+3])
+
+        np.testing.assert_array_almost_equal(y_smooth[1:-1], yy[:-2])
+        return
+
+    def test_smooth_2(self):
+        x = np.linspace(0, 100, 100)
+        y = np.sin(x)
+        y_smooth = tu.smooth(y, window_len=3, lim=0)
+
+        yy = np.zeros(100)
+        for i in range(100):
+            yy[i] = np.mean(y[i:i+3])
+
+        yy[yy<=0]=0
 
         np.testing.assert_array_almost_equal(y_smooth[1:-1], yy[:-2])
         return

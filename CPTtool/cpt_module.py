@@ -147,10 +147,10 @@ class CPT:
         :return:
         """
 
-        self.tip = tools_utils.smooth(self.tip, window_len=nb_points)
-        self.friction = tools_utils.smooth(self.friction, window_len=nb_points)
-        self.friction_nbr = tools_utils.smooth(self.friction_nbr, window_len=nb_points)
-        self.water = tools_utils.smooth(self.water, window_len=nb_points)
+        self.tip = tools_utils.smooth(self.tip, window_len=nb_points, lim=0)
+        self.friction = tools_utils.smooth(self.friction, window_len=nb_points, lim=0)
+        self.friction_nbr = tools_utils.smooth(self.friction_nbr, window_len=nb_points, lim=0)
+        self.water = tools_utils.smooth(self.water, window_len=nb_points, lim=0)
         return
 
     def define_pre_drill(self, cpt_BRO):
