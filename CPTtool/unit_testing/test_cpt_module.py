@@ -139,6 +139,54 @@ class TestCptModule(unittest.TestCase):
         self.assertTrue( 'File cpt_name has a number of samples smaller than 10'== aux)
         return
 
+    def test_read_BRO_Raise_Exception1(self):
+
+        # Define the cpt values
+        # here the points are only two so that will return an error message
+        d = {'penetrationLength': [1.5, 20.0],
+             'coneResistance': [-1, 2],
+             'localFriction': [4, 5],
+             'frictionRatio': [0.22, 0.33],
+             }
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    'predrilled_z': 1.5,
+                    "dataframe": df}
+
+        # run the fuction
+        aux = self.cpt.parse_bro(cpt_data, minimum_length=10, minimum_samples=1)
+
+        # check if the returned message is the appropriate
+        self.assertTrue('File cpt_name is corrupted' == aux)
+        return
+
+    def test_read_BRO_Raise_Exception2(self):
+
+        # Define the cpt values
+        # here the points are only two so that will return an error message
+        d = {'penetrationLength': [1.5, 20.0],
+             'coneResistance': [1, 2],
+             'localFriction': [-4, 5],
+             'frictionRatio': [0.22, 0.33],
+             }
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    'predrilled_z': 1.5,
+                    "dataframe": df}
+
+        # run the fuction
+        aux = self.cpt.parse_bro(cpt_data, minimum_length=10, minimum_samples=1)
+
+        # check if the returned message is the appropriate
+        self.assertTrue('File cpt_name is corrupted' == aux)
+        return
+
     def test_rho_calculation(self):
         self.cpt.gamma = np.ones(10)
         self.cpt.g = 10.

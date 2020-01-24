@@ -61,11 +61,15 @@ class CPT:
 
         return
 
-    def parse_bro(self, cpt, minimum_length=5, minimum_samples=10):
+    def parse_bro(self, cpt, minimum_length=5, minimum_samples=10, minimum_ratio=0.1):
         """
         Parse the BRO information into the object structure
 
         :param cpt: BRO cpt dataset
+        :param minimum_length: minimum length that cpt files needs to have
+        :param minimum_samples: minimum samples that cpt files needs to have
+        :param minimum_ratio: minimum ratio of positive values that cpt files needs to have
+
         :return:
         """
 
@@ -105,6 +109,15 @@ class CPT:
 
         # check if there is a pre_drill. if so pad the data
         depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt)
+
+        # check quality of CPT
+        # if more than minimum_ratio CPT is corrupted: discard CPT
+        if (
+                len(cone_resistance[cone_resistance <= 0]) / len(cone_resistance) > minimum_ratio
+                or len(cone_resistance[local_friction <= 0]) / len(local_friction) > minimum_ratio
+            ):
+            message = "File " + cpt["id"] + " is corrupted"
+            return message
 
         # parse depth
         self.depth = depth
@@ -275,6 +288,7 @@ class CPT:
 
         # calculate unit weight according to Robertson & Cabal 2015
         if method == "Robertson":
+
             aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
             aux[np.abs(aux) == np.inf] = gamma_limit / self.g
             aux = tools_utils.ceil_value(aux, 10)
