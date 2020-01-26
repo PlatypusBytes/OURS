@@ -1,22 +1,18 @@
-def test_all_cpts(bro_path, output_folder, file_summary, console):
-    import sys
-    sys.path.append(r"../../CPTtool")
-    sys.path.append(r"../../CPTtool/shapefiles")
-    import bro
-    import os
-    import pickle
-    import numpy as np
-    import cpt_tool
-    import log_handler
+import sys
+sys.path.append(r"../../CPTtool")
+sys.path.append(r"../../CPTtool/shapefiles")
+import bro
+import os
+import pickle
+import cpt_tool
+import log_handler
+
+
+def test_all_cpts(bro_path, output_folder):
 
     # create output folder
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-
-    # open summary file
-    fo = open(file_summary, "w")
-    # open console file
-    sys.stdout = open(console, "w")
 
     # define methods
     methods = {"gamma": "Robertson",
@@ -50,32 +46,31 @@ def test_all_cpts(bro_path, output_folder, file_summary, console):
     # read all cpts single
     for j in range(len(idx_file[1])):
         print(j)
+        sys.stderr.write(str(j) + "\n")
+
         jsn = {"scenarios": []}
         i = j
-        try:
-            indices = [idx_file[1][i][2:4]]
-            # call bro
-            cpt = bro.read_bro_xml(xml_file, indices)
 
-            # check if empty
-            cpt = list(filter(None, cpt))
-            if not cpt:
-                continue
+        indices = [idx_file[1][i][2:4]]
+        # call bro
+        cpt = bro.read_bro_xml(xml_file, indices)
 
-            # process the file if not empty
-            log_file = log_handler.LogFile(output_folder, i)
-            cpt_tool.read_cpt(cpt, methods, output_folder, properties, False, 0, log_file, jsn, 0)
-            log_file.close()
-            sys.stdout.flush()
-        except Exception as e:
-            print(e)
-            print("ERROR on index " + str(i))
-            fo.write("ERROR on index " + str(i) + '\n')
-            fo.write("    indices " + str(indices) + '\n')
+        # check if empty
+        cpt = list(filter(None, cpt))
+        if not cpt:
+            continue
 
-    fo.close()
+        # process the file if not empty
+        log_file = log_handler.LogFile(output_folder, i)
+        cpt_tool.read_cpt(cpt, methods, output_folder, properties, False, 0, log_file, jsn, 0)
+        log_file.close()
+
+        sys.stderr.flush()
+
     return
 
 
 if __name__ == "__main__":
-    test_all_cpts("./bro_dataset", "./results", "./summary.txt", "./console.txt")
+    sys.stderr = open('./log.txt', 'w')
+    test_all_cpts("./bro_dataset", "./results")
+    sys.stderr.close()

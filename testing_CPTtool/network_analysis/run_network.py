@@ -1,9 +1,10 @@
-def test_network(bro_path, output_folder, summary_file, console):
-    import sys
-    sys.path.append(r"../../CPTtool")
-    import os
-    import cpt_tool
+import sys
+sys.path.append(r"../../CPTtool")
+import os
+import cpt_tool
 
+
+def test_network(bro_path, output_folder, summary_file):
     # create output folder
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -11,8 +12,6 @@ def test_network(bro_path, output_folder, summary_file, console):
     # summary file
     fo = open(summary_file, "w")
     fo.write("Analysis started\n")
-    # open console file
-    sys.stdout = open(console, "w")
 
     # read coordinates
     with open("./coords_network.csv", "r") as f:
@@ -28,6 +27,9 @@ def test_network(bro_path, output_folder, summary_file, console):
 
     # run analysis for each coordinate point
     for i, c in enumerate(coords):
+
+        sys.stderr.write(str(c) + "\n")
+
         # define properties
         properties = {"Name": "asd",
                       "MaxCalcDist": "25.0",
@@ -50,11 +52,12 @@ def test_network(bro_path, output_folder, summary_file, console):
         cpt_tool.analysis(properties, methods, os.path.join(output_folder, str(i) + "_" + str(c[0]) + "_" + str(c[1])), False)
         fo.write("Analysis done for index: " + str(i) + " coordinate: " + str(c[0]) + " " + str(c[1]) + "\n")
         fo.flush()
-        sys.stdout.flush()
 
     fo.write("Analysis finished\n")
     return
 
 
 if __name__ == "__main__":
-    test_network("../../bro_dataset/brocpt.xml", "./results", "summary.txt", "console.txt")
+    sys.stderr = open('log.txt', 'w')
+    test_network("../../bro_dataset/brocpt.xml", "./results", "summary.txt")
+    sys.stderr.close()
