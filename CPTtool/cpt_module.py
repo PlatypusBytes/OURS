@@ -108,7 +108,8 @@ class CPT:
         cpt["dataframe"] = cpt["dataframe"].drop_duplicates(subset='penetrationLength', keep="first")
 
         # check if there is a pre_drill. if so pad the data
-        depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt)
+        depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt,
+                                                                                                      length_of_average_points=minimum_samples)
 
         # check quality of CPT
         # if more than minimum_ratio CPT is corrupted: discard CPT
@@ -153,7 +154,7 @@ class CPT:
         self.water = tools_utils.smooth(self.water, window_len=nb_points, lim=0)
         return
 
-    def define_pre_drill(self, cpt_BRO):
+    def define_pre_drill(self, cpt_BRO, length_of_average_points=3):
         r"""
         Checks the existence of pre-drill.
         If predrill exists it add the average value of tip, friction and friction number to the pre-drill length.
@@ -161,10 +162,10 @@ class CPT:
         If pore water pressure is measured, the pwp is assumed to be zero at surface level.
 
         :param cpt_BRO: BRO cpt dataset
+        :param length_of_average_points: number of samples of the CPT to be used to fill pre-drill
         :return: depth, tip resistance, friction number, friction, pore water pressure
         """
 
-        length_of_average_points = 3
         starting_depth = 0
         pore_pressure = None
         if float(cpt_BRO['predrilled_z']) != 0.:
@@ -193,7 +194,7 @@ class CPT:
                 pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe']["porePressureU2"].values)
 
             # Enrich the Penetration Length
-            depth = np.append(local_depth, cpt_BRO['dataframe']['penetrationLength'].values)
+            depth = np.append(local_depth, local_depth[-1] + dicretisation + cpt_BRO['dataframe']['penetrationLength'].values)
             coneresistance = np.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
             frictionratio = np.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
             localfriction = np.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)

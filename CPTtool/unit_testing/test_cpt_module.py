@@ -40,11 +40,11 @@ class TestCptModule(unittest.TestCase):
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         # Check the equality with the pre-given lists
-        np.testing.assert_array_equal(self.cpt.tip, [2000., 2000., 2000., 1000., 2000., 3000.])
-        np.testing.assert_array_equal(self.cpt.friction, [5000., 5000., 5000., 4000., 5000., 6000.])
-        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.33, 0.33, 0.33, 0.22, 0.33, 0.44])
-        np.testing.assert_array_equal(self.cpt.depth, [0, 0.5, 1., 1.5, 2., 2.5])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.5, 1., 1.5, 2., 2.5]])
+        np.testing.assert_array_equal(self.cpt.tip, np.ones(6) * self.cpt.tip)
+        np.testing.assert_array_equal(self.cpt.friction, np.ones(6) * self.cpt.friction)
+        np.testing.assert_array_equal(self.cpt.friction_nbr, np.ones(6) * self.cpt.friction_nbr)
+        np.testing.assert_array_equal(self.cpt.depth, [0, 0.5, 1, 3, 3.5, 4])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.5, 1, 3, 3.5, 4]])
         np.testing.assert_array_equal(self.cpt.water, [0., 0., 0., 0., 0., 0.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
@@ -82,11 +82,11 @@ class TestCptModule(unittest.TestCase):
 
         # Check the equality with the pre-defined values
         np.testing.assert_array_equal(self.cpt.water, pore_pressure)
-        np.testing.assert_array_equal(self.cpt.tip, [2000., 2000., 2000., 1000., 2000., 3000.])
-        np.testing.assert_array_equal(self.cpt.friction, [5000., 5000., 5000., 4000., 5000., 6000.])
-        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.33, 0.33, 0.33, 0.22, 0.33, 0.44])
-        np.testing.assert_array_equal(self.cpt.depth, [0, 0.5, 1., 1.5, 2., 2.5])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.5, 1., 1.5, 2., 2.5]])
+        np.testing.assert_array_equal(self.cpt.tip, np.ones(6) * self.cpt.tip)
+        np.testing.assert_array_equal(self.cpt.friction, np.ones(6) * self.cpt.friction)
+        np.testing.assert_array_equal(self.cpt.friction_nbr, np.ones(6) * self.cpt.friction_nbr)
+        np.testing.assert_array_equal(self.cpt.depth, [0, 0.5, 1, 3, 3.5, 4])
+        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.5, 1, 3, 3.5, 4]])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         return
@@ -617,9 +617,9 @@ class TestCptModule(unittest.TestCase):
                     "dataframe": df}
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
-        np.testing.assert_array_equal(self.cpt.tip, [1500, 1000, 2000])
-        np.testing.assert_array_equal(self.cpt.friction, [3500, 3000, 4000])
-        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.275, 0.22, 0.33])
+        np.testing.assert_array_equal(self.cpt.tip, np.ones(3) * self.cpt.tip)
+        np.testing.assert_array_equal(self.cpt.friction, np.ones(3) * self.cpt.friction)
+        np.testing.assert_array_equal(self.cpt.friction_nbr, np.ones(3) * self.cpt.friction_nbr)
         np.testing.assert_array_equal(self.cpt.depth, [0, 0.1, 0.2])
         np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.1, 0.2]])
         np.testing.assert_array_equal(self.cpt.water, [0., 0., 0.])
@@ -644,12 +644,12 @@ class TestCptModule(unittest.TestCase):
                     'predrilled_z': 0.}
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
-        np.testing.assert_array_equal(self.cpt.tip, [1500, 1000, 2000])
-        np.testing.assert_array_equal(self.cpt.friction, [3500, 3000, 4000])
-        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.275, 0.22, 0.33])
+        np.testing.assert_array_equal(self.cpt.tip, np.ones(3) * self.cpt.tip)
+        np.testing.assert_array_equal(self.cpt.friction, np.ones(3) * self.cpt.friction)
+        np.testing.assert_array_equal(self.cpt.friction_nbr, np.ones(3) * self.cpt.friction_nbr)
         np.testing.assert_array_equal(self.cpt.depth, [0, 0.1, 0.2])
         np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.1, 0.2]])
-        np.testing.assert_array_equal(self.cpt.water, [i * 1000 for i in [0.75, 0.5, 1]])
+        np.testing.assert_array_equal(self.cpt.water, [i * 1000 for i in [0.5, 0.5, 1]])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         return
