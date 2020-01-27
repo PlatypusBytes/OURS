@@ -532,6 +532,23 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(test_damping, self.cpt.damping)
         return
 
+    def test_damp_calc_7(self):
+        # stress is zero so damping is infinite
+        self.cpt.lithology = ["1", "1", "1"]
+        self.cpt.effective_stress = np.zeros(len(self.cpt.lithology))
+        self.cpt.total_stress = np.zeros(len(self.cpt.lithology)) + 1
+        self.cpt.qt = np.ones(len(self.cpt.lithology)) * 10
+
+        # Define the target array
+        test_damping = [1, 1, 1]
+
+        # Running the function
+        self.cpt.damp_calc()
+
+        # Testing if the lists are equals
+        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        return
+
     def test_qt_calc(self):
         # Define the inputs
         self.cpt.tip = np.array([1])

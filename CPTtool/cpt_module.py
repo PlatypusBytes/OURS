@@ -581,6 +581,8 @@ class CPT:
             else:
                 self.damping[i] = 0.55 * Cu ** 0.1 * D50 ** -0.3 * (self.effective_stress[i] / self.Pa) ** -0.08
 
+        # limit the damping (when stress is zero damping is infinite)
+        self.damping[self.damping == np.inf] = 100
         # damping units -> dimensionless
         self.damping /= 100
         return
