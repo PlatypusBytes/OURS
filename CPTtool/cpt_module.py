@@ -193,14 +193,14 @@ class CPT:
                 pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe']["porePressureU2"].values)
 
             # Enrich the Penetration Length
-            depth = np.append(local_depth, local_depth[-1] + dicretisation + cpt_BRO['dataframe']['penetrationLength'].values)
+            depth = np.append(local_depth, local_depth[-1] + dicretisation + cpt_BRO['dataframe']['penetrationLength'].values - cpt_BRO['dataframe']['penetrationLength'].values[0])
             coneresistance = np.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
             frictionratio = np.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
             localfriction = np.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
 
         else:
             # No predrill existing: just parsing data
-            depth = cpt_BRO['dataframe']['penetrationLength'].values
+            depth = cpt_BRO['dataframe']['penetrationLength'].values - cpt_BRO['dataframe']['penetrationLength'].values[0]
             coneresistance = cpt_BRO['dataframe']['coneResistance'].values
             frictionratio = cpt_BRO['dataframe']['frictionRatio'].values
             localfriction = cpt_BRO['dataframe']['localFriction'].values
