@@ -69,7 +69,6 @@ class CPT:
         :param minimum_length: minimum length that cpt files needs to have
         :param minimum_samples: minimum samples that cpt files needs to have
         :param minimum_ratio: minimum ratio of positive values that cpt files needs to have
-
         :return:
         """
 
@@ -260,7 +259,7 @@ class CPT:
 
         return
 
-    def gamma_calc(self, gamma_limit, method="Robertson"):
+    def gamma_calc(self, gamma_limit, method="Robertson", gamma_min=10):
         r"""
         Computes unit weight.
 
@@ -283,29 +282,30 @@ class CPT:
         ----------
         :param gamma_limit: Maximum value for gamma
         :param method: (optional) Method to compute unit weight. Default is Robertson
+        :param gamma_min: (optional) Minimum gamma. Default is 10
         """
 
         np.seterr(divide="ignore", over='print')
 
         # calculate unit weight according to Robertson & Cabal 2015
         if method == "Robertson":
-
             aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
             aux[np.abs(aux) == np.inf] = gamma_limit / self.g
-            aux = tools_utils.ceil_value(aux, 10)
+            aux = tools_utils.ceil_value(aux, gamma_min / self.g)
             self.gamma = aux * self.g
+
         elif method == "Lengkeek":
             aux = 19. - 4.12 * np.log10(5000. / self.qt) / np.log10(30. / self.friction_nbr)
             aux[np.abs(aux) == np.inf] = gamma_limit  # should this be divided with self.g ?
-            aux = tools_utils.ceil_value(aux, 10)
+            aux = tools_utils.ceil_value(aux, gamma_min)
             self.gamma = aux
+
         elif method == "all":  # if all, compares all the methods and plot
             self.gamma_calc(gamma_limit, method="Lengkeek")
             gamma_1 = self.gamma
             self.gamma_calc(gamma_limit, method="Robertson")
             gamma_2 = self.gamma
             self.plot_correlations([gamma_1, gamma_2], "Unit Weight [kN/m3]", ["Lengkeek", "Robertson"], "unit_weight")
-            pass
         return
 
     def rho_calc(self):
@@ -401,24 +401,6 @@ class CPT:
         self.n = n
 
         return
-
-    # def qc1n_calc(self):
-    #     r"""
-    #     Normalisation of qc into qc1n
-    #
-    #     Normalisation of qc into qc1n following :cite:`boulanger_2014`.
-    #
-    #     .. math::
-    #
-    #         q_{c1N} = C_{N} \cdot \frac{q_{c}}{Pa}
-    #
-    #     """
-    #     import numpy as np 		
-    #
-    #     # normalise qc
-    #     qc100 = self.tip * np.min([np.ones(len(self.tip)) * 1.7, (self.Pa / self.effective_stress)**self.n], axis=0)
-    #     self.qc1n = qc100 / self.Pa
-    #     return
 
     def IC_calc(self):
         r"""
