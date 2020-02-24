@@ -84,7 +84,7 @@ def parse_bro_xml(xml):
 
     # Initialize data dictionary
     data = {"id": None, "location_x": None, "location_y": None,
-            "offset_z": None, "predrilled_z": None, "a": None}
+            "offset_z": None, "predrilled_z": None, "a": 0.80}
 
     # Location
     x, y = parse_xml_location(xml)
@@ -101,13 +101,12 @@ def parse_bro_xml(xml):
         data["offset_z"] = float(z)
 
     # Pre drilled depth
-    z = None
     for loc in root.iter(ns + "predrilledDepth"):
         z = loc.text
-    # if predrill does not exist it is zero
-    if not z:
-        z = 0.
-    data["predrilled_z"] = float(z)
+        # if predrill does not exist it is zero
+        if not z:
+            z = 0.
+        data["predrilled_z"] = float(z)
 
     # Cone coefficient - a
     for loc in root.iter(ns + "coneSurfaceQuotient"):
