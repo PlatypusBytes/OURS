@@ -225,18 +225,18 @@ class TestCptModule(unittest.TestCase):
         local_gamma1 = aux * 9.81
 
         # call the function to be checked
-        self.cpt.gamma_calc(gamma_limit)
+        self.cpt.gamma_calc()
 
         # Check if they are equal
         np.testing.assert_array_equal(local_gamma1, self.cpt.gamma)
 
         # Exact solution Lengkeek
         local_gamma2 = 19 - 4.12 * ((np.log10(5000 / self.cpt.qt)) / (np.log10(30 / self.cpt.friction_nbr)))
-        self.cpt.gamma_calc(gamma_limit, method='Lengkeek')
+        self.cpt.gamma_calc(gamma_max=gamma_limit, method='Lengkeek')
         np.testing.assert_array_equal(local_gamma2, self.cpt.gamma)
 
         # all of them
-        self.cpt.gamma_calc(gamma_limit, method='all')
+        self.cpt.gamma_calc(gamma_max=gamma_limit, method='all')
 
         import os.path
         self.assertTrue(os.path.isfile('UNIT_TEST_unit_weight.png'))

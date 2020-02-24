@@ -27,7 +27,7 @@ class TestCptTool(unittest.TestCase):
 
     def test_define_methods_no_file(self):
         methods = cpt_tool.define_methods(None)
-        self.assertEqual(methods['gamma'], "Robertson")
+        self.assertEqual(methods['gamma'], "Lengkeek")
         self.assertEqual(methods['vs'], "Robertson")
         self.assertEqual(methods['OCR'], "Mayne")
         self.assertEqual(methods['radius'], 600)

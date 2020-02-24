@@ -2,6 +2,7 @@ import os
 import numpy as np
 import robertson
 import tools_utils
+import netcdf
 import matplotlib.pylab as plt
 import matplotlib.patches as patches
 from cycler import cycler
@@ -250,7 +251,6 @@ class CPT:
         :param path_bro: path for the location of the netCDF file with expected water levels
         :return:
         """
-        import netcdf
         pwp = netcdf.NetCDF()
         pwp.read_cdffile(path_bro)
         pwp.query(self.coord[0], self.coord[1])
@@ -258,7 +258,7 @@ class CPT:
 
         return
 
-    def gamma_calc(self, gamma_limit, method="Robertson", gamma_min=10):
+    def gamma_calc(self, method="Robertson", gamma_min=10.5, gamma_max=22):
         r"""
         Computes unit weight.
 
@@ -279,30 +279,39 @@ class CPT:
 
         Parameters
         ----------
-        :param gamma_limit: Maximum value for gamma
         :param method: (optional) Method to compute unit weight. Default is Robertson
-        :param gamma_min: (optional) Minimum gamma. Default is 10
+        :param gamma_max: (optional) Maximum gamma. Default is 22
+        :param gamma_min: (optional) Minimum gamma. Default is 10.5
         """
 
-        np.seterr(divide="ignore", over='print')
+        # ignore divisions warnings
+        np.seterr(divide="ignore", invalid='ignore', over='print')
 
         # calculate unit weight according to Robertson & Cabal 2015
         if method == "Robertson":
             aux = 0.27 * np.log10(self.friction_nbr) + 0.36 * np.log10(self.qt / self.Pa) + 1.236
-            aux[np.abs(aux) == np.inf] = gamma_limit / self.g
+            # set lower limit
             aux = tools_utils.ceil_value(aux, gamma_min / self.g)
+            # set higher limit
+            aux[np.abs(aux) >= gamma_max] = gamma_max / self.g
+            # assign gamma
             self.gamma = aux * self.g
 
         elif method == "Lengkeek":
             aux = 19. - 4.12 * np.log10(5000. / self.qt) / np.log10(30. / self.friction_nbr)
-            aux[np.abs(aux) == np.inf] = gamma_limit  # should this be divided with self.g ?
+            # if nan: aux is 19
+            aux[np.isnan(aux)] = 19.
+            # set lower limit
             aux = tools_utils.ceil_value(aux, gamma_min)
+            # set higher limit
+            aux[np.abs(aux) >= gamma_max] = gamma_max
+            # assign gamma
             self.gamma = aux
 
         elif method == "all":  # if all, compares all the methods and plot
-            self.gamma_calc(gamma_limit, method="Lengkeek")
+            self.gamma_calc(method="Lengkeek")
             gamma_1 = self.gamma
-            self.gamma_calc(gamma_limit, method="Robertson")
+            self.gamma_calc(method="Robertson")
             gamma_2 = self.gamma
             self.plot_correlations([gamma_1, gamma_2], "Unit Weight [kN/m3]", ["Lengkeek", "Robertson"], "unit_weight")
         return

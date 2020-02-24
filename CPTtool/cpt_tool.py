@@ -18,7 +18,7 @@ def define_methods(input_file):
     # possible keys:
     keys = ["gamma", "vs", "OCR", "radius"]
     # possible key-values
-    gamma_keys = ["Robertson", "Lengkeek", "all"]
+    gamma_keys = ["Lengkeek", "Robertson", "all"]
     vs_keys = ["Robertson", "Mayne", "Andrus", "Zang", "Ahmed", "all"]
     OCR_keys = ["Mayne", "Robertson"]
     rad = 600.
@@ -96,7 +96,7 @@ def read_json(input_file):
 
 
 def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn,
-             scenario, gamma_max=22):
+             scenario):
     """
     Read CPT
 
@@ -113,7 +113,6 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     :param log_file: Log file for the analysis
     :param jsn: dictionary with the scenarios
     :param scenario: scenario number
-    :param gamma_max: (optional) maximum value specific weight soil
     :return: return_cpt: list with the processed cpt objects
     """
 
@@ -141,7 +140,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         # compute qc
         cpt.qt_calc()
         # compute unit weight
-        cpt.gamma_calc(gamma_max, method=methods["gamma"])
+        cpt.gamma_calc(method=methods["gamma"])
         # compute density
         cpt.rho_calc()
         # compute water pressure level
