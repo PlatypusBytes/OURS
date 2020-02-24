@@ -22,6 +22,7 @@ class CPT:
         self.tip = []
         self.friction = []
         self.friction_nbr = []
+        self.a = []
         self.name = []
         self.gamma = []
         self.rho = []
@@ -54,10 +55,6 @@ class CPT:
         # fixed values
         self.g = 9.81
         self.Pa = 100.
-        self.a = 0.8
-
-        # log file
-        # self.log_file = log_file
 
         return
 
@@ -132,6 +129,8 @@ class CPT:
         # parser friction number
         self.friction_nbr = friction_ratio
         self.friction_nbr[self.friction_nbr <= 0] = 0.
+        # read a
+        self.a = cpt['a']
         # default water is zero
         self.water = np.zeros(len(self.depth))
         # if water exists parse water

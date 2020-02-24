@@ -92,9 +92,9 @@ class TestCptTool(unittest.TestCase):
         data = list(filter(None, cpt_BRO['polygons']['2M81ykd']['data']))
 
         jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, output,
-                          {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
-                           "MinLayerThickness": '0.5', "BRO_data": prop["BRO_data"]}
-                          , plots, 0, log_file, {"scenarios": []}, 0)
+                                                 {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
+                                                  "MinLayerThickness": '0.5', "BRO_data": prop["BRO_data"]},
+                                                 plots, 0, log_file, {"scenarios": []}, 0)
 
         # check json file
         self.assertTrue(is_jsn_modified)
@@ -133,6 +133,7 @@ class TestCptTool(unittest.TestCase):
                     "location_x": 111,
                     "location_y": 222,
                     "offset_z": 0.5,
+                    "a": 0.85,
                     "dataframe": df,
                     'predrilled_z': 0.}
         data = [cpt_data]

@@ -34,6 +34,7 @@ class TestCptModule(unittest.TestCase):
                     "location_y": 222,
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
+                    'a': 0.8,
                     "dataframe": df}
 
         # Run the function to be checked
@@ -48,6 +49,8 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.water, [0., 0., 0., 0., 0., 0.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
+        np.testing.assert_equal(self.cpt.a, 0.8)
+
         return
 
     def test__pre_drill_with_pore_pressure(self):
@@ -67,6 +70,7 @@ class TestCptModule(unittest.TestCase):
                     "location_y": 222,
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
+                    'a': 0.73,
                     "dataframe": df}
 
         # define the pore pressure array before the predrilling
@@ -89,7 +93,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.5, 1, 1.5, 2, 2.5]])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
-
+        np.testing.assert_equal(self.cpt.a, 0.73)
         return
 
     def test__pre_drill_Raise_Exception1(self):
@@ -107,6 +111,7 @@ class TestCptModule(unittest.TestCase):
                     "location_y": 222,
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
+                    'a': 0.73,
                     "dataframe": df}
 
         # run the fuction
@@ -131,6 +136,7 @@ class TestCptModule(unittest.TestCase):
                     "location_y": 222,
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
+                    'a': 0.6,
                     "dataframe": df}
 
         # run the fuction
@@ -155,6 +161,7 @@ class TestCptModule(unittest.TestCase):
                     "location_y": 222,
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
+                    'a': 0.5,
                     "dataframe": df}
 
         # run the fuction
@@ -179,6 +186,7 @@ class TestCptModule(unittest.TestCase):
                     "location_y": 222,
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
+                    'a': 0.5,
                     "dataframe": df}
 
         # run the fuction
@@ -632,7 +640,9 @@ class TestCptModule(unittest.TestCase):
                     "location_y": 222,
                     "offset_z": 0.5,
                     'predrilled_z': 0.,
+                    'a': 0.85,
                     "dataframe": df}
+
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         # Check the equality with the pre-given lists
@@ -644,6 +654,8 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.water, [0., 0.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
+        np.testing.assert_equal(self.cpt.a, 0.85)
+
         return
 
     def test_bro_parser_water(self):
@@ -659,6 +671,7 @@ class TestCptModule(unittest.TestCase):
                     "location_x": 111,
                     "location_y": 222,
                     "offset_z": 0.5,
+                    "a": 0.85,
                     "dataframe": df,
                     'predrilled_z': 0.}
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
@@ -672,7 +685,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.water, [500., 1000.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
-
+        np.testing.assert_equal(self.cpt.a, 0.85)
         return
 
     def test_bro_parser_nan(self):
@@ -689,7 +702,9 @@ class TestCptModule(unittest.TestCase):
                     "location_y": 222,
                     "offset_z": 0.5,
                     "predrilled_z": 0.,
+                    "a": 0.8,
                     "dataframe": df}
+
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         # Check the equality with the pre-given lists
@@ -701,6 +716,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.water, [500.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
+        np.testing.assert_equal(self.cpt.a, 0.8)
         return
 
     def tearDown(self):

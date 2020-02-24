@@ -84,7 +84,7 @@ def parse_bro_xml(xml):
 
     # Initialize data dictionary
     data = {"id": None, "location_x": None, "location_y": None,
-            "offset_z": None, "predrilled_z": None}
+            "offset_z": None, "predrilled_z": None, "a": None}
 
     # Location
     x, y = parse_xml_location(xml)
@@ -101,12 +101,18 @@ def parse_bro_xml(xml):
         data["offset_z"] = float(z)
 
     # Pre drilled depth
+    z = None
     for loc in root.iter(ns + "predrilledDepth"):
         z = loc.text
-        # if predrill does not exist it is zero
-        if not z:
-            z = 0.
-        data["predrilled_z"] = float(z)
+    # if predrill does not exist it is zero
+    if not z:
+        z = 0.
+    data["predrilled_z"] = float(z)
+
+    # Cone coefficient - a
+    for loc in root.iter(ns + "coneSurfaceQuotient"):
+        a = loc.text
+        data["a"] = float(a)
 
     # Find which columns are not empty
     avail_columns = []
@@ -456,7 +462,7 @@ def read_bro(parameters):
     if not exists(idx_fn):
         print("Cannot open provided geomorphological data files (.dat & .idx): {}".format(idx_fn))
         sys.exit(2)
-    gm_index = index.Index(file_idx)  # created by shapefiles/gen_geomorph_idx.py
+    gm_index = index.Index(file_idx)  # created by auxiliary_code/gen_geomorph_idx.py
 
     geomorphs = list(gm_index.intersection((x-r, y-r, x+r, y+r), objects="raw"))
     circle = Point(x, y).buffer(r, resolution=32)
