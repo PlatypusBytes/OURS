@@ -398,7 +398,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.lithology = ['1', '2', '3', '4', '5', "6", "7", "8", "9"]
 
         # Set the target outputs
-        test_poisson = [0.495, 0.495, 0.495, 0.2, 0.2, 0.3, 0.3, 0.3, 0.3]
+        test_poisson = [0.495, 0.495, 0.495, 0.25, 0.3, 0.3, 0.3, 0.375, 0.375]
 
         # Call the function
         self.cpt.poisson_calc()

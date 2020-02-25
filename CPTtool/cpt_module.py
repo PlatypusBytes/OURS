@@ -591,10 +591,13 @@ class CPT:
             # if soft layer
             if lit == "1" or lit == "2" or lit == "3":
                 self.poisson[i] = 0.495
-            elif lit == "4" or lit == "5":
-                self.poisson[i] = 0.2
-            else:
+            elif lit == "4":
+                self.poisson[i] = 0.25
+            elif lit == "5" or lit == "6" or lit == "7":
                 self.poisson[i] = 0.3
+            else:
+                self.poisson[i] = 0.375
+
         return
 
     def qt_calc(self):
