@@ -315,6 +315,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.effective_stress = np.array([1])
         self.cpt.tip = np.array([2])
         self.cpt.qt = np.array([2])
+        self.cpt.friction = np.array([0.5])
         self.Pa = 100
         self.cpt.gamma = np.array([10])
         self.cpt.vs = np.array([1])
@@ -337,7 +338,7 @@ class TestCptModule(unittest.TestCase):
 
         # Check the results for  Mayne
         # Calculate analytically
-        test_vs = np.exp((self.cpt.gamma + 4.03) / 4.17) * (self.cpt.effective_stress / self.Pa) ** 0.25
+        test_vs = 118.8 * np.log10(self.cpt.friction) + 18.5
         test_GO = self.cpt.rho * test_vs ** 2
 
         # Call function

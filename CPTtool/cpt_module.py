@@ -439,11 +439,9 @@ class CPT:
 
             G_{0} = \frac{\gamma}{g} \cdot v_{s}^{2}
 
-        * Mayne :cite:`mayne_2006`:
+        * Mayne :cite:`mayne_2007`:
 
         .. math::
-
-            v_{s} = e^{\frac{\gamma_{sat} + 4.03}{4.17}} \cdot \left( \frac{\sigma_{v0}'}{\sigma_{atm}} \right)^{0.25}
 
             v_{s} = 118.8 \cdot \log \left(f_{s} \right) + 18.5
 
@@ -477,7 +475,7 @@ class CPT:
             self.G0 = self.rho * self.vs**2
         elif method == "Mayne":
             # vs: following Mayne (2006)
-            vs = np.exp((self.gamma + 4.03) / 4.17) * (self.effective_stress / self.Pa) ** 0.25
+            vs = 118.8 * np.log10(self.friction) + 18.5
             self.vs = tools_utils.ceil_value(vs, 0)
             self.G0 = self.rho * self.vs ** 2
         elif method == "Andrus":
@@ -492,7 +490,7 @@ class CPT:
             self.G0 = self.rho * self.vs ** 2
         elif method == "Ahmed":
             vs = 1000. * np.exp(-0.887 * self.IC) * (1. + 0.443 * self.Fr * self.effective_stress / self.Pa * self.g
-                                                          / self.gamma) ** 0.5
+                                                     / self.gamma) ** 0.5
             self.vs = tools_utils.ceil_value(vs, 0)
             self.G0 = self.rho * self.vs ** 2
         elif method == "all":  # compares all and assumes default
