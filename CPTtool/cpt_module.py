@@ -19,7 +19,8 @@ class CPT:
         # variables
         self.depth = []
         self.coord = []
-        self.NAP = []
+        self.local_reference_level = []
+        self.depth_to_reference = []
         self.tip = []
         self.friction = []
         self.friction_nbr = []
@@ -47,6 +48,8 @@ class CPT:
         self.depth_json = []
         self.indx_json = []
         self.unit_testing = False
+        self.vertical_datum = []
+        self.local_reference = []
 
         # checks if file_path exits. If not creates file_path
         if not os.path.exists(out_fold):
@@ -57,9 +60,12 @@ class CPT:
         self.g = 9.81
         self.Pa = 100.
 
+        # private variables
+        self.__water_measurement_types = ["porePressureU1", "porePressureU2", "porePressureU3"]
+
         return
 
-    def parse_bro(self, cpt, minimum_length=5, minimum_samples=50, minimum_ratio=0.1):
+    def parse_bro(self, cpt, minimum_length=5, minimum_samples=50, minimum_ratio=0.1, convert_to_kPa=True):
         """
         Parse the BRO information into the object structure
 
@@ -91,6 +97,22 @@ class CPT:
         # parse coordinates
         self.coord = [cpt['location_x'], cpt['location_y']]
 
+        # parse reference datum
+        key = 'vertical_datum'
+        self.vertical_datum = cpt[key] if key in cpt else []
+
+        # parse local reference point
+        key = 'local_reference'
+        self.local_reference = cpt[key] if key in cpt else []
+
+        # parse measurement type of pore pressure
+        self.water_measurement_type = [water_measurement_type for water_measurement_type in self.__water_measurement_types
+                                       if water_measurement_type in cpt["dataframe"]]
+        if not self.water_measurement_type:
+            self.water_measurement_type = "no_measurements"
+        else:
+            self.water_measurement_type = self.water_measurement_type[0]
+
         # check criteria of minimum length
         if np.max(np.abs(cpt['dataframe'].penetrationLength.values)) < minimum_length:
             message = "File " + cpt["id"] + " has a length smaller than " + str(minimum_length)
@@ -108,6 +130,9 @@ class CPT:
         depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt,
                                                                                                       length_of_average_points=minimum_samples)
 
+
+
+
         # check quality of CPT
         # if more than minimum_ratio CPT is corrupted: discard CPT
         if (
@@ -117,15 +142,20 @@ class CPT:
             message = "File " + cpt["id"] + " is corrupted"
             return message
 
+        # unit in kPa is required for correlations
+        unit_converter = 1000. if convert_to_kPa else 1.
+
         # parse depth
         self.depth = depth
+        # parse surface level
+        self.local_reference_level = cpt['offset_z']
         # parse NAP depth
-        self.NAP = cpt['offset_z'] - depth
+        self.depth_to_reference = self.local_reference_level - depth
         # parse tip resistance
-        self.tip = cone_resistance * 1000.
+        self.tip = cone_resistance * unit_converter
         self.tip[self.tip <= 0] = 0.
         # parse friction
-        self.friction = local_friction * 1000.
+        self.friction = local_friction * unit_converter
         self.friction[self.friction <= 0] = 0.
         # parser friction number
         self.friction_nbr = friction_ratio
@@ -135,8 +165,8 @@ class CPT:
         # default water is zero
         self.water = np.zeros(len(self.depth))
         # if water exists parse water
-        if "porePressureU2" in cpt["dataframe"]:
-            self.water = pore_pressure * 1000.
+        if self.water_measurement_type in self.__water_measurement_types:
+            self.water = pore_pressure * unit_converter
         return True
 
     def smooth(self, nb_points=5):
@@ -187,10 +217,12 @@ class CPT:
             # if there is pore water pressure
             # Here the endpoint is False so that for the final of local_pore_pressure I don't end up with the same value
             # as the first in the Pore Pressure array.
-            if "porePressureU2" in cpt_BRO["dataframe"]:
-                local_pore_pressure = np.linspace(0, cpt_BRO['dataframe']["porePressureU2"].values[0], len(local_depth),
-                                                  endpoint=False)
-                pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe']["porePressureU2"].values)
+
+            for water_measurement_type in self.__water_measurement_types:
+                if water_measurement_type in cpt_BRO['dataframe']:
+                    local_pore_pressure = np.linspace(0, cpt_BRO['dataframe'][water_measurement_type].values[0],
+                                                      len(local_depth), endpoint=False)
+                    pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe'][water_measurement_type].values)
 
             # Enrich the Penetration Length
             depth = np.append(local_depth, local_depth[-1] + dicretisation + cpt_BRO['dataframe']['penetrationLength'].values - cpt_BRO['dataframe']['penetrationLength'].values[0])
@@ -206,8 +238,10 @@ class CPT:
             localfriction = cpt_BRO['dataframe']['localFriction'].values
 
             # if there is pore water pressure
-            if "porePressureU2" in cpt_BRO['dataframe']:
-                pore_pressure = cpt_BRO['dataframe']['porePressureU2'].values
+            for water_measurement_type in self.__water_measurement_types:
+                if water_measurement_type in cpt_BRO['dataframe']:
+                    pore_pressure = cpt_BRO['dataframe'][water_measurement_type].values
+
 
         # correct for missing samples in the top of the CPT
         if depth[0] > 0:
@@ -218,8 +252,9 @@ class CPT:
             localfriction = np.append(np.average(cpt_BRO['dataframe']['localFriction'][:length_of_average_points]), localfriction)
 
             # if there is pore water pressure
-            if "porePressureU2" in cpt_BRO["dataframe"]:
-                pore_pressure = np.append(np.average(cpt_BRO['dataframe']['porePressureU2'][:length_of_average_points]), pore_pressure)
+            for water_measurement_type in self.__water_measurement_types:
+                if water_measurement_type in cpt_BRO["dataframe"]:
+                    pore_pressure = np.append(np.average(cpt_BRO['dataframe'][water_measurement_type][:length_of_average_points]), pore_pressure)
 
         return depth, coneresistance, frictionratio, localfriction, pore_pressure
 
@@ -342,8 +377,8 @@ class CPT:
         self.total_stress = np.cumsum(self.gamma * z) + self.depth[0] * np.mean(self.gamma[:10])
         # compute pwp
         # determine location of phreatic line: it cannot be above the CPT depth
-        z_aux = np.min([self.pwp, self.NAP[0] + self.depth[0]])
-        pwp = (z_aux - self.NAP) * self.g
+        z_aux = np.min([self.pwp, self.depth_to_reference[0] + self.depth[0]])
+        pwp = (z_aux - self.depth_to_reference) * self.g
         # no suction is allowed
         pwp[pwp <= 0] = 0
         # compute effective stress
@@ -797,8 +832,8 @@ class CPT:
                      "total stress [-kPa];effective stress [kPa];Qtn [-];Fr [-];IC [-];vs [m/s];G0 [kPa];"
                      "Poisson [-];Damping [-]\n")
 
-            for i in range(len(self.NAP)):
-                fo.write(str(self.NAP[i]) + ";" +
+            for i in range(len(self.depth_to_reference)):
+                fo.write(str(self.depth_to_reference[i]) + ";" +
                          str(self.depth[i]) + ";" +
                          str(self.tip[i]) + ";" +
                          str(self.friction[i]) + ";" +

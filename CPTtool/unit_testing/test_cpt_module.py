@@ -45,7 +45,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.friction, [4000, 4000, 4000, 4000, 5000, 6000])
         np.testing.assert_array_equal(self.cpt.friction_nbr, [0.22, 0.22, 0.22, 0.22, 0.33, 0.44])
         np.testing.assert_array_equal(self.cpt.depth, [0, 0.5, 1, 1.5, 2, 2.5])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.5, 1, 1.5, 2, 2.5]])
+        np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 0.5, 1, 1.5, 2, 2.5]])
         np.testing.assert_array_equal(self.cpt.water, [0., 0., 0., 0., 0., 0.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
@@ -90,7 +90,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.friction, [4000, 4000, 4000, 4000, 5000, 6000])
         np.testing.assert_array_equal(self.cpt.friction_nbr, [0.22, 0.22, 0.22, 0.22, 0.33, 0.44])
         np.testing.assert_array_equal(self.cpt.depth, [0, 0.5, 1, 1.5, 2, 2.5])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.5, 1, 1.5, 2, 2.5]])
+        np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 0.5, 1, 1.5, 2, 2.5]])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         np.testing.assert_equal(self.cpt.a, 0.73)
@@ -246,7 +246,7 @@ class TestCptModule(unittest.TestCase):
         # Defining the inputs of the function
         self.cpt.depth = np.arange(0, 2, 0.1)
         self.cpt.gamma = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15]
-        self.cpt.NAP = np.zeros(20)
+        self.cpt.depth_to_reference = np.zeros(20)
         self.pwp = 0
         self.cpt.stress_calc()
 
@@ -651,7 +651,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.friction, [3000, 4000])
         np.testing.assert_array_equal(self.cpt.friction_nbr, [0.22, 0.33])
         np.testing.assert_array_equal(self.cpt.depth, [0, 0.1])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.1]])
+        np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 0.1]])
         np.testing.assert_array_equal(self.cpt.water, [0., 0.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
@@ -682,7 +682,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.friction, [3000, 4000])
         np.testing.assert_array_equal(self.cpt.friction_nbr, [0.22, 0.33])
         np.testing.assert_array_equal(self.cpt.depth, [0, 0.1])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0, 0.1]])
+        np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 0.1]])
         np.testing.assert_array_equal(self.cpt.water, [500., 1000.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
@@ -713,7 +713,7 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.friction, [3000])
         np.testing.assert_array_equal(self.cpt.friction_nbr, [0.22])
         np.testing.assert_array_equal(self.cpt.depth, [0])
-        np.testing.assert_array_equal(self.cpt.NAP, [cpt_data["offset_z"] - i for i in [0]])
+        np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0]])
         np.testing.assert_array_equal(self.cpt.water, [500.])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")

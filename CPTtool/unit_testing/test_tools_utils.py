@@ -212,7 +212,7 @@ class TestUtils(TestCase):
         # create cpt object
         cpt = Object()
         cpt.depth = np.linspace(0, 10, 10)
-        cpt.NAP = np.linspace(0, -10, 10)
+        cpt.depth_to_reference = np.linspace(0, -10, 10)
         cpt.tip = np.zeros(10)
         cpt.Qtn = np.ones(10)
         cpt.Fr = np.ones(10) * 2
@@ -255,7 +255,7 @@ class TestUtils(TestCase):
         # create cpt object
         cpt1 = Object()
         cpt1.depth = np.linspace(0, 10, 10)
-        cpt1.NAP = np.linspace(0, -10, 10)
+        cpt1.depth_to_reference = np.linspace(0, -10, 10)
         cpt1.tip = np.zeros(10)
         cpt1.Qtn = np.ones(10)
         cpt1.Fr = np.ones(10) * 2
@@ -268,7 +268,7 @@ class TestUtils(TestCase):
 
         cpt2 = Object()
         cpt2.depth = np.linspace(1, 11, 10)
-        cpt2.NAP = np.linspace(-1, -11, 10)
+        cpt2.depth_to_reference = np.linspace(-1, -11, 10)
         cpt2.tip = np.zeros(10) * 2
         cpt2.Qtn = np.ones(10) * 2
         cpt2.Fr = np.ones(10) * 2 * 2
@@ -311,7 +311,7 @@ class TestUtils(TestCase):
         # create cpt object
         cpt1 = Object()
         cpt1.depth = np.linspace(0, 10, 10)
-        cpt1.NAP = np.linspace(0, -10, 10)
+        cpt1.depth_to_reference = np.linspace(0, -10, 10)
         cpt1.tip = np.zeros(10)
         cpt1.Qtn = np.ones(10)
         cpt1.Fr = np.ones(10) * 2
@@ -324,7 +324,7 @@ class TestUtils(TestCase):
 
         cpt2 = Object()
         cpt2.depth = np.linspace(1, 11, 10)
-        cpt2.NAP = np.linspace(-1, -11, 10)
+        cpt2.depth_to_reference = np.linspace(-1, -11, 10)
         cpt2.tip = np.zeros(10) * 2
         cpt2.Qtn = np.ones(10) * 2
         cpt2.Fr = np.ones(10) * 2 * 2
@@ -354,7 +354,7 @@ class TestUtils(TestCase):
         np.testing.assert_array_almost_equal(results["rho"], cpt1.rho * w1 + cpt2.rho * w2)
         np.testing.assert_array_almost_equal(results["damping"], cpt1.damping * w1 + cpt2.damping * w2)
         np.testing.assert_array_almost_equal(results["IC"], cpt1.IC * w1 + cpt2.IC * w2)
-        np.testing.assert_array_almost_equal(np.round(results["NAP"]), np.round(cpt1.NAP * w1 + cpt2.NAP * w2))
+        np.testing.assert_array_almost_equal(np.round(results["NAP"]), np.round(cpt1.depth_to_reference * w1 + cpt2.depth_to_reference * w2))
         np.testing.assert_array_almost_equal(results["depth"], (cpt1.depth * w1 + cpt2.depth * w2) - (cpt1.depth * w1 + cpt2.depth * w2)[0])
         # test variance
         mean = np.mean(cpt1.Qtn * w1 + cpt2.Qtn * w2)
@@ -387,7 +387,7 @@ class TestUtils(TestCase):
         # create cpt object
         cpt1 = Object()
         cpt1.depth = np.linspace(0, 10, 10)
-        cpt1.NAP = np.linspace(0, -10, 10)
+        cpt1.depth_to_reference = np.linspace(0, -10, 10)
         cpt1.tip = np.zeros(10)
         cpt1.Qtn = np.ones(10)
         cpt1.Fr = np.ones(10) * 2
@@ -400,7 +400,7 @@ class TestUtils(TestCase):
 
         cpt2 = Object()
         cpt2.depth = np.linspace(1, 11, 20)
-        cpt2.NAP = np.linspace(-1, -11, 20)
+        cpt2.depth_to_reference = np.linspace(-1, -11, 20)
         cpt2.tip = np.zeros(20) * 2
         cpt2.Qtn = np.ones(20) * 2
         cpt2.Fr = np.ones(20) * 2 * 2

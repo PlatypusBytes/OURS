@@ -77,9 +77,9 @@ def interpolation(data_cpt, coordinates, power=1):
         coords.append([data_cpt[i].coord[0], data_cpt[i].coord[1]])
         # obtain the depths of the cpt
         min_max_nap.append([data_cpt[i].coord[0], data_cpt[i].coord[1],
-                            min(data_cpt[i].NAP), max(data_cpt[i].NAP),
-                            np.mean(np.diff(data_cpt[i].NAP))])
-        depth_points.append(data_cpt[i].NAP)
+                            min(data_cpt[i].depth_to_reference), max(data_cpt[i].depth_to_reference),
+                            np.mean(np.diff(data_cpt[i].depth_to_reference))])
+        depth_points.append(data_cpt[i].depth_to_reference)
     # get atttributes to interpolate
     for at in attributes:
         training = []
