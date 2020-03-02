@@ -58,6 +58,19 @@ to_epsg = "28992"
 to_srs = pyproj.Proj(init='epsg:{}'.format(to_epsg))
 
 
+def xml_to_byte_string(fn):
+    """
+    Opens an xml-file and returns a byte-string
+    :param fn: xml file name
+    :return: byte-string of the xml file
+    """
+    ext = splitext(fn)[1]
+    if ext == ".xml":
+        with open(fn, "r") as f:
+            # memory-map the file, size 0 means whole file
+            xml_bytes = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)[:]
+    return xml_bytes
+
 def writexml(data, id="test", path="debug"):
     """Quick function to write xml in memory to disk.
     :param data: lxml etree root.
@@ -84,7 +97,8 @@ def parse_bro_xml(xml):
 
     # Initialize data dictionary
     data = {"id": None, "location_x": None, "location_y": None,
-            "offset_z": None, "predrilled_z": None, "a": 0.80}
+            "offset_z": None, "predrilled_z": None, "a": 0.80,
+            "vertical_datum": None, "local_reference": None}
 
     # Location
     x, y = parse_xml_location(xml)
@@ -95,10 +109,18 @@ def parse_bro_xml(xml):
     for loc in root.iter(ns4 + "broId"):
         data["id"] = loc.text
 
-    # NAP offset
+    # Offset to reference point
     for loc in root.iter(ns + "offset"):
         z = loc.text
         data["offset_z"] = float(z)
+
+    # Local reference point
+    for loc in root.iter(ns + "localVerticalReferencePoint"):
+        data["local_reference"] = loc.text
+
+    # Vertical datum
+    for loc in root.iter(ns + "verticalDatum"):
+        data["vertical_datum"] = loc.text
 
     # Pre drilled depth
     for loc in root.iter(ns + "predrilledDepth"):
