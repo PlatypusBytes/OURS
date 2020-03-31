@@ -122,8 +122,8 @@ class FunctionalTests(unittest.TestCase):
 
     def tearDown(self):
         # delete folders
-        if os.path.exists('./results'):
-            shutil.rmtree('./results')
+        # if os.path.exists('./results'):
+        #     shutil.rmtree('./results')
         return
 
 
