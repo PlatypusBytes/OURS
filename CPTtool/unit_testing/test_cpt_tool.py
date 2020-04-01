@@ -66,6 +66,37 @@ class TestCptTool(unittest.TestCase):
         self.assertTrue(data != {})
         return
 
+    def test_parse_cpt(self):
+        # inputs
+        file_properties = 'unit_testing_files\\input_Ground.json'
+        methods_cpt = {'radius': 100}
+        with open(file_properties) as properties:
+            prop = json.load(properties)
+
+        # read BRO data base
+        inpt = {"BRO_data": prop["BRO_data"],
+                "Source_x": float(prop["Source_x"][0]), "Source_y": float(prop["Source_y"][0]),
+                "Radius": float(methods_cpt["radius"])}
+
+        cpt_BRO = bro.read_bro(inpt)
+        dataframe = cpt_BRO['polygons']['2M81ykd']['data'][0]['dataframe']
+
+        # define target columns and values
+        target_columns = ['penetrationLength', 'depth', 'elapsedTime', 'coneResistance', 'inclinationEW',
+                          'inclinationNS', 'inclinationResultant', 'localFriction', 'porePressureU2', 'frictionRatio']
+
+        target_values = [1.105, 1.105, 242.800, 0.160, -1.000,
+                         0.000, 1.000, 0.001, 0.001, np.nan]
+
+        # assert if only the columns are read which should be read,
+        # assert if the values in the first row of the dataframe are correct
+        for idx, column in enumerate(dataframe.columns.values):
+            self.assertEqual(column, target_columns[idx])
+            if np.isnan(target_values[idx]):
+                self.assertTrue(np.isnan(dataframe.values[0][idx]))
+            else:
+                self.assertAlmostEqual(dataframe.values[0][idx], target_values[idx], places=3)
+
     def test_read_cpt(self):
         # inputs
         file_properties = 'unit_testing_files\\input_Ground.json'

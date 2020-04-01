@@ -50,6 +50,7 @@ class CPT:
         self.unit_testing = False
         self.vertical_datum = []
         self.local_reference = []
+        self.inclination_resultant = []
 
         # checks if file_path exits. If not creates file_path
         if not os.path.exists(out_fold):
@@ -129,10 +130,6 @@ class CPT:
         # check if there is a pre_drill. if so pad the data
         depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt,
                                                                                                       length_of_average_points=minimum_samples)
-
-
-
-
         # check quality of CPT
         # if more than minimum_ratio CPT is corrupted: discard CPT
         if (
@@ -167,6 +164,10 @@ class CPT:
         # if water exists parse water
         if self.water_measurement_type in self.__water_measurement_types:
             self.water = pore_pressure * unit_converter
+        # parse inclination resultant
+        if 'inclinationResultant' in cpt['dataframe']:
+            self.inclination_resultant = cpt['dataframe']['inclinationResultant'].values
+
         return True
 
     def smooth(self, nb_points=5):

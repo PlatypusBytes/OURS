@@ -634,6 +634,7 @@ class TestCptModule(unittest.TestCase):
              'coneResistance': [1, 2],
              'localFriction': [3, 4],
              'frictionRatio': [0.22, 0.33],
+             'inclinationResultant': [1, 2]
              }
         df = pd.DataFrame(data=d)
         cpt_data = {"id": "cpt_name",
@@ -642,7 +643,9 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     'predrilled_z': 0.,
                     'a': 0.85,
-                    "dataframe": df}
+                    "dataframe": df,
+                    "vertical_datum": "NAP",
+                    "local_reference": "maaiveld"}
 
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
@@ -653,9 +656,12 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.depth, [0, 0.1])
         np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 0.1]])
         np.testing.assert_array_equal(self.cpt.water, [0., 0.])
+        np.testing.assert_array_equal(self.cpt.inclination_resultant, [1, 2])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         np.testing.assert_equal(self.cpt.a, 0.85)
+        np.testing.assert_equal(self.cpt.vertical_datum, "NAP")
+        np.testing.assert_equal(self.cpt.local_reference, "maaiveld")
 
         return
 
@@ -666,6 +672,7 @@ class TestCptModule(unittest.TestCase):
              'localFriction': [3, 4],
              'porePressureU2': [0.5, 1],
              'frictionRatio': [0.22, 0.33],
+             'inclinationResultant': [1, 2]
              }
         df = pd.DataFrame(data=d)
         cpt_data = {"id": "cpt_name",
@@ -674,7 +681,11 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     "a": 0.85,
                     "dataframe": df,
-                    'predrilled_z': 0.}
+                    'predrilled_z': 0.,
+                    "vertical_datum": "NAP",
+                    "local_reference": "maaiveld"}
+
+
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
         # Check the equality with the pre-given lists
@@ -684,9 +695,13 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.depth, [0, 0.1])
         np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 0.1]])
         np.testing.assert_array_equal(self.cpt.water, [500., 1000.])
+        np.testing.assert_array_equal(self.cpt.inclination_resultant, [1, 2])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         np.testing.assert_equal(self.cpt.a, 0.85)
+        np.testing.assert_equal(self.cpt.vertical_datum, "NAP")
+        np.testing.assert_equal(self.cpt.local_reference, "maaiveld")
+
         return
 
     def test_bro_parser_nan(self):
@@ -696,6 +711,7 @@ class TestCptModule(unittest.TestCase):
              'localFriction': [3, np.nan],
              'porePressureU2': [0.5, 1],
              'frictionRatio': [0.22, 0.33],
+             'inclinationResultant': [1, 2]
              }
         df = pd.DataFrame(data=d)
         cpt_data = {"id": "cpt_name",
@@ -704,7 +720,9 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     "predrilled_z": 0.,
                     "a": 0.8,
-                    "dataframe": df}
+                    "dataframe": df,
+                    "vertical_datum": "NAP",
+                    "local_reference": "maaiveld"}
 
         self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
 
@@ -715,9 +733,12 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal(self.cpt.depth, [0])
         np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0]])
         np.testing.assert_array_equal(self.cpt.water, [500.])
+        np.testing.assert_array_equal(self.cpt.inclination_resultant, [1])
         np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
         np.testing.assert_equal(self.cpt.name, "cpt_name")
         np.testing.assert_equal(self.cpt.a, 0.8)
+        np.testing.assert_equal(self.cpt.vertical_datum, "NAP")
+        np.testing.assert_equal(self.cpt.local_reference, "maaiveld")
         return
 
     def tearDown(self):
