@@ -70,6 +70,7 @@ class CPT:
         """
         Parse the BRO information into the object structure
 
+        todo: correct depth with inclination angle
         :param cpt: BRO cpt dataset
         :param minimum_length: minimum length that cpt files needs to have
         :param minimum_samples: minimum samples that cpt files needs to have
@@ -127,6 +128,10 @@ class CPT:
         # check data consistency: remove doubles depth
         cpt["dataframe"] = cpt["dataframe"].drop_duplicates(subset='penetrationLength', keep="first")
 
+        # parse inclination resultant
+        if 'inclinationResultant' in cpt['dataframe']:
+            self.inclination_resultant = cpt['dataframe']['inclinationResultant'].values
+
         # check if there is a pre_drill. if so pad the data
         depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt,
                                                                                                       length_of_average_points=minimum_samples)
@@ -164,11 +169,22 @@ class CPT:
         # if water exists parse water
         if self.water_measurement_type in self.__water_measurement_types:
             self.water = pore_pressure * unit_converter
-        # parse inclination resultant
-        if 'inclinationResultant' in cpt['dataframe']:
-            self.inclination_resultant = cpt['dataframe']['inclinationResultant'].values
 
         return True
+
+    def calculate_corrected_depth(self, penetration_length, inclination):
+        """
+        Correct the penetration length with the inclination angle
+        
+        todo implement this function after calculating the pre excavated depth
+        :param penetration_length: measured penetration length
+        :param inclination: measured inclination of the cone
+        :return: corrected depth
+        """
+        corrected_d_depth = np.diff(penetration_length) * np.cos(np.radians(inclination[:-1]))
+        corrected_depth = np.concatenate((penetration_length[0], penetration_length[0] +
+                                          np.cumsum(corrected_d_depth)), axis=None)
+        return corrected_depth
 
     def smooth(self, nb_points=5):
         r"""
@@ -226,7 +242,9 @@ class CPT:
                     pore_pressure = np.append(local_pore_pressure, cpt_BRO['dataframe'][water_measurement_type].values)
 
             # Enrich the Penetration Length
-            depth = np.append(local_depth, local_depth[-1] + dicretisation + cpt_BRO['dataframe']['penetrationLength'].values - cpt_BRO['dataframe']['penetrationLength'].values[0])
+            depth = np.append(local_depth, local_depth[-1] + dicretisation +
+                              cpt_BRO['dataframe']['penetrationLength'].values -
+                              cpt_BRO['dataframe']['penetrationLength'].values[0])
             coneresistance = np.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
             frictionratio = np.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
             localfriction = np.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
@@ -251,6 +269,7 @@ class CPT:
             coneresistance = np.append(np.average(cpt_BRO['dataframe']['coneResistance'][:length_of_average_points]), coneresistance)
             frictionratio = np.append(np.average(cpt_BRO['dataframe']['frictionRatio'][:length_of_average_points]), frictionratio)
             localfriction = np.append(np.average(cpt_BRO['dataframe']['localFriction'][:length_of_average_points]), localfriction)
+
 
             # if there is pore water pressure
             for water_measurement_type in self.__water_measurement_types:

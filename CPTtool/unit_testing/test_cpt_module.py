@@ -18,6 +18,42 @@ class TestCptModule(unittest.TestCase):
         self.cpt = cpt_module.CPT("./")
         pass
 
+    def test_calculate_corrected_depth_without_predrill(self):
+        # make a cpt without pre drill
+        d_depth = 1
+        d_start = 0
+        d_end = 3
+        penetration_length = np.linspace(d_start, d_end, np.ceil((d_end - d_start) / d_depth) + 1, endpoint=True)
+        d = {'penetrationLength': penetration_length,
+             'coneResistance': [1, 2, 3, 4],
+             'localFriction': [4, 5, 6, 7],
+             'frictionRatio': [0.22, 0.33, 0.44, 0.55],
+             'inclinationResultant': [0, 1, 30, 2]
+             }
+
+        # set up the upper part of the dictionary
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    'predrilled_z': 0.0,
+                    'a': 0.8,
+                    "dataframe": df}
+
+        # parse data
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
+
+        # Run the function to be checked
+        corrected_depth = self.cpt.calculate_corrected_depth(self.cpt.depth, self.cpt.inclination_resultant)
+
+        # define the target depth
+        target_depth = np.array([0.0, 1.0, 1.9998477, 2.8658731])
+
+        # check if corrected depth is calculated correctly
+        np.testing.assert_array_almost_equal(corrected_depth, target_depth)
+
+
     def test__pre_drill_with_predrill(self):
 
         # make a cpt with the pre_drill option
