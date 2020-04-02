@@ -128,13 +128,18 @@ class CPT:
         # check data consistency: remove doubles depth
         cpt["dataframe"] = cpt["dataframe"].drop_duplicates(subset='penetrationLength', keep="first")
 
-        # parse inclination resultant
-        if 'inclinationResultant' in cpt['dataframe']:
-            self.inclination_resultant = cpt['dataframe']['inclinationResultant'].values
+
 
         # check if there is a pre_drill. if so pad the data
         depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt,
                                                                                                       length_of_average_points=minimum_samples)
+
+        # parse inclination resultant
+        if 'inclinationResultant' in cpt['dataframe']:
+            self.inclination_resultant = cpt['dataframe']['inclinationResultant'].values
+        else:
+            self.inclination_resultant = np.empty(len(depth)) * np.nan
+
         # check quality of CPT
         # if more than minimum_ratio CPT is corrupted: discard CPT
         if (
@@ -200,6 +205,27 @@ class CPT:
         self.water = tools_utils.smooth(self.water, window_len=nb_points, lim=0)
         return
 
+    def get_depth_from_bro(self, cpt_BRO):
+        """
+        If depth is present in the bro cpt and is valid, the depth is parsed from depth
+        elseif resultant inclination angle is present and valid in the bro cpt, the penetration length is corrected with
+        the inclination angle.
+        if both depth and inclination angle are not present/valid, the depth is parsed from the penetration length.
+        :param cpt_BRO:
+        :return:
+        """
+        depth = np.array([])
+        if 'depth' in cpt_BRO['dataframe']:
+            if cpt_BRO['dataframe']['depth'].values.dtype == np.dtype('float64'):
+                depth = cpt_BRO['dataframe']['depth'].values
+        if 'inclinationResultant' in cpt_BRO['dataframe'] and depth.size == 0:
+            if cpt_BRO['dataframe']['inclinationResultant'].values.dtype == np.dtype('float64'):
+                depth = self.calculate_corrected_depth(cpt_BRO['dataframe']['penetrationLength'].values,
+                                                    cpt_BRO['dataframe']['inclinationResultant'].values)
+        if depth.size == 0:
+            depth = cpt_BRO['dataframe']['penetrationLength'].values
+        return depth
+
     def define_pre_drill(self, cpt_BRO, length_of_average_points=3):
         r"""
         Checks the existence of pre-drill.
@@ -214,11 +240,14 @@ class CPT:
 
         starting_depth = 0
         pore_pressure = None
+
+        depth = self.get_depth_from_bro(cpt_BRO)
+
         if float(cpt_BRO['predrilled_z']) != 0.:
             # if there is pre-dill add the average values to the pre-dill
 
             # Set the discretisation
-            dicretisation = np.average(np.diff(cpt_BRO['dataframe']['penetrationLength'].values))
+            dicretisation = np.average(np.diff(depth))
 
             # find the average
             average_cone_res = np.average(cpt_BRO['dataframe']['coneResistance'][:length_of_average_points])
@@ -243,15 +272,14 @@ class CPT:
 
             # Enrich the Penetration Length
             depth = np.append(local_depth, local_depth[-1] + dicretisation +
-                              cpt_BRO['dataframe']['penetrationLength'].values -
-                              cpt_BRO['dataframe']['penetrationLength'].values[0])
+                              depth - depth[0])
             coneresistance = np.append(local_cone_res, cpt_BRO['dataframe']['coneResistance'].values)
             frictionratio = np.append(local_fr_ratio, cpt_BRO['dataframe']['frictionRatio'].values)
             localfriction = np.append(local_loc_fr, cpt_BRO['dataframe']['localFriction'].values)
 
         else:
             # No predrill existing: just parsing data
-            depth = cpt_BRO['dataframe']['penetrationLength'].values - cpt_BRO['dataframe']['penetrationLength'].values[0]
+            depth = depth - depth[0]
             coneresistance = cpt_BRO['dataframe']['coneResistance'].values
             frictionratio = cpt_BRO['dataframe']['frictionRatio'].values
             localfriction = cpt_BRO['dataframe']['localFriction'].values
