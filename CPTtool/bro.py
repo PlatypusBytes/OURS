@@ -98,7 +98,9 @@ def parse_bro_xml(xml):
     # Initialize data dictionary
     data = {"id": None, "location_x": None, "location_y": None,
             "offset_z": None, "predrilled_z": None, "a": 0.80,
-            "vertical_datum": None, "local_reference": None}
+            "vertical_datum": None, "local_reference": None,
+            "quality_class": None, "cone_penetrometer_type": None,
+            "cpt_standard": None, 'result_time': None}
 
     # Location
     x, y = parse_xml_location(xml)
@@ -108,6 +110,10 @@ def parse_bro_xml(xml):
     # BRO Id
     for loc in root.iter(ns4 + "broId"):
         data["id"] = loc.text
+
+    # Norm of the cpt
+    for loc in root.iter(ns2 + "cptStandard"):
+        data["cpt_standard"] = loc.text
 
     # Offset to reference point
     for loc in root.iter(ns + "offset"):
@@ -121,6 +127,19 @@ def parse_bro_xml(xml):
     # Vertical datum
     for loc in root.iter(ns + "verticalDatum"):
         data["vertical_datum"] = loc.text
+
+    # cpt class
+    for loc in root.iter(ns + "qualityClass"):
+        data["quality_class"] = loc.text
+
+    # cpt type and serial number
+    for loc in root.iter(ns + "conePenetrometerType"):
+        data["cone_penetrometer_type"] = loc.text
+
+    # cpt time of result
+    for cpt in root.iter(ns + "conePenetrationTest"):
+        for loc in cpt.iter(ns5 + "resultTime"):
+            data["result_time"] = loc.text
 
     # Pre drilled depth
     for loc in root.iter(ns + "predrilledDepth"):
