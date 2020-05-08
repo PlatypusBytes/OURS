@@ -3,6 +3,7 @@ import numpy as np
 import robertson
 import tools_utils
 import netcdf
+import more_itertools as mit
 import matplotlib.pylab as plt
 import matplotlib.patches as patches
 from cycler import cycler
@@ -128,8 +129,6 @@ class CPT:
         # check data consistency: remove doubles depth
         cpt["dataframe"] = cpt["dataframe"].drop_duplicates(subset='penetrationLength', keep="first")
 
-
-
         # check if there is a pre_drill. if so pad the data
         depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt,
                                                                                                       length_of_average_points=minimum_samples)
@@ -145,7 +144,7 @@ class CPT:
         if (
                 len(cone_resistance[cone_resistance <= 0]) / len(cone_resistance) > minimum_ratio
                 or len(cone_resistance[local_friction <= 0]) / len(local_friction) > minimum_ratio
-            ):
+        ):
             message = "File " + cpt["id"] + " is corrupted"
             return message
 
@@ -221,7 +220,7 @@ class CPT:
         if 'inclinationResultant' in cpt_BRO['dataframe'] and depth.size == 0:
             if cpt_BRO['dataframe']['inclinationResultant'].values.dtype == np.dtype('float64'):
                 depth = self.calculate_corrected_depth(cpt_BRO['dataframe']['penetrationLength'].values,
-                                                    cpt_BRO['dataframe']['inclinationResultant'].values)
+                                                       cpt_BRO['dataframe']['inclinationResultant'].values)
         if depth.size == 0:
             depth = cpt_BRO['dataframe']['penetrationLength'].values
         return depth
@@ -288,7 +287,6 @@ class CPT:
             for water_measurement_type in self.__water_measurement_types:
                 if water_measurement_type in cpt_BRO['dataframe']:
                     pore_pressure = cpt_BRO['dataframe'][water_measurement_type].values
-
 
         # correct for missing samples in the top of the CPT
         if depth[0] > 0:
@@ -555,7 +553,7 @@ class CPT:
             vs = alpha_vs * (self.qt - self.total_stress) / self.Pa
             vs = tools_utils.ceil_value(vs, 0)
             self.vs = vs ** 0.5
-            self.G0 = self.rho * self.vs**2
+            self.G0 = self.rho * self.vs ** 2
         elif method == "Mayne":
             # vs: following Mayne (2006)
             vs = 118.8 * np.log10(self.friction) + 18.5
@@ -592,8 +590,10 @@ class CPT:
             self.vs_calc(method="Robertson")
             vs2 = self.vs
             G0_2 = self.G0
-            self.plot_correlations([vs1, vs2, vs3, vs4, vs5], "Shear wave velocity [m/s]", ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_wave")
-            self.plot_correlations([G0_1, G0_2, G0_3, G0_4, G0_5], "Shear modulus [kPa]", ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_modulus")
+            self.plot_correlations([vs1, vs2, vs3, vs4, vs5], "Shear wave velocity [m/s]",
+                                   ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_wave")
+            self.plot_correlations([G0_1, G0_2, G0_3, G0_4, G0_5], "Shear modulus [kPa]",
+                                   ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_modulus")
         return
 
     def damp_calc(self, d_min=2, Cu=2., D50=0.2, Ip=40., method="Mayne", freq=1.):
@@ -694,6 +694,54 @@ class CPT:
         # qt = qc + u2 * (1 - a)
         self.qt = self.tip + self.water * (1. - self.a)
         self.qt[self.qt <= 0] = 0
+        return
+
+    def filter(self, lithologies, key, value):
+        """
+        Filters the values of the CPT object.
+        The filter removes the index of the object for the defined **lithologies**, where the **key** is smaller than
+         the **value**
+        The filter only removes the first consecutive samples.
+
+        :param lithologies: list of lithologies to be filtered
+        :param key: Key of the object to be filtered
+        :param value: value of the key to be limited
+        :return:
+        """
+        # attributes to be changed
+        attributes = ["depth", "depth_to_reference", "tip", "friction", "friction_nbr", "gamma", "rho", "total_stress",
+                      "effective_stress", "qt", "Qtn", "Fr", "IC", "n", "vs", "G0", "poisson", "damping", "water",
+                      "lithology", "litho_points", "inclination_resultant"]
+
+        # find indexes of the lithologies to be filtered
+        idx_lito = []
+        for lit in lithologies:
+            idx_lito.extend([i for i, val in enumerate(self.lithology) if val == lit])
+
+        # find indexes where the key attribute is smaller than the value
+        idx_key = np.where(getattr(self, key) <= value)[0].tolist()
+
+        # intercept indexes: append
+        idx = list(set(idx_lito) & set(idx_key))
+
+        # if nothing to delete : return
+        if not idx:
+            return
+
+        # find first consecutive indexes
+        idx_to_delete = [list(group) for group in mit.consecutive_groups(idx)][0]
+
+        # check if zeros is in idx_to_delete: otherwise return
+        if 0 not in idx_to_delete:
+            return
+
+        # delete all attributes
+        for att in attributes:
+            setattr(self, att, getattr(self, att)[idx_to_delete[-1] + 1:])
+
+        # correct depth
+        self.depth -= self.depth[0]
+
         return
 
     def plot_correlations(self, x_data, x_label, l_name, name):

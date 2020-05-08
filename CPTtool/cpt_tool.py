@@ -40,7 +40,6 @@ def define_methods(input_file):
     # if the file is available
     with open(input_file, "r") as f:
         data = json.load(f)
-    # todo Close this file f.close()
 
     # # checks if the keys are correct
     for i in data.keys():
@@ -61,11 +60,11 @@ def define_methods(input_file):
         print("Error: gamma key is not known. OCR keys must be: " + ', '.join(OCR_keys))
         sys.exit(5)
     # check if radius is a float
-
     if not isinstance(data["radius"], (int, float)):
         print("Error: radius is not known. must be a float")
         sys.exit(5)
 
+    # add to dicionary
     methods = {"gamma": data["gamma"],
                "vs": data["vs"],
                "OCR": data["OCR"],
@@ -157,6 +156,8 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         cpt.damp_calc(method=methods["OCR"])
         # compute Poisson ratio
         cpt.poisson_calc()
+        # filter values
+        cpt.filter(["1", "2"], "G0", 1e6)
         # make the plots (optional)
         if make_plots:
             cpt.write_csv()
