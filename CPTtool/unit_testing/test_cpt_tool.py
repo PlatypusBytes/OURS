@@ -16,6 +16,7 @@ import cpt_tool
 import bro
 import log_handler
 
+
 class TestCptTool(unittest.TestCase):
     def setUp(self):
         return
@@ -307,8 +308,9 @@ class TestCptTool(unittest.TestCase):
         with open(output + '\\' + 'results_0.json') as jsonfile:
             jsonresults = json.load(jsonfile)
 
-        self.assertEqual(jsonresults['scenarios'][0]['probability'], 0.23)
-        self.assertEqual(jsonresults['scenarios'][1]['probability'], 0.77)
+        print(jsonresults['scenarios'][0]['probability'])
+        self.assertEqual(jsonresults['scenarios'][0]['probability'], 0.231)
+        self.assertEqual(jsonresults['scenarios'][1]['probability'], 0.769)
 
         # Check plots
         for i in cpt_results:
