@@ -287,7 +287,7 @@ def analysis(properties, methods_cpt, output, plots):
 
         # round probability to two decimals
         for i in range(len(jsn["scenarios"])):
-            jsn["scenarios"][i]["probability"] = round(jsn["scenarios"][i]["probability"], 2)
+            jsn["scenarios"][i]["probability"] = round(jsn["scenarios"][i]["probability"], 3)
 
         # dump json
         tools_utils.dump_json(jsn, idx, output)
