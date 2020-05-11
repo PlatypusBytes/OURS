@@ -239,13 +239,13 @@ class TestUtils(TestCase):
         np.testing.assert_array_almost_equal(results["NAP"], np.linspace(0, -10, 10))
         np.testing.assert_array_almost_equal(results["depth"], np.linspace(0, 10, 10))
         # test variance
-        np.testing.assert_array_almost_equal(results["Qtn_var"], (np.ones(10) * cpt.Qtn*10) ** 2)
-        np.testing.assert_array_almost_equal(results["Fr_var"],  (np.ones(10) * cpt.Fr*10) ** 2)
-        np.testing.assert_array_almost_equal(results["G0_var"],  (np.ones(10) * cpt.G0*10) ** 2)
-        np.testing.assert_array_almost_equal(results["poisson_var"],  (np.ones(10) * cpt.poisson*10) ** 2)
-        np.testing.assert_array_almost_equal(results["rho_var"],  (np.ones(10) * cpt.rho*10) ** 2)
-        np.testing.assert_array_almost_equal(results["damping_var"],  (np.ones(10) * cpt.damping*10) ** 2)
-        np.testing.assert_array_almost_equal(results["IC_var"],  (np.ones(10) * cpt.IC*10) ** 2)
+        np.testing.assert_array_almost_equal(results["Qtn_var"], (np.ones(10) * cpt.Qtn*1) ** 2)
+        np.testing.assert_array_almost_equal(results["Fr_var"],  (np.ones(10) * cpt.Fr*1) ** 2)
+        np.testing.assert_array_almost_equal(results["G0_var"],  (np.ones(10) * cpt.G0*2) ** 2)
+        np.testing.assert_array_almost_equal(results["poisson_var"],  (np.ones(10) * cpt.poisson*1) ** 2)
+        np.testing.assert_array_almost_equal(results["rho_var"],  (np.ones(10) * cpt.rho*0.5) ** 2)
+        np.testing.assert_array_almost_equal(results["damping_var"],  (np.ones(10) * cpt.damping*2) ** 2)
+        np.testing.assert_array_almost_equal(results["IC_var"],  (np.ones(10) * cpt.IC*1.) ** 2)
         return
 
     def test_interpolation_2(self):

@@ -65,6 +65,8 @@ def interpolation(data_cpt, coordinates, power=1):
     # list of attributes to be interpolated
     attributes = ["Qtn", "Fr", "G0", "poisson", "rho", "damping", "IC"]
     attributes_var = ["Qtn_var", "Fr_var", "G0_var", "poisson_var", "rho_var", "damping_var", "IC_var"]
+    # default cov for the attributes
+    attibutes_cov = [1, 1, 2, 1, 0.5, 2, 1]
 
     # transform cpt data into a continuous list for all cpts
     coords = []  # cpt coordinates
@@ -110,7 +112,7 @@ def interpolation(data_cpt, coordinates, power=1):
 
     # for each attribute perform interpolation and assign it to the results dict
     for i, at in enumerate(attributes):
-        interp = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power)
+        interp = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power, default_cov=attibutes_cov[i])
         # create interpolation object
         interp.interpolate(coords, np.array(data_training[i]), depth_points, depth)
         # predict
