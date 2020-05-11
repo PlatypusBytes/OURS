@@ -76,11 +76,11 @@ class CPT:
         """
         Parse the BRO information into the object structure
 
-        todo: correct depth with inclination angle
         :param cpt: BRO cpt dataset
-        :param minimum_length: minimum length that cpt files needs to have
-        :param minimum_samples: minimum samples that cpt files needs to have
-        :param minimum_ratio: minimum ratio of positive values that cpt files needs to have
+        :param minimum_length: (optional) minimum length that cpt files needs to have
+        :param minimum_samples: (optional) minimum samples that cpt files needs to have
+        :param minimum_ratio: (optional) minimum ratio of positive values that cpt files needs to have
+        :param convert_to_kPa: (optional) convert units to kPa
         :return:
         """
 
@@ -181,31 +181,18 @@ class CPT:
 
         return True
 
-    def calculate_corrected_depth(self, penetration_length, inclination):
-        """
-        Correct the penetration length with the inclination angle
-        
-        todo implement this function after calculating the pre excavated depth
-        :param penetration_length: measured penetration length
-        :param inclination: measured inclination of the cone
-        :return: corrected depth
-        """
-        corrected_d_depth = np.diff(penetration_length) * np.cos(np.radians(inclination[:-1]))
-        corrected_depth = np.concatenate((penetration_length[0], penetration_length[0] +
-                                          np.cumsum(corrected_d_depth)), axis=None)
-        return corrected_depth
-
-    def smooth(self, nb_points=5):
+    def smooth(self, nb_points=5, limit=0):
         r"""
         Smooth the cpt input data
 
         :param nb_points: (optional) number of points for smoothing. default 5
+        :param limit: (optional) lower limit of the smooth
         :return:
         """
 
-        self.tip = tools_utils.smooth(self.tip, window_len=nb_points, lim=0)
-        self.friction = tools_utils.smooth(self.friction, window_len=nb_points, lim=0)
-        self.friction_nbr = tools_utils.smooth(self.friction_nbr, window_len=nb_points, lim=0)
+        self.tip = tools_utils.smooth(self.tip, window_len=nb_points, lim=limit)
+        self.friction = tools_utils.smooth(self.friction, window_len=nb_points, lim=limit)
+        self.friction_nbr = tools_utils.smooth(self.friction_nbr, window_len=nb_points, lim=limit)
         self.water = tools_utils.smooth(self.water, window_len=nb_points, lim=0)
         return
 
@@ -215,7 +202,7 @@ class CPT:
         elseif resultant inclination angle is present and valid in the bro cpt, the penetration length is corrected with
         the inclination angle.
         if both depth and inclination angle are not present/valid, the depth is parsed from the penetration length.
-        :param cpt_BRO:
+        :param cpt_BRO: dataframe
         :return:
         """
         depth = np.array([])
@@ -601,7 +588,7 @@ class CPT:
                                    ["Mayne", "Robertson", "Andrus", "Zang", "Ahmed"], "shear_modulus")
         return
 
-    def damp_calc(self, d_min=2, Cu=2., D50=0.2, Ip=40., method="Mayne", freq=1.):
+    def damp_calc(self, method="Mayne", d_min=2, Cu=2., D50=0.2, Ip=40., freq=1.):
         r"""
         Damping calculation.
 
@@ -628,11 +615,11 @@ class CPT:
 
         Parameters
         ----------
+        :param method: (optional) Method for calculation of OCR. Default is Mayne        :param d_min: (optional) Minimum damping. Default is 2%
         :param d_min: (optional) Minimum damping. Default is 2%
         :param Cu: (optional) Coefficient of uniformity. Default is 2.0
         :param D50: (optional) Median grain size. Default is 0.2 mm
         :param Ip: (optional) Plasticity index. Default is 40
-        :param method: (optional) Method for calculation of OCR. Default is Mayne
         :param freq: (optional) Frequency. Default is 1 Hz
         """
 
@@ -701,7 +688,7 @@ class CPT:
         self.qt[self.qt <= 0] = 0
         return
 
-    def filter(self, lithologies, key, value):
+    def filter(self, lithologies=[""], key="G0", value=0):
         """
         Filters the values of the CPT object.
         The filter removes the index of the object for the defined **lithologies**, where the **key** is smaller than
@@ -951,3 +938,17 @@ class CPT:
                          str(self.poisson[i]) + ";" +
                          str(self.damping[i]) + '\n')
         return
+
+    @staticmethod
+    def calculate_corrected_depth(penetration_length, inclination):
+        """
+        Correct the penetration length with the inclination angle
+
+        :param penetration_length: measured penetration length
+        :param inclination: measured inclination of the cone
+        :return: corrected depth
+        """
+        corrected_d_depth = np.diff(penetration_length) * np.cos(np.radians(inclination[:-1]))
+        corrected_depth = np.concatenate((penetration_length[0], penetration_length[0] +
+                                          np.cumsum(corrected_d_depth)), axis=None)
+        return corrected_depth

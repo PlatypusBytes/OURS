@@ -78,6 +78,36 @@ def define_methods(input_file):
     return methods
 
 
+def define_settings():
+    """
+    Defines settings for the optional parameters of the CPT analysis
+
+    :return: settings dictionary
+    """
+
+    # settings
+    settings = {"minimum_length": 5,  # minimum length of CPT
+                "minimum_samples": 50,  # minimum number of samples of CPT
+                "minimum_ratio": 0.1,  # mimimum ratio of correct values in a CPT
+                "convert_to_kPa": True,  # convert CPT to kPa
+                "nb_points": 5,  # number of points for smoothing
+                "limit": 0,  # lower bound of the smooth function
+                "gamma_min": 10.5,  # minimum unit weight
+                "gamma_max": 22,  # maximum unit weight
+                "d_min": 2.,  # parameter for damping (minimum damping)
+                "Cu": 2.,  # parameter for damping (coefficient of uniformity)
+                "D50": 0.2,  # parameter for damping (median grain size)
+                "Ip": 40.,  # parameter for damping (plastic index)
+                "freq": 1.,  # parameter for damping (frequency)
+                "lithologies": ["1", "2"],  # lithologies to filter
+                "key": "G0",  # attribute to filder
+                "value": 1e6,  # lower value to filter
+                "power": 1,  # power for IDW interpolation
+                }
+
+    return settings
+
+
 def read_json(input_file):
     """
     Reads input json file
@@ -96,7 +126,8 @@ def read_json(input_file):
     return data
 
 
-def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn, scenario):
+def read_cpt(cpt_BRO, methods, settings, output_folder, input_dictionary, make_plots, index_coordinate, log_file,
+             jsn, scenario):
     """
     Read CPT
 
@@ -106,6 +137,7 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     ----------
     :param cpt_BRO: cpt information from the BRO
     :param methods: Methods for the CPT correlations
+    :param settings: Settings for the optional parameters for the CPT correlations
     :param output_folder: Folder to save the files
     :param input_dictionary: Dictionary with input settings
     :param make_plots: Bool to make plots
@@ -126,18 +158,20 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         # initialise CPT module
         cpt = cpt_module.CPT(output_folder)
         # read data from BRO
-        data_quality = cpt.parse_bro(cpt_BRO[idx_cpt])
+        data_quality = cpt.parse_bro(cpt_BRO[idx_cpt],
+                                     minimum_length=settings["minimum_length"], minimum_samples=settings["minimum_samples"],
+                                     minimum_ratio=settings["minimum_ratio"], convert_to_kPa=settings["convert_to_kPa"])
         # check data quality from the BRO file
         if data_quality is not True:
             # If the quality is not good skip this cpt file
             log_file.error_message(data_quality)
             continue
         # smooth data
-        cpt.smooth()
+        cpt.smooth(nb_points=settings["nb_points"], limit=settings["limit"])
         # compute qc
         cpt.qt_calc()
         # compute unit weight
-        cpt.gamma_calc(method=methods["gamma"])
+        cpt.gamma_calc(method=methods["gamma"], gamma_min=settings["gamma_min"], gamma_max=settings["gamma_max"])
         # compute density
         cpt.rho_calc()
         # compute water pressure level
@@ -151,11 +185,12 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
         # compute shear wave velocity and shear modulus
         cpt.vs_calc(method=methods["vs"])
         # compute damping
-        cpt.damp_calc(method=methods["OCR"])
+        cpt.damp_calc(method=methods["OCR"], d_min=settings["d_min"], Cu=settings["Cu"], D50=settings["D50"],
+                      Ip=settings["Ip"], freq=settings["freq"])
         # compute Poisson ratio
         cpt.poisson_calc()
         # filter values
-        cpt.filter(["1", "2"], "G0", 1e6)
+        cpt.filter(lithologies=settings["lithologies"], key=settings["key"], value=settings["value"])
         # make the plots (optional)
         if make_plots:
             cpt.write_csv()
@@ -170,17 +205,19 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     if bool(results_cpt):
         # perform interpolation
         result_interp = tools_utils.interpolation(results_cpt, [input_dictionary['Receiver_x'][index_coordinate],
-                                                                input_dictionary['Receiver_y'][index_coordinate]])
+                                                                input_dictionary['Receiver_y'][index_coordinate]],
+                                                  power=settings["power"])
 
         # merge the layers thickness
-        depth_json, indx_json, lithology_json = tools_utils.merge_thickness(result_interp, float(input_dictionary["MinLayerThickness"]))
+        depth_json, indx_json, lithology_json = tools_utils.merge_thickness(result_interp,
+                                                                            float(input_dictionary["MinLayerThickness"]))
         # add results to the dictionary
         jsn = tools_utils.add_json(jsn, scenario, depth_json, indx_json, lithology_json, result_interp)
         is_jsn_modified = True
     return jsn, is_jsn_modified
 
 
-def analysis(properties, methods_cpt, output, plots):
+def analysis(properties, methods_cpt, settings_cpt, output, plots):
     """
     Analysis of CPT
 
@@ -188,6 +225,7 @@ def analysis(properties, methods_cpt, output, plots):
 
     :param properties: JSON file with the properties of the analysis: opened json file
     :param methods_cpt: methods to use for the CPT interpretation
+    :param settings_cpt: settings for the optional parameters for the CPT interpretation
     :param output: path for the output results
     :param plots: boolean create the plots
     :return:
@@ -235,7 +273,8 @@ def analysis(properties, methods_cpt, output, plots):
             # remove the nones
             data = list(filter(None, cpts['polygons'][zone]['data']))
             if data:
-                jsn, is_jsn_modified = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
+                jsn, is_jsn_modified = read_cpt(data, methods_cpt, settings_cpt, output, properties, plots, idx,
+                                                log_file, jsn, scenario)
                 if is_jsn_modified:
                     results["polygons"].update({zone: True})
                     prob.append(cpts['polygons'][zone]['perc'])
@@ -265,7 +304,8 @@ def analysis(properties, methods_cpt, output, plots):
         results.update({"circle": []})
         if data:
             # if data exists in the circle
-            jsn, is_jsn_modified = read_cpt(data, methods_cpt, output, properties, plots, idx, log_file, jsn, scenario)
+            jsn, is_jsn_modified = read_cpt(data, methods_cpt, settings_cpt, output, properties, plots, idx, log_file,
+                                            jsn, scenario)
             if is_jsn_modified:
                 results["circle"] = True
                 jsn["scenarios"][scenario].update({"coordinates": [properties["Receiver_x"][idx], properties["Receiver_y"][idx]],
@@ -310,6 +350,8 @@ if __name__ == "__main__":
     props = read_json(args.json)
     # define methods for the analysis of CPT
     methods = define_methods(args.methods)
+    # define settings
+    settings = define_settings()
 
     # do analysis
-    analysis(props, methods, args.output, args.plots)
+    analysis(props, methods, settings, args.output, args.plots)
