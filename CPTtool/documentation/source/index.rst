@@ -85,4 +85,8 @@ Content
    cpt_tool
    cpt_module
    robertson
+   bro
+   inv_dist
+   netcdf
+   tools_utils
    references

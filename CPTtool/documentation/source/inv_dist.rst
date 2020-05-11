@@ -1,7 +1,7 @@
-robertson module
+inv\_dist module
 ================
 
-.. automodule:: robertson
+.. automodule:: inv_dist
    :members:
    :undoc-members:
    :show-inheritance:
