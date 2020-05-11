@@ -929,6 +929,82 @@ class TestCptModule(unittest.TestCase):
         np.testing.assert_array_equal([2, 3, 4, 5], self.cpt.Fr)
         return
 
+    def test_filter_5(self):
+        # Define all the inputs
+        self.cpt.IC = np.array([1, 2, 3, 4, 5])
+        self.cpt.Qtn = np.array([1, 2, 3, 4, 5])
+        self.cpt.rho = np.array([1, 2, 3, 4, 5])
+        self.cpt.lithology = ["5", "1", "2", "2", "5"]
+        self.cpt.total_stress = np.array([1, 2, 3, 4, 5])
+        self.cpt.effective_stress = np.array([1, 2, 3, 4, 5])
+        self.cpt.tip = np.array([1, 2, 3, 4, 5])
+        self.cpt.qt = np.array([1, 2, 3, 4, 5])
+        self.cpt.friction = np.array([1, 2, 3, 4, 5])
+        self.Pa = 100
+        self.cpt.gamma = np.array([1, 2, 3, 4, 5])
+        self.cpt.vs = np.array([1, 2, 3, 4, 5])
+        self.cpt.depth = np.array([1, 2, 3, 4, 5])
+        self.cpt.G0 = np.array([1, 20, 3, 4, 5])
+        self.cpt.Fr = np.array([1, 2, 3, 4, 5])
+        self.cpt.name = "UNIT_TESTING"
+
+        # Call function
+        self.cpt.filter(["1", "2"], "G0", 15)
+
+        # Check their equality
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.IC)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.Qtn)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.rho)
+        np.testing.assert_array_equal(["5", "1", "2", "2", "5"], self.cpt.lithology)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.total_stress)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.effective_stress)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.tip)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.friction)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.gamma)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.vs)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.depth)
+        np.testing.assert_array_equal([1, 20, 3, 4, 5], self.cpt.G0)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5], self.cpt.Fr)
+        return
+
+    def test_filter_6(self):
+        # Define all the inputs
+        self.cpt.IC = np.array([1, 2, 3, 4, 5])
+        self.cpt.Qtn = np.array([1, 2, 3, 4, 5])
+        self.cpt.rho = np.array([1, 2, 3, 4, 5])
+        self.cpt.lithology = ["1", "1", "2", "2", "5"]
+        self.cpt.total_stress = np.array([1, 2, 3, 4, 5])
+        self.cpt.effective_stress = np.array([1, 2, 3, 4, 5])
+        self.cpt.tip = np.array([1, 2, 3, 4, 5])
+        self.cpt.qt = np.array([1, 2, 3, 4, 5])
+        self.cpt.friction = np.array([1, 2, 3, 4, 5])
+        self.Pa = 100
+        self.cpt.gamma = np.array([1, 2, 3, 4, 5])
+        self.cpt.vs = np.array([1, 2, 3, 4, 5])
+        self.cpt.depth = np.array([1, 2, 3, 4, 5])
+        self.cpt.G0 = np.array([1, 2, 3, 40, 5])
+        self.cpt.Fr = np.array([1, 2, 3, 4, 5])
+        self.cpt.name = "UNIT_TESTING"
+
+        # Call function
+        self.cpt.filter(["1", "2"], "G0", 15)
+
+        # Check their equality
+        np.testing.assert_array_equal([4, 5], self.cpt.IC)
+        np.testing.assert_array_equal([4, 5], self.cpt.Qtn)
+        np.testing.assert_array_equal([4, 5], self.cpt.rho)
+        np.testing.assert_array_equal(["2", "5"], self.cpt.lithology)
+        np.testing.assert_array_equal([4, 5], self.cpt.total_stress)
+        np.testing.assert_array_equal([4, 5], self.cpt.effective_stress)
+        np.testing.assert_array_equal([4, 5], self.cpt.tip)
+        np.testing.assert_array_equal([4, 5], self.cpt.friction)
+        np.testing.assert_array_equal([4, 5], self.cpt.gamma)
+        np.testing.assert_array_equal([4, 5], self.cpt.vs)
+        np.testing.assert_array_equal([0, 1], self.cpt.depth)
+        np.testing.assert_array_equal([40, 5], self.cpt.G0)
+        np.testing.assert_array_equal([4, 5], self.cpt.Fr)
+        return
+
     def tearDown(self):
         # Delete all files created while testing
         import os
