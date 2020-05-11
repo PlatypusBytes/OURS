@@ -1,3 +1,16 @@
+"""
+Robertson soil classification
+"""
+# import packages
+import os
+import numpy as np
+import shapefile
+from shapely.geometry import Polygon
+from shapely.geometry import Point
+# import OURS packages
+import tools_utils
+
+
 class Robertson:
     r"""
     Robertson soil classification.
@@ -25,10 +38,6 @@ class Robertson:
         :param model_name: Name of model and shapefile
         :return: list of the polygons defining the soil types
         """
-        import os
-        import tools_utils
-        import shapefile
-        from shapely.geometry import Polygon
 
         # define the path for the shape file
         path_shapefile = tools_utils.resource_path(os.path.join(os.path.join(os.path.dirname(__file__), path_shapefile), model_name))
@@ -52,8 +61,6 @@ class Robertson:
         :param iter_max: (optional) Maximum number of iterations
         :return: lithology array, Qtn, Fr
         """
-        import numpy as np
-        from shapely.geometry import Point
 
         litho = [""] * len(Qtn)
         coords = np.zeros((len(Qtn), 2))

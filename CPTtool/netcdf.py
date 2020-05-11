@@ -1,3 +1,7 @@
+"""
+NetCFD
+"""
+# import packages
 import netCDF4
 import numpy as np
 import pyproj
@@ -6,6 +10,7 @@ import logging
 
 to_srs = pyproj.Proj(init='epsg:4326')
 source_srs = pyproj.Proj(init='epsg:28992')
+
 
 class NetCDF:
 

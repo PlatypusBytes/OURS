@@ -1,6 +1,11 @@
+"""
+Log handler
+"""
+# import packages
+import os
+
 class LogFile:
     def __init__(self, output_folder, index):
-        import os
         # checks if file_path exits. If not creates file_path
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)

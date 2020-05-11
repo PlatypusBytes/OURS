@@ -1,12 +1,17 @@
+"""
+CPT module
+"""
+# import packages
 import os
 import numpy as np
-import robertson
-import tools_utils
-import netcdf
 import more_itertools as mit
 import matplotlib.pylab as plt
 import matplotlib.patches as patches
 from cycler import cycler
+# import OURS packages
+import robertson
+import tools_utils
+import netcdf
 
 
 class CPT:

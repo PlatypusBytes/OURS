@@ -1,13 +1,16 @@
 """
-Tools for the cpt module
+Tools for OURS
 """
+# import packages
 from itertools import groupby
 from operator import itemgetter
 import numpy as np
 import os
 import sys
-import inv_dist
 import json
+# import OURS packages
+import robertson
+import inv_dist
 
 
 def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
@@ -192,7 +195,6 @@ def merge_thickness(cpt_data, min_layer_thick):
     :return lithology_json: merged lithology
 
     """
-    import robertson
 
     # compute lithology of interpolated cpt
     cpt_data["Qtn"][cpt_data["Qtn"] <= 1.] = 1.0

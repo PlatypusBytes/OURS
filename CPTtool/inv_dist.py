@@ -1,3 +1,7 @@
+"""
+Inverse distance interpolation
+"""
+# import packages
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.interpolate import interp1d

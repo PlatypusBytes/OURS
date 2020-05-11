@@ -1,8 +1,16 @@
+"""
+CPT tool
+"""
+# import packages
+import os
+import json
 import argparse
-import log_handler
-import bro
 import sys
+# import OURS packages
+import bro
+import log_handler
 import tools_utils
+import cpt_module
 
 
 def define_methods(input_file):
@@ -12,9 +20,6 @@ def define_methods(input_file):
     :param input_file: json file with methods
     :return: methods: dictionary with the methods for CPT correlations
     """
-    import os
-    import json
-
     # possible keys:
     keys = ["gamma", "vs", "OCR", "radius"]
     # possible key-values
@@ -80,9 +85,6 @@ def read_json(input_file):
     :param input_file: json file with the input values
     :return: data: dictionary with the input files
     """
-    import os
-    import json
-
     # check if file exits
     if not os.path.isfile(input_file):
         print("Input JSON file does not exist")
@@ -94,8 +96,7 @@ def read_json(input_file):
     return data
 
 
-def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn,
-             scenario):
+def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, index_coordinate, log_file, jsn, scenario):
     """
     Read CPT
 
@@ -112,11 +113,8 @@ def read_cpt(cpt_BRO, methods, output_folder, input_dictionary, make_plots, inde
     :param log_file: Log file for the analysis
     :param jsn: dictionary with the scenarios
     :param scenario: scenario number
-    :return: return_cpt: list with the processed cpt objects
+    :return: json file with results, bool (True/False) if there results are not empty
     """
-
-    # read the cpt files
-    import cpt_module
 
     is_jsn_modified = False
     # dictionary for the results

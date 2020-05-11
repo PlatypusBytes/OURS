@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""BRO XML CPT database reader, indexer and parser.
+"""
+BRO XML CPT database reader, indexer and parser.
 
 Enables searching of very large XML CPT database dumps.
 In order to speed up these operations, an index will
@@ -17,7 +16,7 @@ As of January 2019, almost a 100.000 CPTs are stored in the XML
 and creating the index will take 5-10min depending on disk performance.
 
 """
-
+# import packages
 import sys
 import mmap
 import math
