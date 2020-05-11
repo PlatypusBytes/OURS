@@ -19,6 +19,25 @@ import log_handler
 
 class TestCptTool(unittest.TestCase):
     def setUp(self):
+        # settings
+        self.settings = {"minimum_length": 5,  # minimum length of CPT
+                         "minimum_samples": 50,  # minimum number of samples of CPT
+                         "minimum_ratio": 0.1,  # mimimum ratio of correct values in a CPT
+                         "convert_to_kPa": True,  # convert CPT to kPa
+                         "nb_points": 5,  # number of points for smoothing
+                         "limit": 0,  # lower bound of the smooth function
+                         "gamma_min": 10.5,  # minimum unit weight
+                         "gamma_max": 22,  # maximum unit weight
+                         "d_min": 2.,  # parameter for damping (minimum damping)
+                         "Cu": 2.,  # parameter for damping (coefficient of uniformity)
+                         "D50": 0.2,  # parameter for damping (median grain size)
+                         "Ip": 40.,  # parameter for damping (plastic index)
+                         "freq": 1.,  # parameter for damping (frequency)
+                         "lithologies": ["1", "2"],  # lithologies to filter
+                         "key": "G0",  # attribute to filder
+                         "value": 1e6,  # lower value to filter
+                         "power": 1,  # power for IDW interpolation
+                         }
         return
 
     def test_define_methods_error(self):
@@ -123,7 +142,7 @@ class TestCptTool(unittest.TestCase):
             cpt_BRO['polygons']['2M81ykd']['data'][1]['dataframe'].depth.dropna().empty
         data = list(filter(None, cpt_BRO['polygons']['2M81ykd']['data']))
 
-        jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, output,
+        jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, self.settings, output,
                                                  {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
                                                   "MinLayerThickness": '0.5', "BRO_data": prop["BRO_data"]},
                                                  plots, 0, log_file, {"scenarios": []}, 0)
@@ -170,7 +189,7 @@ class TestCptTool(unittest.TestCase):
                     'predrilled_z': 0.}
         data = [cpt_data]
 
-        jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, output,
+        jsn, is_jsn_modified = cpt_tool.read_cpt(data, methods_cpt, self.settings, output,
                                                  {"Receiver_x": prop["Source_x"][0], "Receiver_y": prop["Source_y"][0],
                                                   "MinLayerThickness": '0.5', "BRO_data": prop["BRO_data"]},
                                                  plots, 0, log_file, {"scenarios": []}, 0)
@@ -190,7 +209,7 @@ class TestCptTool(unittest.TestCase):
             prop = json.load(properties)
 
         # the function
-        cpt_tool.analysis(prop, methods_cpt, output, plots)
+        cpt_tool.analysis(prop, methods_cpt, self.settings, output, plots)
 
         # test if files are filled in correctly
         with open(output + '\\' + 'log_file_0.txt') as logfile:
@@ -224,7 +243,7 @@ class TestCptTool(unittest.TestCase):
             prop = json.load(properties)
 
         # the function
-        cpt_tool.analysis(prop, methods_cpt, output, plots)
+        cpt_tool.analysis(prop, methods_cpt, self.settings, output, plots)
 
         # the results cpts
         cpt_results = ['CPT000000000448', 'CPT000000000449']
@@ -277,7 +296,7 @@ class TestCptTool(unittest.TestCase):
             prop = json.load(properties)
 
         # the function
-        cpt_tool.analysis(prop, methods_cpt, output, plots)
+        cpt_tool.analysis(prop, methods_cpt, self.settings, output, plots)
 
         # the results cpts
         cpt_results = ['CPT000000000207', 'CPT000000000197', 'CPT000000000191', 'CPT000000000193', 'CPT000000000200',
@@ -333,7 +352,7 @@ class TestCptTool(unittest.TestCase):
             prop = json.load(properties)
 
         # the function
-        cpt_tool.analysis(prop, methods_cpt, output, plots)
+        cpt_tool.analysis(prop, methods_cpt, self.settings, output, plots)
 
         # the results cpts
         cpt_results = ['CPT000000000022', 'CPT000000000023', 'CPT000000000024', 'CPT000000000025', 'CPT000000000029',

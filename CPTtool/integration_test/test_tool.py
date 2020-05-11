@@ -16,6 +16,25 @@ class FunctionalTests(unittest.TestCase):
         # reference results Robertson
         self.data_ref_rob = [r'./results_REF_rob_0.json', r'./results_REF_rob_1.json', r'./results_REF_rob_2.json']
 
+        # settings
+        self.settings = {"minimum_length": 5,  # minimum length of CPT
+                         "minimum_samples": 50,  # minimum number of samples of CPT
+                         "minimum_ratio": 0.1,  # mimimum ratio of correct values in a CPT
+                         "convert_to_kPa": True,  # convert CPT to kPa
+                         "nb_points": 5,  # number of points for smoothing
+                         "limit": 0,  # lower bound of the smooth function
+                         "gamma_min": 10.5,  # minimum unit weight
+                         "gamma_max": 22,  # maximum unit weight
+                         "d_min": 2.,  # parameter for damping (minimum damping)
+                         "Cu": 2.,  # parameter for damping (coefficient of uniformity)
+                         "D50": 0.2,  # parameter for damping (median grain size)
+                         "Ip": 40.,  # parameter for damping (plastic index)
+                         "freq": 1.,  # parameter for damping (frequency)
+                         "lithologies": ["1", "2"],  # lithologies to filter
+                         "key": "G0",  # attribute to filder
+                         "value": 1e6,  # lower value to filter
+                         "power": 1,  # power for IDW interpolation
+                         }
         return
 
     def test_xml(self):
@@ -23,7 +42,7 @@ class FunctionalTests(unittest.TestCase):
         # run xml
         props = cpt.read_json(r'./inputs/input_xml.json')
         methods = cpt.define_methods(r'./inputs/methods.json')
-        cpt.analysis(props, methods, "./results", False)
+        cpt.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref):
@@ -45,7 +64,7 @@ class FunctionalTests(unittest.TestCase):
         # run xml
         props = cpt.read_json(r'./inputs/input_xml.json')
         methods = cpt.define_methods(r'./inputs/methods_robertson.json')
-        cpt.analysis(props, methods, "./results", False)
+        cpt.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref_rob):
@@ -66,7 +85,7 @@ class FunctionalTests(unittest.TestCase):
         # run zip
         props = cpt.read_json(r'./inputs/input_zip.json')
         methods = cpt.define_methods(r'./inputs/methods.json')
-        cpt.analysis(props, methods, "./results", False)
+        cpt.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref):
@@ -88,7 +107,7 @@ class FunctionalTests(unittest.TestCase):
         # run zip
         props = cpt.read_json(r'./inputs/input_zip.json')
         methods = cpt.define_methods(r'./inputs/methods_robertson.json')
-        cpt.analysis(props, methods, "./results", False)
+        cpt.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref_rob):
