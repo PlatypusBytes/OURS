@@ -78,15 +78,23 @@ def define_methods(input_file):
     return methods
 
 
-def define_settings():
+def define_settings(input_file):
     """
     Defines settings for the optional parameters of the CPT analysis
 
+    :param input_file: json file with methods
     :return: settings dictionary
     """
 
-    # settings
-    settings = {"minimum_length": 5,  # minimum length of CPT
+    # keys for settings
+    keys_dic = ["minimum_length", "minimum_samples", "minimum_ratio", "convert_to_kPa",
+                "nb_points", "limit", "gamma_min", "gamma_max", "d_min", "Cu",
+                "D50", "Ip", "freq", "lithologies", "key", "value", "power"]
+
+    # if no file is available: -> uses default values
+    if not input_file:
+        # settings
+        sett = {"minimum_length": 5,  # minimum length of CPT
                 "minimum_samples": 50,  # minimum number of samples of CPT
                 "minimum_ratio": 0.1,  # mimimum ratio of correct values in a CPT
                 "convert_to_kPa": True,  # convert CPT to kPa
@@ -105,7 +113,30 @@ def define_settings():
                 "power": 1,  # power for IDW interpolation
                 }
 
-    return settings
+        return sett
+
+    # check if input file exists
+    if not os.path.isfile(input_file):
+        print("File with settings definition does not exist")
+        sys.exit(4)
+
+    # if the file is available
+    with open(input_file, "r") as f:
+        data = json.load(f)
+
+    # # checks if the keys are correct
+    for i in data.keys():
+        if not any(i in k for k in keys_dic):
+            print("Error: Key " + i + " is not known. Keys must be: " + ', '.join(keys_dic))
+            sys.exit(5)
+
+    # create setting dic
+    sett = {}
+    # add key to dic
+    for k in keys_dic:
+        sett.update({k: data[k]})
+
+    return sett
 
 
 def read_json(input_file):
@@ -343,7 +374,8 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--json', help='input JSON file', required=True)
     parser.add_argument('-o', '--output', help='location of the output folder', required=True)
     parser.add_argument('-p', '--plots', help='make plots', required=False, default=False)
-    parser.add_argument('-m', '--methods', help='define methods for CPT correlations', required=False, default=False)
+    parser.add_argument('-m', '--methods', help='methods for CPT correlations', required=False, default=False)
+    parser.add_argument('-s', '--settings', help='settings for CPT correlations', required=False, default=False)
     args = parser.parse_args()
 
     # reads input json file
@@ -351,7 +383,7 @@ if __name__ == "__main__":
     # define methods for the analysis of CPT
     methods = define_methods(args.methods)
     # define settings
-    settings = define_settings()
+    settings = define_settings(args.settings)
 
     # do analysis
     analysis(props, methods, settings, args.output, args.plots)

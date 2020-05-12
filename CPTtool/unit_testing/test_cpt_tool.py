@@ -40,6 +40,47 @@ class TestCptTool(unittest.TestCase):
                          }
         return
 
+    def test_define_settings_error(self):
+        with self.assertRaises(SystemExit):
+            cpt_tool.define_settings('fake_file.json')
+        return
+
+    def test_define_settings_no_file(self):
+        sett = cpt_tool.define_settings(False)
+        for s in sett:
+            self.assertEqual(sett[s], self.settings[s])
+        return
+
+    def test_define_settings(self):
+        sett = cpt_tool.define_settings(r'./unit_testing_files/settings.json')
+
+        settings = {"minimum_length": 5,  # minimum length of CPT
+                    "minimum_samples": 50,  # minimum number of samples of CPT
+                    "minimum_ratio": 0.1,  # mimimum ratio of correct values in a CPT
+                    "convert_to_kPa": False,  # convert CPT to kPa
+                    "nb_points": 5,  # number of points for smoothing
+                    "limit": 0,  # lower bound of the smooth function
+                    "gamma_min": 10.5,  # minimum unit weight
+                    "gamma_max": 220,  # maximum unit weight
+                    "d_min": 2.,  # parameter for damping (minimum damping)
+                    "Cu": 2.,  # parameter for damping (coefficient of uniformity)
+                    "D50": 0.2,  # parameter for damping (median grain size)
+                    "Ip": 40.,  # parameter for damping (plastic index)
+                    "freq": 1.,  # parameter for damping (frequency)
+                    "lithologies": ["1", "2", "5"],  # lithologies to filter
+                    "key": "poisson",  # attribute to filder
+                    "value": 1e6,  # lower value to filter
+                    "power": 10,  # power for IDW interpolation
+                    }
+        for s in sett:
+            self.assertEqual(sett[s], settings[s])
+        return
+
+    def test_define_methods_no_keys_in_file(self):
+        with self.assertRaises(SystemExit):
+            cpt_tool.define_methods(r'unit_testing_files\\settings_no_key.json')
+        return
+
     def test_define_methods_error(self):
         with self.assertRaises(SystemExit):
             cpt_tool.define_methods('fake_file.json')
