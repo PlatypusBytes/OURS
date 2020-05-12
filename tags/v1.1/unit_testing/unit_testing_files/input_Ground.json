@@ -1,0 +1,15 @@
+{  
+   "Name":"een naam",
+   "MaxCalcDist":"25.0",
+   "MaxCalcDepth":"30.0",
+   "MinLayerThickness":"0.5",
+   "SpectrumType":"1",
+   "LowFreq":"1",
+   "HighFreq":"63",
+   "CalcType":"1", 
+   "Source_x":["117467"],
+   "Source_y":["464666"],
+   "Receiver_x":["117470"],
+   "Receiver_y":["464670"],
+   "BRO_data":"../bro/bro_test.xml"
+}
