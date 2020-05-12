@@ -80,45 +80,60 @@ class InverseDistance:
         point_var = []
         point_depth = []
         for p in range(self.nb_near_points):
-            # compute the weighs
+            # compute the weights
             wei = (1. / dist[p]**self.power) / np.sum(1. / dist ** self.power)
-            point_aver.append(self.training_data[idx[p]] * wei)
-            point_val.append(self.training_data[idx[p]])
+            # if single point
+            if point:
+                point_aver.append(self.training_data[idx[p]] * wei)
+                point_val.append(self.training_data[idx[p]])
+            # for multiple points
+            else:
+                point_aver.append(np.log(self.training_data[idx[p]]) * wei)
+                point_val.append(np.log(self.training_data[idx[p]]))
             point_depth.append(self.depth_data[idx[p]])
 
-        # if single point
+        # compute average
         if point:
-            self.zn = [np.sum(point_aver)]
-        # if
+            zn = [np.sum(point_aver)]
         else:
             new = []
             for i in range(self.nb_near_points):
                 f = interp1d(point_depth[i], point_aver[i], fill_value=(point_aver[i][-1], point_aver[i][0]), bounds_error=False)
                 new.append(f(self.depth_prediction))
-
-            self.zn = np.sum(np.array(new), axis=0)
+            zn = np.sum(np.array(new), axis=0)
 
         # compute variance
         if point:
             for p in range(self.nb_near_points):
                 # compute the weighs
                 wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
-                point_var.append((point_val[p] - self.zn) ** 2 * wei)
+                point_var.append((point_val[p] - zn) ** 2 * wei)
         else:
             # compute mean
             new = []
             for i in range(self.nb_near_points):
                 f = interp1d(point_depth[i], point_val[i], fill_value=(point_val[i][-1], point_val[i][0]), bounds_error=False)
                 new.append(f(self.depth_prediction))
-
+            # compute variance
             for p in range(self.nb_near_points):
-                # compute the weighs
+                # compute the weights
                 wei = (1. / dist[p] ** self.power) / np.sum(1. / dist ** self.power)
-                point_var.append((new[p] - self.zn) ** 2 * wei)
+                # compute var
+                point_var.append((new[p] - zn) ** 2 * wei)
 
-        self.var = np.sum(np.array(point_var), axis=0)
+        var = np.sum(np.array(point_var), axis=0)
 
-        # # if only 1 data point is available (var = 0 for all points) -> var is default value
+        # add to variables
+        if point:
+            # update to normal parameters
+            self.zn = zn
+            self.var = var
+        else:
+            # update to lognormal parameters
+            self.zn = np.exp(zn + var / 2)
+            self.var = np.exp(2 * zn + var) * (np.exp(var) - 1)
+
+        # if only 1 data point is available (var = 0 for all points) -> var is default value
         if self.nb_near_points == 1:
             self.var = np.full(len(self.var), (self.cov_default * np.array(self.zn)) ** 2)
         return

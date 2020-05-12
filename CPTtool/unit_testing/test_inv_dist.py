@@ -144,18 +144,13 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 2))
 
+        # compute correct lognormal parameters
+        mean, var = self.compute_lognormal(position, testing, data)
+
         # testing - mean
-        np.testing.assert_array_almost_equal(interp.zn, np.ones(10) * 1.5)
+        np.testing.assert_array_almost_equal(interp.zn, mean)
         # testing - var
-        dist = []
-        for i in position:
-            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
-        dist = np.array(dist)
-        var = []
-        for k in range(len(position)):
-            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
-            var.append((data[k] - np.ones(10) * 1.5) ** 2 * weight)
-        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
+        np.testing.assert_array_almost_equal(interp.var, var)
         return
 
     def test_data_7(self):
@@ -171,18 +166,14 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 2))
 
+        # compute correct lognormal parameters
+        mean, var = self.compute_lognormal(position, testing, data)
+
         # testing - mean
-        np.testing.assert_array_almost_equal(interp.zn, np.ones(10) * 1.)
+        np.testing.assert_array_almost_equal(interp.zn, mean)
         # testing - var
-        dist = []
-        for i in position:
-            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
-        dist = np.array(dist)
-        var = []
-        for k in range(len(position)):
-            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
-            var.append((data[k] - np.ones(10) * 1.) ** 2 * weight)
-        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
+        np.testing.assert_array_almost_equal(interp.var, var)
+
         return
 
     def test_data_8(self):
@@ -198,23 +189,14 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 2))
 
-        # analytical result
-        w1 = 1 / np.linalg.norm(position[0]-testing) ** 1
-        w2 = 1 / np.linalg.norm(position[1]-testing) ** 1
-        solution = (1. * w1 * np.ones(10) + 2. * w2 * np.ones(10)) / (w1 + w2)
+        # compute correct lognormal parameters
+        mean, var = self.compute_lognormal(position, testing, data)
 
         # testing - mean
-        np.testing.assert_array_almost_equal(interp.zn, solution)
+        np.testing.assert_array_almost_equal(interp.zn, mean)
         # testing - var
-        dist = []
-        for i in range(len(position)):
-            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
-        dist = np.array(dist)
-        var = []
-        for k in range(len(position)):
-            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
-            var.append((data[k] - solution) ** 2 * weight)
-        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
+        np.testing.assert_array_almost_equal(interp.var, var)
+
         return
 
     def test_data_9(self):
@@ -230,22 +212,13 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 2))
 
-        # analytical result
-        w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
-        w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
-        solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
+        # compute correct lognormal parameters
+        mean, var = self.compute_lognormal(position, testing, data)
+
         # testing - mean
-        np.testing.assert_array_almost_equal(interp.zn, solution)
+        np.testing.assert_array_almost_equal(interp.zn, mean)
         # testing - var
-        dist = []
-        for i in range(len(position)):
-            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
-        dist = np.array(dist)
-        var = []
-        for k in range(len(position)):
-            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
-            var.append((data[k] - solution) ** 2 * weight)
-        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
+        np.testing.assert_array_almost_equal(interp.var, var)
 
         return
 
@@ -262,22 +235,14 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 2))
 
-        # analytical result
-        w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
-        w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
-        solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
+        # compute correct lognormal parameters
+        mean, var = self.compute_lognormal(position, testing, data)
+
         # testing - mean
-        np.testing.assert_array_almost_equal(interp.zn, solution)
+        np.testing.assert_array_almost_equal(interp.zn, mean)
         # testing - var
-        dist = []
-        for i in range(len(position)):
-            dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
-        dist = np.array(dist)
-        var = []
-        for k in range(len(position)):
-            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
-            var.append((data[k] - solution) ** 2 * weight)
-        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
+        np.testing.assert_array_almost_equal(interp.var, var)
+
         return
 
     def test_data_11(self):
@@ -293,23 +258,41 @@ class TestInverDist(TestCase):
         # predict
         interp.predict(testing.reshape(1, 2))
 
-        # analytical result
-        w1 = 1 / np.linalg.norm(position[0] - testing) ** 1
-        w2 = 1 / np.linalg.norm(position[1] - testing) ** 1
-        solution = (1. * w1 + 2. * w2 * np.ones(10)) / (w1 + w2)
+        # compute correct lognormal parameters
+        mean, var = self.compute_lognormal(position, testing, data)
+
         # testing - mean
-        np.testing.assert_array_almost_equal(interp.zn, solution)
+        np.testing.assert_array_almost_equal(interp.zn, mean)
         # testing - var
+        np.testing.assert_array_almost_equal(interp.var, var)
+        return
+
+
+    @staticmethod
+    def compute_lognormal(position, testing, data):
+
+        # compute mean and var
         dist = []
-        for i in range(len(position)):
+        for i in position:
             dist.append(np.linalg.norm(position[i] - testing) + 1e-9)
         dist = np.array(dist)
+        mean = []
         var = []
         for k in range(len(position)):
             weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
-            var.append((data[k] - solution) ** 2 * weight)
-        np.testing.assert_array_almost_equal(interp.var, np.sum(var, axis=0))
-        return
+            mean.append(np.log(data[k]) * weight)
+
+        aux_m = np.sum(np.array(mean), axis=0)
+
+        for k in range(len(position)):
+            weight = (1. / dist[k] ** 1) / np.sum(1. / dist ** 1)
+            var.append((np.log(data[k]) - aux_m) ** 2 * weight)
+
+        aux_v = np.sum(np.array(var), axis=0)
+        mean = np.exp(aux_m + aux_v / 2)
+        var = np.exp(2 * aux_m + aux_v) * (np.exp(aux_v) - 1)
+
+        return mean, var
 
     def tearDown(self):
         return

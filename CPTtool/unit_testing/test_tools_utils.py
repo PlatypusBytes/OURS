@@ -285,23 +285,23 @@ class TestUtils(TestCase):
         results = tu.interpolation(cpts_data, [coordinates[0], coordinates[1]])
 
         # test interpolation
-        np.testing.assert_array_almost_equal(results["Qtn"], np.ones(10) * 1.5)
-        np.testing.assert_array_almost_equal(results["Fr"], np.ones(10) * 2 * 1.5)
-        np.testing.assert_array_almost_equal(results["G0"], np.ones(10) * 10 * 1.5)
-        np.testing.assert_array_almost_equal(results["poisson"], np.ones(10) * 0.12 * 1.5)
-        np.testing.assert_array_almost_equal(results["rho"], np.ones(10) * 1.5)
-        np.testing.assert_array_almost_equal(results["damping"], np.ones(10) * 0.01 * 1.5)
-        np.testing.assert_array_almost_equal(results["IC"], np.ones(10) * 0.25 * 1.5)
+        np.testing.assert_array_almost_equal(results["Qtn"], self.log_normal_parameters(cpt1.Qtn, cpt2.Qtn, 0.5, 0.5)[0])
+        np.testing.assert_array_almost_equal(results["Fr"],self.log_normal_parameters(cpt1.Fr, cpt2.Fr, 0.5, 0.5)[0])
+        np.testing.assert_array_almost_equal(results["G0"], self.log_normal_parameters(cpt1.G0, cpt2.G0, 0.5, 0.5)[0])
+        np.testing.assert_array_almost_equal(results["poisson"], self.log_normal_parameters(cpt1.poisson, cpt2.poisson, 0.5, 0.5)[0])
+        np.testing.assert_array_almost_equal(results["rho"], self.log_normal_parameters(cpt1.rho, cpt2.rho, 0.5, 0.5)[0])
+        np.testing.assert_array_almost_equal(results["damping"], self.log_normal_parameters(cpt1.damping, cpt2.damping, 0.5, 0.5)[0])
+        np.testing.assert_array_almost_equal(results["IC"], self.log_normal_parameters(cpt1.IC, cpt2.IC, 0.5, 0.5)[0])
         # np.testing.assert_array_almost_equal(results["NAP"], np.linspace(-0.5, -10.5, 10))
         np.testing.assert_array_almost_equal(results["depth"], np.linspace(0.5, 10.5, 10) - 0.5)
         # test variance
-        np.testing.assert_array_almost_equal(results["Qtn_var"], np.var([cpt1.Qtn, cpt2.Qtn]))
-        np.testing.assert_array_almost_equal(results["Fr_var"], np.var([cpt1.Fr, cpt2.Fr]))
-        np.testing.assert_array_almost_equal(results["G0_var"], np.var([cpt1.G0, cpt2.G0]))
-        np.testing.assert_array_almost_equal(results["poisson_var"], np.var([cpt1.poisson, cpt2.poisson]))
-        np.testing.assert_array_almost_equal(results["rho_var"], np.var([cpt1.rho, cpt2.rho]))
-        np.testing.assert_array_almost_equal(results["damping_var"], np.var([cpt1.damping, cpt2.damping]))
-        np.testing.assert_array_almost_equal(results["IC_var"], np.var([cpt1.IC, cpt2.IC]))
+        np.testing.assert_array_almost_equal(results["Qtn_var"], self.log_normal_parameters(cpt1.Qtn, cpt2.Qtn, 0.5, 0.5)[1])
+        np.testing.assert_array_almost_equal(results["Fr_var"], self.log_normal_parameters(cpt1.Fr, cpt2.Fr, 0.5, 0.5)[1])
+        np.testing.assert_array_almost_equal(results["G0_var"], self.log_normal_parameters(cpt1.G0, cpt2.G0, 0.5, 0.5)[1])
+        np.testing.assert_array_almost_equal(results["poisson_var"], self.log_normal_parameters(cpt1.poisson, cpt2.poisson, 0.5, 0.5)[1])
+        np.testing.assert_array_almost_equal(results["rho_var"], self.log_normal_parameters(cpt1.rho, cpt2.rho, 0.5, 0.5)[1])
+        np.testing.assert_array_almost_equal(results["damping_var"], self.log_normal_parameters(cpt1.damping, cpt2.damping, 0.5, 0.5)[1])
+        np.testing.assert_array_almost_equal(results["IC_var"], self.log_normal_parameters(cpt1.IC, cpt2.IC, 0.5, 0.5)[1])
         return
 
     def test_interpolation_3(self):
@@ -340,44 +340,31 @@ class TestUtils(TestCase):
         cpts_data = {"one": cpt1, "two": cpt2}
         results = tu.interpolation(cpts_data, [coordinates[0], coordinates[1]])
 
-        # test interpolation
+        # weights
         d1 = np.sqrt((11 - 10) ** 2 + (21 - 20) ** 2)
         d2 = np.sqrt((11 - 20) ** 2 + (21 - 40) ** 2)
 
         w1 = (1 / d1) / (1 / d1 + 1/ d2)
         w2 = (1 / d2) / (1 / d1 + 1/ d2)
 
-        np.testing.assert_array_almost_equal(results["Qtn"], cpt1.Qtn * w1 + cpt2.Qtn * w2)
-        np.testing.assert_array_almost_equal(results["Fr"], cpt1.Fr * w1 + cpt2.Fr * w2)
-        np.testing.assert_array_almost_equal(results["G0"], cpt1.G0 * w1 + cpt2.G0 * w2)
-        np.testing.assert_array_almost_equal(results["poisson"], cpt1.poisson * w1 + cpt2.poisson * w2)
-        np.testing.assert_array_almost_equal(results["rho"], cpt1.rho * w1 + cpt2.rho * w2)
-        np.testing.assert_array_almost_equal(results["damping"], cpt1.damping * w1 + cpt2.damping * w2)
-        np.testing.assert_array_almost_equal(results["IC"], cpt1.IC * w1 + cpt2.IC * w2)
-        np.testing.assert_array_almost_equal(np.round(results["NAP"]), np.round(cpt1.depth_to_reference * w1 + cpt2.depth_to_reference * w2))
-        np.testing.assert_array_almost_equal(results["depth"], (cpt1.depth * w1 + cpt2.depth * w2) - (cpt1.depth * w1 + cpt2.depth * w2)[0])
+        # test interpolation
+        np.testing.assert_array_almost_equal(results["Qtn"], self.log_normal_parameters(cpt1.Qtn, cpt2.Qtn, w1, w2)[0])
+        np.testing.assert_array_almost_equal(results["Fr"],self.log_normal_parameters(cpt1.Fr, cpt2.Fr, w1, w2)[0])
+        np.testing.assert_array_almost_equal(results["G0"], self.log_normal_parameters(cpt1.G0, cpt2.G0, w1, w2)[0])
+        np.testing.assert_array_almost_equal(results["poisson"], self.log_normal_parameters(cpt1.poisson, cpt2.poisson, w1, w2)[0])
+        np.testing.assert_array_almost_equal(results["rho"], self.log_normal_parameters(cpt1.rho, cpt2.rho, w1, w2)[0])
+        np.testing.assert_array_almost_equal(results["damping"], self.log_normal_parameters(cpt1.damping, cpt2.damping, w1, w2)[0])
+        np.testing.assert_array_almost_equal(results["IC"], self.log_normal_parameters(cpt1.IC, cpt2.IC, w1, w2)[0])
+        # np.testing.assert_array_almost_equal(results["NAP"], np.linspace(-0.5, -10.5, 10))
+        np.testing.assert_array_almost_equal(results["depth"], np.linspace(0.5, 10.5, 10) - 0.5)
         # test variance
-        mean = np.mean(cpt1.Qtn * w1 + cpt2.Qtn * w2)
-        var = (cpt1.Qtn - mean) ** 2 * w1 + (cpt2.Qtn - mean) ** 2 * w2
-        np.testing.assert_array_almost_equal(results["Qtn_var"], var)
-        mean = np.mean(cpt1.Fr * w1 + cpt2.Fr * w2)
-        var = (cpt1.Fr - mean) ** 2 * w1 + (cpt2.Fr - mean) ** 2 * w2
-        np.testing.assert_array_almost_equal(results["Fr_var"], var)
-        mean = np.mean(cpt1.G0 * w1 + cpt2.G0 * w2)
-        var = (cpt1.G0 - mean) ** 2 * w1 + (cpt2.G0 - mean) ** 2 * w2
-        np.testing.assert_array_almost_equal(results["G0_var"], var)
-        mean = np.mean(cpt1.poisson * w1 + cpt2.poisson * w2)
-        var = (cpt1.poisson - mean) ** 2 * w1 + (cpt2.poisson - mean) ** 2 * w2
-        np.testing.assert_array_almost_equal(results["poisson_var"], var)
-        mean = np.mean(cpt1.rho * w1 + cpt2.rho * w2)
-        var = (cpt1.rho - mean) ** 2 * w1 + (cpt2.rho - mean) ** 2 * w2
-        np.testing.assert_array_almost_equal(results["rho_var"], var)
-        mean = np.mean(cpt1.damping * w1 + cpt2.damping * w2)
-        var = (cpt1.damping - mean) ** 2 * w1 + (cpt2.damping - mean) ** 2 * w2
-        np.testing.assert_array_almost_equal(results["damping_var"], var)
-        mean = np.mean(cpt1.IC * w1 + cpt2.IC * w2)
-        var = (cpt1.IC - mean) ** 2 * w1 + (cpt2.IC - mean) ** 2 * w2
-        np.testing.assert_array_almost_equal(results["IC_var"], var)
+        np.testing.assert_array_almost_equal(results["Qtn_var"], self.log_normal_parameters(cpt1.Qtn, cpt2.Qtn, w1, w2)[1])
+        np.testing.assert_array_almost_equal(results["Fr_var"], self.log_normal_parameters(cpt1.Fr, cpt2.Fr, w1, w2)[1])
+        np.testing.assert_array_almost_equal(results["G0_var"], self.log_normal_parameters(cpt1.G0, cpt2.G0, w1, w2)[1])
+        np.testing.assert_array_almost_equal(results["poisson_var"], self.log_normal_parameters(cpt1.poisson, cpt2.poisson, w1, w2)[1])
+        np.testing.assert_array_almost_equal(results["rho_var"], self.log_normal_parameters(cpt1.rho, cpt2.rho, w1, w2)[1])
+        np.testing.assert_array_almost_equal(results["damping_var"], self.log_normal_parameters(cpt1.damping, cpt2.damping, w1, w2)[1])
+        np.testing.assert_array_almost_equal(results["IC_var"], self.log_normal_parameters(cpt1.IC, cpt2.IC, w1, w2)[1])
         return
 
     def test_interpolation_4(self):
@@ -416,25 +403,27 @@ class TestUtils(TestCase):
         cpts_data = {"one": cpt1, "two": cpt2}
         results = tu.interpolation(cpts_data, [coordinates[0], coordinates[1]])
 
+        # weights
+        w1 = w2 = 0.5
+
         # test interpolation
-        np.testing.assert_array_almost_equal(results["Qtn"], np.ones(14) * 1.5)
-        np.testing.assert_array_almost_equal(results["Fr"], np.ones(14) * 2 * 1.5)
-        np.testing.assert_array_almost_equal(results["G0"], np.ones(14) * 10 * 1.5)
-        np.testing.assert_array_almost_equal(results["poisson"], np.ones(14) * 0.12 * 1.5)
-        np.testing.assert_array_almost_equal(results["rho"], np.ones(14) * 1.5)
-        np.testing.assert_array_almost_equal(results["damping"], np.ones(14) * 0.01 * 1.5)
-        np.testing.assert_array_almost_equal(results["IC"], np.ones(14) * 0.25 * 1.5)
-        np.testing.assert_array_almost_equal(results["NAP"], np.linspace(-0.5, -10.5, 14))
+        np.testing.assert_array_almost_equal(results["Qtn"], self.log_normal_parameters(cpt1.Qtn, cpt2.Qtn, w1, w2, resample=np.ones(14))[0])
+        np.testing.assert_array_almost_equal(results["Fr"],self.log_normal_parameters(cpt1.Fr, cpt2.Fr, w1, w2, resample=np.ones(14))[0])
+        np.testing.assert_array_almost_equal(results["G0"], self.log_normal_parameters(cpt1.G0, cpt2.G0, w1, w2, resample=np.ones(14))[0])
+        np.testing.assert_array_almost_equal(results["poisson"], self.log_normal_parameters(cpt1.poisson, cpt2.poisson, w1, w2, resample=np.ones(14))[0])
+        np.testing.assert_array_almost_equal(results["rho"], self.log_normal_parameters(cpt1.rho, cpt2.rho, w1, w2, resample=np.ones(14))[0])
+        np.testing.assert_array_almost_equal(results["damping"], self.log_normal_parameters(cpt1.damping, cpt2.damping, w1, w2, resample=np.ones(14))[0])
+        np.testing.assert_array_almost_equal(results["IC"], self.log_normal_parameters(cpt1.IC, cpt2.IC, w1, w2, resample=np.ones(14))[0])
         np.testing.assert_array_almost_equal(results["depth"], np.linspace(0.5, 10.5, 14) - 0.5)
         # test variance
+        np.testing.assert_array_almost_equal(results["Qtn_var"], self.log_normal_parameters(cpt1.Qtn, cpt2.Qtn, w1, w2, resample=np.ones(14))[1])
+        np.testing.assert_array_almost_equal(results["Fr_var"], self.log_normal_parameters(cpt1.Fr, cpt2.Fr, w1, w2, resample=np.ones(14))[1])
+        np.testing.assert_array_almost_equal(results["G0_var"], self.log_normal_parameters(cpt1.G0, cpt2.G0, w1, w2, resample=np.ones(14))[1])
+        np.testing.assert_array_almost_equal(results["poisson_var"], self.log_normal_parameters(cpt1.poisson, cpt2.poisson, w1, w2, resample=np.ones(14))[1])
+        np.testing.assert_array_almost_equal(results["rho_var"], self.log_normal_parameters(cpt1.rho, cpt2.rho, w1, w2, resample=np.ones(14))[1])
+        np.testing.assert_array_almost_equal(results["damping_var"], self.log_normal_parameters(cpt1.damping, cpt2.damping, w1, w2, resample=np.ones(14))[1])
+        np.testing.assert_array_almost_equal(results["IC_var"], self.log_normal_parameters(cpt1.IC, cpt2.IC, w1, w2, resample=np.ones(14))[1])
 
-        np.testing.assert_array_almost_equal(results["Qtn_var"], np.ones(14) * np.var([cpt1.Qtn, cpt2.Qtn[:10]]))
-        np.testing.assert_array_almost_equal(results["Fr_var"], np.ones(14) * np.var([cpt1.Fr, cpt2.Fr[:10]]))
-        np.testing.assert_array_almost_equal(results["G0_var"], np.ones(14) * np.var([cpt1.G0, cpt2.G0[:10]]))
-        np.testing.assert_array_almost_equal(results["poisson_var"], np.ones(14) * np.var([cpt1.poisson, cpt2.poisson[:10]]))
-        np.testing.assert_array_almost_equal(results["rho_var"], np.ones(14) * np.var([cpt1.rho, cpt2.rho[:10]]))
-        np.testing.assert_array_almost_equal(results["damping_var"], np.ones(14) * np.var([cpt1.damping, cpt2.damping[:10]]))
-        np.testing.assert_array_almost_equal(results["IC_var"], np.ones(14) * np.var([cpt1.IC, cpt2.IC[:10]]))
         return
 
     def test_smooth_1(self):
@@ -462,6 +451,19 @@ class TestUtils(TestCase):
 
         np.testing.assert_array_almost_equal(y_smooth[1:-1], yy[:-2])
         return
+
+    @staticmethod
+    def log_normal_parameters(data_1, data_2, w1, w2, resample=None):
+        if resample is not None:
+            data_1 = resample * np.mean(data_1)
+            data_2 = resample * np.mean(data_2)
+
+        mean_aux = np.log(data_1) * w1 + np.log(data_2) * w2
+        var_aux = (np.log(data_1) - mean_aux)**2 * w1 + (np.log(data_2) - mean_aux)**2 * w2
+        mean = np.exp(mean_aux + var_aux / 2)
+        var = np.exp(2 * mean_aux + var_aux) * (np.exp(var_aux) - 1)
+
+        return mean, var
 
     def tearDown(self):
         return
