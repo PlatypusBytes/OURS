@@ -1,0 +1,15 @@
+{
+  "Name": "een naam",
+  "MaxCalcDist": "25.0",
+  "MaxCalcDepth": "30.0",
+  "MinLayerThickness": "0.5",
+  "SpectrumType": "1",
+  "LowFreq": "1",
+  "HighFreq": "63",
+  "CalcType": "1",
+  "Source_x": ["146006.0095"],
+  "Source_y": ["428618.964"],
+  "Receiver_x": ["146006.0095"],
+  "Receiver_y": ["428618.964"],
+  "BRO_data": "../bro_dataset/brocpt.xml"
+}

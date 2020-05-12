@@ -1,0 +1,248 @@
+# Info # : Analysis started for coordinate point: (146006.0095, 428618.964)
+# Info # : Reading CPT: CPT000000035909
+# Info # : Analysis succeeded for: CPT000000035909
+# Info # : Reading CPT: CPT000000005797
+# Info # : Analysis succeeded for: CPT000000005797
+# Info # : Reading CPT: CPT000000005759
+# Info # : Analysis succeeded for: CPT000000005759
+# Info # : Reading CPT: CPT000000005762
+# Info # : Analysis succeeded for: CPT000000005762
+# Info # : Reading CPT: CPT000000032444
+# Info # : Analysis succeeded for: CPT000000032444
+# Info # : Reading CPT: CPT000000032445
+# Info # : Analysis succeeded for: CPT000000032445
+# Info # : Reading CPT: CPT000000035906
+# Info # : Analysis succeeded for: CPT000000035906
+# Info # : Reading CPT: CPT000000035869
+# Info # : Analysis succeeded for: CPT000000035869
+# Info # : Reading CPT: CPT000000034143
+# Info # : Analysis succeeded for: CPT000000034143
+# Info # : Reading CPT: CPT000000035877
+# Info # : Analysis succeeded for: CPT000000035877
+# Info # : Reading CPT: CPT000000035903
+# Info # : Analysis succeeded for: CPT000000035903
+# Info # : Reading CPT: CPT000000034138
+# Info # : Analysis succeeded for: CPT000000034138
+# Info # : Reading CPT: CPT000000035878
+# Info # : Analysis succeeded for: CPT000000035878
+# Info # : Reading CPT: CPT000000035871
+# Info # : Analysis succeeded for: CPT000000035871
+# Info # : Reading CPT: CPT000000035870
+# Info # : Analysis succeeded for: CPT000000035870
+# Info # : Reading CPT: CPT000000034141
+# Info # : Analysis succeeded for: CPT000000034141
+# Info # : Reading CPT: CPT000000005828
+# Info # : Analysis succeeded for: CPT000000005828
+# Info # : Reading CPT: CPT000000005771
+# Info # : Analysis succeeded for: CPT000000005771
+# Info # : Reading CPT: CPT000000035874
+# Info # : Analysis succeeded for: CPT000000035874
+# Info # : Reading CPT: CPT000000005768
+# Info # : Analysis succeeded for: CPT000000005768
+# Info # : Reading CPT: CPT000000035882
+# Info # : Analysis succeeded for: CPT000000035882
+# Info # : Reading CPT: CPT000000035910
+# Info # : Analysis succeeded for: CPT000000035910
+# Info # : Reading CPT: CPT000000035905
+# Info # : Analysis succeeded for: CPT000000035905
+# Info # : Reading CPT: CPT000000035883
+# Info # : Analysis succeeded for: CPT000000035883
+# Info # : Reading CPT: CPT000000035879
+# Info # : Analysis succeeded for: CPT000000035879
+# Info # : Reading CPT: CPT000000035904
+# Info # : Analysis succeeded for: CPT000000035904
+# Info # : Reading CPT: CPT000000035875
+# Info # : Analysis succeeded for: CPT000000035875
+# Info # : Reading CPT: CPT000000035876
+# Info # : Analysis succeeded for: CPT000000035876
+# Info # : Reading CPT: CPT000000005765
+# Info # : Analysis succeeded for: CPT000000005765
+# Info # : Reading CPT: CPT000000035880
+# Info # : Analysis succeeded for: CPT000000035880
+# Info # : Reading CPT: CPT000000035881
+# Info # : Analysis succeeded for: CPT000000035881
+# Info # : Reading CPT: CPT000000032676
+# Info # : Analysis succeeded for: CPT000000032676
+# Info # : Reading CPT: CPT000000077455
+# Info # : Analysis succeeded for: CPT000000077455
+# Info # : Reading CPT: CPT000000077456
+# Info # : Analysis succeeded for: CPT000000077456
+# Info # : Reading CPT: CPT000000035888
+# Info # : Analysis succeeded for: CPT000000035888
+# Info # : Reading CPT: CPT000000005794
+# Info # : Analysis succeeded for: CPT000000005794
+# Info # : Reading CPT: CPT000000035889
+# Info # : Analysis succeeded for: CPT000000035889
+# Info # : Reading CPT: CPT000000035895
+# Info # : Analysis succeeded for: CPT000000035895
+# Info # : Reading CPT: CPT000000035891
+# Info # : Analysis succeeded for: CPT000000035891
+# Info # : Reading CPT: CPT000000035884
+# Info # : Analysis succeeded for: CPT000000035884
+# Info # : Reading CPT: CPT000000035890
+# Info # : Analysis succeeded for: CPT000000035890
+# Info # : Reading CPT: CPT000000035885
+# Info # : Analysis succeeded for: CPT000000035885
+# Info # : Reading CPT: CPT000000035894
+# Info # : Analysis succeeded for: CPT000000035894
+# Info # : Reading CPT: CPT000000035908
+# Info # : Analysis succeeded for: CPT000000035908
+# Info # : Reading CPT: CPT000000016097
+# Info # : Analysis succeeded for: CPT000000016097
+# Info # : Reading CPT: CPT000000016099
+# Info # : Analysis succeeded for: CPT000000016099
+# Info # : Reading CPT: CPT000000016098
+# Info # : Analysis succeeded for: CPT000000016098
+# Info # : Reading CPT: CPT000000035907
+# Info # : Analysis succeeded for: CPT000000035907
+# Info # : Reading CPT: CPT000000029315
+# Info # : Analysis succeeded for: CPT000000029315
+# Info # : Reading CPT: CPT000000035892
+# Info # : Analysis succeeded for: CPT000000035892
+# Info # : Reading CPT: CPT000000004298
+# Info # : Analysis succeeded for: CPT000000004298
+# Info # : Reading CPT: CPT000000113342
+# Info # : Analysis succeeded for: CPT000000113342
+# Info # : Reading CPT: CPT000000113394
+# Info # : Analysis succeeded for: CPT000000113394
+# Info # : Reading CPT: CPT000000113249
+# Info # : Analysis succeeded for: CPT000000113249
+# Info # : Reading CPT: CPT000000113309
+# Info # : Analysis succeeded for: CPT000000113309
+# Info # : Reading CPT: CPT000000027172
+# Info # : Analysis succeeded for: CPT000000027172
+# Info # : Reading CPT: CPT000000002513
+# Info # : Analysis succeeded for: CPT000000002513
+# Info # : Reading CPT: CPT000000118513
+# Info # : Analysis succeeded for: CPT000000118513
+# Info # : Reading CPT: CPT000000113280
+# Info # : Analysis succeeded for: CPT000000113280
+# Info # : Reading CPT: CPT000000002510
+# Info # : Analysis succeeded for: CPT000000002510
+# Info # : Reading CPT: CPT000000113565
+# Info # : Analysis succeeded for: CPT000000113565
+# Info # : Reading CPT: CPT000000113297
+# Error # : File CPT000000113297 has a length smaller than 5
+# Info # : Reading CPT: CPT000000113248
+# Info # : Analysis succeeded for: CPT000000113248
+# Info # : Reading CPT: CPT000000113300
+# Info # : Analysis succeeded for: CPT000000113300
+# Info # : Reading CPT: CPT000000113334
+# Info # : Analysis succeeded for: CPT000000113334
+# Info # : Reading CPT: CPT000000113427
+# Info # : Analysis succeeded for: CPT000000113427
+# Info # : Reading CPT: CPT000000005285
+# Info # : Analysis succeeded for: CPT000000005285
+# Info # : Reading CPT: CPT000000005286
+# Info # : Analysis succeeded for: CPT000000005286
+# Info # : Reading CPT: CPT000000005287
+# Info # : Analysis succeeded for: CPT000000005287
+# Info # : Reading CPT: CPT000000005288
+# Info # : Analysis succeeded for: CPT000000005288
+# Info # : Reading CPT: CPT000000005289
+# Info # : Analysis succeeded for: CPT000000005289
+# Info # : Reading CPT: CPT000000005290
+# Info # : Analysis succeeded for: CPT000000005290
+# Info # : Reading CPT: CPT000000005291
+# Info # : Analysis succeeded for: CPT000000005291
+# Info # : Reading CPT: CPT000000005301
+# Info # : Analysis succeeded for: CPT000000005301
+# Info # : Reading CPT: CPT000000005292
+# Info # : Analysis succeeded for: CPT000000005292
+# Info # : Reading CPT: CPT000000005293
+# Info # : Analysis succeeded for: CPT000000005293
+# Info # : Reading CPT: CPT000000005294
+# Info # : Analysis succeeded for: CPT000000005294
+# Info # : Reading CPT: CPT000000005295
+# Info # : Analysis succeeded for: CPT000000005295
+# Info # : Reading CPT: CPT000000005284
+# Info # : Analysis succeeded for: CPT000000005284
+# Info # : Reading CPT: CPT000000005283
+# Info # : Analysis succeeded for: CPT000000005283
+# Info # : Reading CPT: CPT000000005282
+# Info # : Analysis succeeded for: CPT000000005282
+# Info # : Reading CPT: CPT000000005281
+# Info # : Analysis succeeded for: CPT000000005281
+# Info # : Reading CPT: CPT000000005280
+# Info # : Analysis succeeded for: CPT000000005280
+# Info # : Reading CPT: CPT000000005279
+# Info # : Analysis succeeded for: CPT000000005279
+# Info # : Reading CPT: CPT000000005277
+# Info # : Analysis succeeded for: CPT000000005277
+# Info # : Reading CPT: CPT000000005278
+# Info # : Analysis succeeded for: CPT000000005278
+# Info # : Reading CPT: CPT000000005318
+# Info # : Analysis succeeded for: CPT000000005318
+# Info # : Reading CPT: CPT000000005276
+# Info # : Analysis succeeded for: CPT000000005276
+# Info # : Reading CPT: CPT000000005272
+# Info # : Analysis succeeded for: CPT000000005272
+# Info # : Reading CPT: CPT000000005274
+# Info # : Analysis succeeded for: CPT000000005274
+# Info # : Reading CPT: CPT000000005275
+# Info # : Analysis succeeded for: CPT000000005275
+# Info # : Reading CPT: CPT000000005273
+# Info # : Analysis succeeded for: CPT000000005273
+# Info # : Reading CPT: CPT000000005269
+# Info # : Analysis succeeded for: CPT000000005269
+# Info # : Reading CPT: CPT000000005268
+# Info # : Analysis succeeded for: CPT000000005268
+# Info # : Reading CPT: CPT000000011155
+# Info # : Analysis succeeded for: CPT000000011155
+# Info # : Reading CPT: CPT000000008527
+# Info # : Analysis succeeded for: CPT000000008527
+# Info # : Reading CPT: CPT000000117100
+# Info # : Analysis succeeded for: CPT000000117100
+# Info # : Reading CPT: CPT000000118739
+# Info # : Analysis succeeded for: CPT000000118739
+# Info # : Reading CPT: CPT000000118443
+# Info # : Analysis succeeded for: CPT000000118443
+# Info # : Reading CPT: CPT000000004436
+# Info # : Analysis succeeded for: CPT000000004436
+# Info # : Reading CPT: CPT000000004438
+# Info # : Analysis succeeded for: CPT000000004438
+# Info # : Reading CPT: CPT000000004437
+# Info # : Analysis succeeded for: CPT000000004437
+# Info # : Reading CPT: CPT000000118499
+# Info # : Analysis succeeded for: CPT000000118499
+# Info # : Reading CPT: CPT000000073761
+# Info # : Analysis succeeded for: CPT000000073761
+# Info # : Reading CPT: CPT000000118395
+# Info # : Analysis succeeded for: CPT000000118395
+# Info # : Reading CPT: CPT000000118386
+# Info # : Analysis succeeded for: CPT000000118386
+# Info # : Reading CPT: CPT000000118416
+# Info # : Analysis succeeded for: CPT000000118416
+# Info # : Reading CPT: CPT000000118497
+# Info # : Analysis succeeded for: CPT000000118497
+# Info # : Reading CPT: CPT000000118426
+# Info # : Analysis succeeded for: CPT000000118426
+# Info # : Reading CPT: CPT000000073751
+# Info # : Analysis succeeded for: CPT000000073751
+# Info # : Reading CPT: CPT000000117106
+# Info # : Analysis succeeded for: CPT000000117106
+# Info # : Reading CPT: CPT000000016694
+# Info # : Analysis succeeded for: CPT000000016694
+# Info # : Reading CPT: CPT000000117520
+# Info # : Analysis succeeded for: CPT000000117520
+# Info # : Reading CPT: CPT000000118433
+# Info # : Analysis succeeded for: CPT000000118433
+# Info # : Reading CPT: CPT000000118826
+# Info # : Analysis succeeded for: CPT000000118826
+# Info # : Reading CPT: CPT000000000588
+# Info # : Analysis succeeded for: CPT000000000588
+# Info # : Reading CPT: CPT000000022410
+# Info # : Analysis succeeded for: CPT000000022410
+# Info # : Reading CPT: CPT000000099201
+# Info # : Analysis succeeded for: CPT000000099201
+# Info # : Reading CPT: CPT000000099202
+# Info # : Analysis succeeded for: CPT000000099202
+# Info # : Reading CPT: CPT000000005788
+# Info # : Analysis succeeded for: CPT000000005788
+# Info # : Reading CPT: CPT000000036472
+# Info # : Analysis succeeded for: CPT000000036472
+# Info # : Reading CPT: CPT000000039460
+# Info # : Analysis succeeded for: CPT000000039460
+# Info # : Reading CPT: CPT000000117191
+# Info # : Analysis succeeded for: CPT000000117191
+# Info # : Analysis finished for coordinate point: (146006.0095, 428618.964)
