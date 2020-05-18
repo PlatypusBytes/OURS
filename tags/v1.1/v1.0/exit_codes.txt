@@ -1,0 +1,7 @@
+Exit codes:
+
+Exit code -2: no BRO file
+Exit code -3: input JSON file does not exit
+Exit code -4: File with methods definition does not exist
+Exit code -5: Error in the method definition
+
