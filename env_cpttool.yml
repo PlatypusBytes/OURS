@@ -22,5 +22,6 @@ dependencies:
   - sphinx=2.1
   - sphinxcontrib-bibtex=0.4
   - tqdm=4.32.1
+  - more-itertools=7.2.0
   - pip:
     - teamcity-messages==1.25
