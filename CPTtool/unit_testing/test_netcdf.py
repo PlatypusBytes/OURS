@@ -1,10 +1,6 @@
 from unittest import TestCase
-import numpy as np
-import sys
 import unittest
-# add the src folder to the path to search for files
-sys.path.append('../')
-import netcdf
+from CPTtool import netcdf
 
 
 class TestCDF(TestCase):

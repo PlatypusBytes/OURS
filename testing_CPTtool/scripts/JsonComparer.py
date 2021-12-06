@@ -1,6 +1,4 @@
-import sys
-sys.path.append( "..\..\CPTTool")
-import cpt_tool
+from CPTtool import cpt_tool
 import json
 
 

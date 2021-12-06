@@ -1,11 +1,8 @@
-import sys
-sys.path.append(r"../../CPTtool")
-sys.path.append(r"../../CPTtool/shapefiles")
-import bro
+from CPTtool import bro
 import os
 import pickle
-import cpt_tool
-import log_handler
+from CPTtool import cpt_tool
+from CPTtool import log_handler
 
 
 def test_all_cpts(bro_path, output_folder):

@@ -1,10 +1,7 @@
 from unittest import TestCase
 import numpy as np
-import sys
 import unittest
-# add the src folder to the path to search for files
-sys.path.append('../')
-import inv_dist
+from CPTtool import inv_dist
 
 
 class TestInverDist(TestCase):

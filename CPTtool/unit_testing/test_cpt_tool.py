@@ -1,20 +1,14 @@
 # unit test for the cpt_module
-
-import sys
 import numpy as np
 from teamcity import is_running_under_teamcity
 from teamcity.unittestpy import TeamcityTestRunner
 from os.path import join, dirname
 from rtree import index
 import json
-
-
-# add the src folder to the path to search for files
-sys.path.append('../')
 import unittest
-import cpt_tool
-import bro
-import log_handler
+from CPTtool import cpt_tool
+from CPTtool import bro
+from CPTtool import log_handler
 
 
 class TestCptTool(unittest.TestCase):
@@ -89,7 +83,7 @@ class TestCptTool(unittest.TestCase):
     def test_define_methods_no_file(self):
         methods = cpt_tool.define_methods(None)
         self.assertEqual(methods['gamma'], "Lengkeek")
-        self.assertEqual(methods['vs'], "Robertson")
+        self.assertEqual(methods['vs'], "Mayne")
         self.assertEqual(methods['OCR'], "Mayne")
         self.assertEqual(methods['radius'], 600)
         return

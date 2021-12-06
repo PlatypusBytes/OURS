@@ -1,7 +1,5 @@
-import sys
-sys.path.append(r'../')
 import numpy as np
-import cpt_tool as cpt
+from CPTtool import cpt_tool as cpt
 import json
 import os
 import unittest

@@ -1,7 +1,5 @@
-import sys
-sys.path.append(r"../../CPTtool")
 import os
-import cpt_tool
+from CPTtool import cpt_tool
 
 
 def test_network(bro_path, output_folder, summary_file):

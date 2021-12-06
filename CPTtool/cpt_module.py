@@ -133,7 +133,6 @@ class CPT:
         key = "result_time"
         self.result_time = cpt[key] if key in cpt else []
 
-
         # parse measurement type of pore pressure
         self.water_measurement_type = [water_measurement_type for water_measurement_type in self.__water_measurement_types
                                        if water_measurement_type in cpt["dataframe"]]
@@ -682,8 +681,11 @@ class CPT:
         self.poisson = np.zeros(len(self.lithology))
 
         for i, lit in enumerate(self.lithology):
+            # If below pwp level -> 0.495
+            if self.depth_to_reference[i] <= self.pwp:
+                self.poisson[i] = 0.495
             # if soft layer
-            if lit == "1" or lit == "2" or lit == "3":
+            elif lit == "1" or lit == "2" or lit == "3":
                 self.poisson[i] = 0.495
             elif lit == "4":
                 self.poisson[i] = 0.25

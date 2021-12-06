@@ -1,11 +1,7 @@
 # unit test for the cpt_module
-import sys
-# add the src folder to the path to search for files
-sys.path.append('../')
+from CPTtool import cpt_module
 import unittest
-import cpt_module
 import numpy as np
-import cpt_tool
 import pandas as pd
 import csv
 import os
@@ -13,7 +9,6 @@ import os
 
 class TestCptModule(unittest.TestCase):
     def setUp(self):
-        import cpt_module
         # Initiating the cpt_module
         self.cpt = cpt_module.CPT("./")
         pass
@@ -433,9 +428,55 @@ class TestCptModule(unittest.TestCase):
     def test_poisson_calc(self):
         # Set the inputs
         self.cpt.lithology = ['1', '2', '3', '4', '5', "6", "7", "8", "9"]
-
+        self.cpt.depth_to_reference = [0, -0.1, -0.2, -0.3, -0.4, -0.5, -0.6, -0.7, -0.8]
+        self.cpt.pwp = -1
         # Set the target outputs
         test_poisson = [0.495, 0.495, 0.495, 0.25, 0.3, 0.3, 0.3, 0.375, 0.375]
+
+        # Call the function
+        self.cpt.poisson_calc()
+
+        # Check if they are equal
+        np.testing.assert_array_equal(test_poisson, self.cpt.poisson)
+        return
+
+    def test_poisson2_calc(self):
+        # Set the inputs
+        self.cpt.lithology = ['1', '2', '3', '4', '5', "6", "7", "8", "9"]
+        self.cpt.depth_to_reference = [0, -0.1, -0.2, -0.3, -0.4, -0.5, -0.6, -0.7, -0.8]
+        self.cpt.pwp = 0
+        # Set the target outputs
+        test_poisson = [0.495, 0.495, 0.495, 0.495, 0.495, 0.495, 0.495, 0.495, 0.495]
+
+        # Call the function
+        self.cpt.poisson_calc()
+
+        # Check if they are equal
+        np.testing.assert_array_equal(test_poisson, self.cpt.poisson)
+        return
+
+    def test_poisson3_calc(self):
+        # Set the inputs
+        self.cpt.lithology = ['1', '2', '3', '4', '5', "6", "7", "8", "9"]
+        self.cpt.depth_to_reference = [0, -0.1, -0.2, -0.3, -0.4, -0.5, -0.6, -0.7, -0.8]
+        self.cpt.pwp = -0.7
+        # Set the target outputs
+        test_poisson = [0.495, 0.495, 0.495, 0.25, 0.3, 0.3, 0.3, 0.495, 0.495]
+
+        # Call the function
+        self.cpt.poisson_calc()
+
+        # Check if they are equal
+        np.testing.assert_array_equal(test_poisson, self.cpt.poisson)
+        return
+
+    def test_poisson4_calc(self):
+        # Set the inputs
+        self.cpt.lithology = ['1', '2', '3', '4', '5', "6", "7", "8", "9"]
+        self.cpt.depth_to_reference = [0, -0.1, -0.2, -0.3, -0.4, -0.5, -0.6, -0.7, -0.8]
+        self.cpt.pwp = -0.71
+        # Set the target outputs
+        test_poisson = [0.495, 0.495, 0.495, 0.25, 0.3, 0.3, 0.3, 0.375, 0.495]
 
         # Call the function
         self.cpt.poisson_calc()

@@ -1,18 +1,15 @@
 from unittest import TestCase
 import numpy as np
-import sys
 import unittest
-# add the src folder to the path to search for files
-sys.path.append('../')
+from CPTtool import robertson
+from Auxiliary_Code.shape_file_creator import Create_Shape_File
+
 
 class TestRobertson(TestCase):
     def setUp(self):
         return
 
     def test_soil_types1(self):
-        import robertson
-        sys.path.append('../../Auxiliary_Code/')
-        from shape_file_creator import Create_Shape_File
 
         actual = Create_Shape_File
         actual.soil_types_robertson(actual)

@@ -2,10 +2,8 @@ from unittest import TestCase
 import numpy as np
 import sys
 import unittest
-# add the src folder to the path to search for files
-sys.path.append('../')
-import tools_utils as tu
 import os
+from CPTtool import tools_utils as tu
 
 
 class TestUtils(TestCase):
