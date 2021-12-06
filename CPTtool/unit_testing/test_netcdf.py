@@ -1,6 +1,8 @@
 from unittest import TestCase
 import unittest
-from CPTtool import netcdf
+import sys
+sys.path.append("../")
+import netcdf
 
 
 class TestCDF(TestCase):

@@ -1,5 +1,7 @@
 import numpy as np
-from CPTtool import cpt_tool as cpt
+import sys
+sys.path.append("../")
+import cpt_tool
 import json
 import os
 import unittest
@@ -38,9 +40,9 @@ class FunctionalTests(unittest.TestCase):
     def test_xml(self):
         # test the xml BRO reader
         # run xml
-        props = cpt.read_json(r'./inputs/input_xml.json')
-        methods = cpt.define_methods(r'./inputs/methods.json')
-        cpt.analysis(props, methods, self.settings, "./results", False)
+        props = cpt_tool.read_json(r'./inputs/input_xml.json')
+        methods = cpt_tool.define_methods(r'./inputs/methods.json')
+        cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref):
@@ -60,9 +62,9 @@ class FunctionalTests(unittest.TestCase):
     def test_xml_robertson(self):
         # test the xml BRO reader
         # run xml
-        props = cpt.read_json(r'./inputs/input_xml.json')
-        methods = cpt.define_methods(r'./inputs/methods_robertson.json')
-        cpt.analysis(props, methods, self.settings, "./results", False)
+        props = cpt_tool.read_json(r'./inputs/input_xml.json')
+        methods = cpt_tool.define_methods(r'./inputs/methods_robertson.json')
+        cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref_rob):
@@ -81,9 +83,9 @@ class FunctionalTests(unittest.TestCase):
     def test_zip(self):
         # test the xml BRO reader
         # run zip
-        props = cpt.read_json(r'./inputs/input_zip.json')
-        methods = cpt.define_methods(r'./inputs/methods.json')
-        cpt.analysis(props, methods, self.settings, "./results", False)
+        props = cpt_tool.read_json(r'./inputs/input_zip.json')
+        methods = cpt_tool.define_methods(r'./inputs/methods.json')
+        cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref):
@@ -103,9 +105,9 @@ class FunctionalTests(unittest.TestCase):
     def test_zip_robertson(self):
         # test the xml BRO reader
         # run zip
-        props = cpt.read_json(r'./inputs/input_zip.json')
-        methods = cpt.define_methods(r'./inputs/methods_robertson.json')
-        cpt.analysis(props, methods, self.settings, "./results", False)
+        props = cpt_tool.read_json(r'./inputs/input_zip.json')
+        methods = cpt_tool.define_methods(r'./inputs/methods_robertson.json')
+        cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref_rob):

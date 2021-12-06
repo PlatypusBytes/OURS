@@ -1,8 +1,11 @@
 from unittest import TestCase
 import numpy as np
 import unittest
-from CPTtool import robertson
-from Auxiliary_Code.shape_file_creator import Create_Shape_File
+import sys
+sys.path.append("../")
+import robertson
+sys.path.append("../../Auxiliary_Code")
+from shape_file_creator import Create_Shape_File
 
 
 class TestRobertson(TestCase):

@@ -3,7 +3,9 @@ import numpy as np
 import sys
 import unittest
 import os
-from CPTtool import tools_utils as tu
+import sys
+sys.path.append("../")
+import tools_utils as tu
 
 
 class TestUtils(TestCase):

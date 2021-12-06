@@ -6,9 +6,11 @@ from os.path import join, dirname
 from rtree import index
 import json
 import unittest
-from CPTtool import cpt_tool
-from CPTtool import bro
-from CPTtool import log_handler
+import sys
+sys.path.append("../")
+import cpt_tool
+import bro
+import log_handler
 
 
 class TestCptTool(unittest.TestCase):

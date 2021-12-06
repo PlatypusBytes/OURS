@@ -1,5 +1,7 @@
 # unit test for the cpt_module
-from CPTtool import cpt_module
+import sys
+sys.path.append("../")
+import cpt_module
 import unittest
 import numpy as np
 import pandas as pd

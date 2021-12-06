@@ -1,7 +1,9 @@
 from unittest import TestCase
 import numpy as np
 import unittest
-from CPTtool import inv_dist
+import sys
+sys.path.append("../")
+import inv_dist
 
 
 class TestInverDist(TestCase):
