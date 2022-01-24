@@ -88,9 +88,10 @@ class CPT:
         :return:
         """
 
-        # remove NAN row from the dataframe
-        for key in cpt["dataframe"]:
-            cpt["dataframe"] = cpt["dataframe"].dropna(subset=[key])
+        # remove NAN columns from the dataframe
+        cpt["dataframe"] = cpt["dataframe"].dropna(how="all", axis=1)
+        # remove NAN rows from the dataframe
+        cpt["dataframe"] = cpt["dataframe"].dropna(how="any", axis=0)
 
         # check if file contains data
         if len(cpt["dataframe"].penetrationLength) == 0:
@@ -192,7 +193,7 @@ class CPT:
         self.friction_nbr = friction_ratio
         self.friction_nbr[self.friction_nbr <= 0] = 0.
         # read a
-        self.a = cpt['a']
+        self.a = cpt.get('a', 0.2)
         # default water is zero
         self.water = np.zeros(len(self.depth))
         # if water exists parse water
@@ -253,7 +254,7 @@ class CPT:
         pore_pressure = None
 
         depth = self.get_depth_from_bro(cpt_BRO)
-
+        depth.sort()
         if float(cpt_BRO['predrilled_z']) != 0.:
             # if there is pre-dill add the average values to the pre-dill
 
