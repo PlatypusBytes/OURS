@@ -629,7 +629,7 @@ def determine_if_all_data_is_available(data):
     :return:
     """
     avail_columns = data.get("dataframe").columns
-    data_excluding_dataframe = {x: data[x] for x in data if x not in {"dataframe"}}
+    data_excluding_dataframe = {x: data[x] for x in data if x not in {"dataframe", "a"}}
     meta_usable = all([x is not None for x in data_excluding_dataframe.values()])
     data_usable = all([col in avail_columns for col in req_columns])
     if not (meta_usable and data_usable):

@@ -177,6 +177,10 @@ class CPT:
         # unit in kPa is required for correlations
         unit_converter = 1000. if convert_to_kPa else 1.
 
+        # read a
+        self.a = cpt.get('a', 0.2)
+        if not(self.a):
+            self.a = 0.2
         # parse depth
         self.depth = depth
         # parse surface level
@@ -192,8 +196,7 @@ class CPT:
         # parser friction number
         self.friction_nbr = friction_ratio
         self.friction_nbr[self.friction_nbr <= 0] = 0.
-        # read a
-        self.a = cpt.get('a', 0.2)
+
         # default water is zero
         self.water = np.zeros(len(self.depth))
         # if water exists parse water

@@ -80,50 +80,6 @@ class FunctionalTests(unittest.TestCase):
                 self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
         return
 
-    def test_zip(self):
-        # test the xml BRO reader
-        # run zip
-        props = cpt_tool.read_json(r'./inputs/input_zip.json')
-        methods = cpt_tool.define_methods(r'./inputs/methods.json')
-        cpt_tool.analysis(props, methods, self.settings, "./results", False)
-
-        # for the points of analysis
-        for i, fil in enumerate(self.data_ref):
-            data_ref = read_file(fil)
-
-            # read results
-            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
-                data = json.load(f)
-                f.close()
-
-            # compare dics
-            for k in range(len(data_ref)):
-                self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
-
-        return
-
-    def test_zip_robertson(self):
-        # test the xml BRO reader
-        # run zip
-        props = cpt_tool.read_json(r'./inputs/input_zip.json')
-        methods = cpt_tool.define_methods(r'./inputs/methods_robertson.json')
-        cpt_tool.analysis(props, methods, self.settings, "./results", False)
-
-        # for the points of analysis
-        for i, fil in enumerate(self.data_ref_rob):
-            data_ref = read_file(fil)
-
-            # read results
-            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
-                data = json.load(f)
-                f.close()
-
-            # compare dics
-            for k in range(len(data_ref)):
-                self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
-
-        return
-
     def assert_dict_almost_equal(self, expected, actual):
 
         for key in expected:
