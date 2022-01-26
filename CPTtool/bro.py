@@ -26,7 +26,6 @@ from os.path import exists, splitext, join, dirname
 from os import stat, name, path
 from zipfile import ZipFile
 import sqlite3
-import time
 import geopandas as gpd
 from shapely.ops import transform
 import math
@@ -546,14 +545,6 @@ def read_bro(parameters):
 
     return out
 
-
-def log_timer_file(string):
-    # TODO delete this before realese this is for testing only
-    file_object = open('log_timer.txt', 'a')
-    file_object.write(string + '\n')
-    file_object.close()
-
-
 def query_equals_according_to_length(keys):
     """
     Function that returns equals search query for geodatabase
@@ -654,7 +645,6 @@ def read_cpt_from_gpkg(polygon, fn):
     :param fn: geopackage file location
     :return: list of dictionaries containing all cpt data
     """
-    start = time.time()
     cpts_results = []
     # transform the polygon from epsg:28992 to epsg:4258
     rd_p = pyproj.Proj(init='epsg:28992')
@@ -675,7 +665,6 @@ def read_cpt_from_gpkg(polygon, fn):
         query = construct_query(returned_ids)
         cursor.execute(query)
         results = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
-        end = time.time()
         cursor.execute(construct_query_cone_surface_quotient(returned_ids))
         cone_surface_quotient = pd.DataFrame(cursor.fetchall(), columns=['id', 'a'])
         column_names_per_cpt = ['id', 'location_x', 'location_y', 'offset_z', 'vertical_datum',
@@ -688,7 +677,6 @@ def read_cpt_from_gpkg(polygon, fn):
             temporary_cpt_dict['dataframe'] = group
             if determine_if_all_data_is_available(temporary_cpt_dict):
                 cpts_results.append(temporary_cpt_dict)
-        log_timer_file(f'read_cpt_from_gpkg: {end - start}')
     return cpts_results
 
 
@@ -763,13 +751,7 @@ def read_bro_gpkg_version(parameters):
 
 if __name__ == "__main__":
     input = {"BRO_data": "../brodata/brocpt.xml", "BRO_data_geopackage": "./bro/brocptvolledigeset.gpkg",  "Source_x": 130538, "Source_y": 516211, "Radius": 600}
-    start = time.time()
     cpts = read_bro(input)
-    end = time.time()
-    log_timer_file(f'read_bro: {end - start}')
     print(cpts.keys())
-    start = time.time()
     cpts = read_bro_gpkg_version(input)
-    end = time.time()
-    log_timer_file(f'read_bro_gpkg_version: {end - start}')
     print(cpts.keys())
