@@ -70,6 +70,7 @@ class CPT:
         # fixed values
         self.g = 9.81
         self.Pa = 100.
+        self.default_a = 0.8
 
         # private variables
         self.__water_measurement_types = ["porePressureU1", "porePressureU2", "porePressureU3"]
@@ -178,9 +179,9 @@ class CPT:
         unit_converter = 1000. if convert_to_kPa else 1.
 
         # read a
-        self.a = cpt.get('a', 0.2)
+        self.a = cpt.get('a')
         if not(self.a):
-            self.a = 0.2
+            self.a = self.default_a
         # parse depth
         self.depth = depth
         # parse surface level
