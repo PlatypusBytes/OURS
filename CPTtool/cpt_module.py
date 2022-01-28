@@ -180,7 +180,7 @@ class CPT:
 
         # read a
         self.a = cpt.get('a')
-        if not(self.a):
+        if not(self.a) or np.isnan(cpt.get('a')):
             self.a = self.default_a
         # parse depth
         self.depth = depth

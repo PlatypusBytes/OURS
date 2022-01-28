@@ -57,8 +57,7 @@ columns_gpkg = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
            'inclination_x', 'inclination_y', 'inclinationResultant',
            'magnetic_inclination',
            'magnetic_declination', 'localFriction',
-           'pore_ratio', 'temperature', 'pore_pressure_u1', 'pore_pressure_u2',
-           'pore_pressure_u3',
+           'pore_ratio', 'temperature', "porePressureU1", "porePressureU2", "porePressureU3",
            'frictionRatio', 'id', 'location_x', 'location_y', 'offset_z',
            'vertical_datum', 'local_reference', 'quality_class',
            'cpt_standard', 'research_report_date', 'predrilled_z']
@@ -667,16 +666,22 @@ def read_cpt_from_gpkg(polygon, fn):
         results = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
         cursor.execute(construct_query_cone_surface_quotient(returned_ids))
         cone_surface_quotient = pd.DataFrame(cursor.fetchall(), columns=['id', 'a'])
-        column_names_per_cpt = ['id', 'location_x', 'location_y', 'offset_z', 'vertical_datum',
-                                'local_reference', 'quality_class', 'cpt_standard', 'predrilled_z']
+        column_names_per_cpt = ['id', 'location_x', 'location_y']
         grouped_results = results.groupby(column_names_per_cpt)
         cpts_results = []
         for name, group in grouped_results:
-            temporary_cpt_dict = dict(zip(column_names_per_cpt, name))
-            temporary_cpt_dict['a'] = cone_surface_quotient[cone_surface_quotient['id'] == name[0]]['a'].values[0]
-            temporary_cpt_dict['dataframe'] = group
-            if determine_if_all_data_is_available(temporary_cpt_dict):
-                cpts_results.append(temporary_cpt_dict)
+           temporary_cpt_dict = dict(zip(column_names_per_cpt, name))
+           temporary_cpt_dict['offset_z'] = list(group['offset_z'].fillna(0))[0]
+           temporary_cpt_dict['vertical_datum'] = list(group['vertical_datum'])[0]
+           temporary_cpt_dict['local_reference'] = list(group['local_reference'])[0]
+           temporary_cpt_dict['quality_class'] = list(group['quality_class'])[0]
+           temporary_cpt_dict['cpt_standard'] = list(group['cpt_standard'])[0]
+           temporary_cpt_dict['predrilled_z'] = list(group['predrilled_z'].fillna(0))[0]
+           temporary_cpt_dict['a'] = cone_surface_quotient[cone_surface_quotient['id'] == name[0]]['a'].values[0]
+           group.sort_values(['penetrationLength', 'depth'], inplace=True)
+           temporary_cpt_dict['dataframe'] = group
+           if determine_if_all_data_is_available(temporary_cpt_dict):
+               cpts_results.append(temporary_cpt_dict)
     return cpts_results
 
 
