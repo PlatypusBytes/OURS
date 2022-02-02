@@ -1,14 +1,16 @@
-import CPTtool
+import sys
+sys.path.append("./CPTtool")
+from CPTtool import cpt_tool
 
 # input json file
-file_input = "./test_folder/input.json"
+file_input = "./example/input.json"
 # output folder location
-output_folder = "./test_folder/output"
+output_folder = "./example/output"
 # creates plots: True / False
-plots = True
+plots = False
 
 # Runs CPTtool
-props = CPTtool.cpt_tool.read_json(file_input)
-methods = CPTtool.cpt_tool.define_methods(False)
-settings = CPTtool.cpt_tool.define_settings(False)
-CPTtool.cpt_tool.analysis(props, methods, settings, output_folder, plots)
+props = cpt_tool.read_json(file_input)
+methods = cpt_tool.define_methods(False)
+settings = cpt_tool.define_settings(False)
+cpt_tool.analysis(props, methods, settings, output_folder, plots)

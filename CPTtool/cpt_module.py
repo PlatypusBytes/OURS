@@ -49,7 +49,6 @@ class CPT:
         self.water = []
         self.lithology = []
         self.litho_points = []
-        # self.lithology_simple = []
         self.lithology_json = []
         self.depth_json = []
         self.indx_json = []
