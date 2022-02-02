@@ -282,7 +282,7 @@ def analysis(properties, methods_cpt, settings_cpt, output, plots):
         inpt = {"BRO_data": properties["BRO_data"],
                 "Source_x": float(properties["Source_x"][idx]), "Source_y": float(properties["Source_y"][idx]),
                 "Radius": float(methods_cpt["radius"]),
-                "BRO_data_geopackage": properties.get("BRO_data_geopackage")}
+                }
         cpts = bro.read_bro_gpkg_version(inpt)
 
         results = {}

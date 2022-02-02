@@ -136,9 +136,9 @@ def read_cpt_from_gpkg(polygon, fn):
     """
     cpts_results = []
     # transform the polygon from epsg:28992 to epsg:4258
-    rd_p = pyproj.Proj(init='epsg:28992')
-    wgs84_p = pyproj.Proj(init='epsg:4258')
-    project = pyproj.Transformer.from_proj(rd_p, wgs84_p)
+    rd_p = pyproj.CRS('epsg:28992')
+    wgs84_p = pyproj.CRS('epsg:4258')
+    project = pyproj.Transformer.from_proj(rd_p, wgs84_p, always_xy=True)
     polygon = transform(project.transform, polygon)
     # get bro_ids from the intersection with the polygon
     bro_ids = gpd.read_file(fn, mask=polygon, usecols='bro_id')
@@ -168,8 +168,9 @@ def read_cpt_from_gpkg(polygon, fn):
             temporary_cpt_dict['cpt_standard'] = list(group['cpt_standard'])[0]
             temporary_cpt_dict['predrilled_z'] = list(group['predrilled_z'].fillna(0))[0]
             temporary_cpt_dict['a'] = cone_surface_quotient[cone_surface_quotient['id'] == name[0]]['a'].values[0]
-            group.sort_values(['penetrationLength', 'depth'], inplace=True)
-            temporary_cpt_dict['dataframe'] = group
+            cpt_group = group.copy(deep=True)
+            cpt_group.sort_values(['penetrationLength', 'depth'], inplace=True)
+            temporary_cpt_dict['dataframe'] = cpt_group
             if determine_if_all_data_is_available(temporary_cpt_dict):
                 cpts_results.append(temporary_cpt_dict)
     return cpts_results
@@ -195,7 +196,7 @@ def read_bro_gpkg_version(parameters):
     :rtype: dict
 
     """
-    fn = parameters["BRO_data_geopackage"]
+    fn = parameters["BRO_data"]
     x, y = parameters["Source_x"], parameters["Source_y"]
     r = parameters["Radius"]
     out = {}
@@ -246,7 +247,7 @@ def read_bro_gpkg_version(parameters):
 
 
 if __name__ == "__main__":
-    input = {"BRO_data_geopackage": "./bro/brocptvolledigeset.gpkg", "Source_x": 82860, "Source_y": 443400,
+    input = {"BRO_data": "./bro/brocptvolledigeset.gpkg", "Source_x": 82860, "Source_y": 443400,
              "Radius": 1200}
     cpts = read_bro_gpkg_version(input)
     print(cpts.keys())

@@ -135,24 +135,44 @@ class TestCptTool(unittest.TestCase):
                 "Source_x": float(prop["Source_x"][0]), "Source_y": float(prop["Source_y"][0]),
                 "Radius": float(methods_cpt["radius"])}
 
-        cpt_BRO = bro.read_bro(inpt)
-        dataframe = cpt_BRO['polygons']['2M81ykd']['data'][0]['dataframe']
+        cpt_BRO = bro.read_bro_gpkg_version(inpt)
+        dataframe = cpt_BRO['polygons']['2M81ykd']['data'][4]['dataframe']
 
         # define target columns and values
-        target_columns = ['penetrationLength', 'depth', 'elapsedTime', 'coneResistance', 'inclinationEW',
-                          'inclinationNS', 'inclinationResultant', 'localFriction', 'porePressureU2', 'frictionRatio']
+        target_columns = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
+                          'corrected_cone_resistance',
+                          'net_cone_resistance', 'magnetic_field_strength_x', 'magnetic_field_strength_y',
+                          'magnetic_field_strength_z',
+                          'magnetic_field_strength_total', 'electrical_conductivity', 'inclination_ew',
+                          'inclination_ns',
+                          'inclination_x', 'inclination_y', 'inclinationResultant',
+                          'magnetic_inclination',
+                          'magnetic_declination', 'localFriction',
+                          'pore_ratio', 'temperature', "porePressureU1", "porePressureU2", "porePressureU3",
+                          'frictionRatio', 'id', 'location_x', 'location_y', 'offset_z',
+                          'vertical_datum', 'local_reference', 'quality_class',
+                          'cpt_standard', 'research_report_date', 'predrilled_z']
 
-        target_values = [1.105, 1.105, 242.800, 0.160, -1.000,
-                         0.000, 1.000, 0.001, 0.001, np.nan]
+        target_values = [1.105, 1.105, 242.800, 0.160, None, None, None, None, None, None, None,
+                         -1.000, 0.000, None, None, 1.000, None, None, 0.001, None, None, None, 0.001, None, np.nan,
+                         "CPT000000000207", 117889.2, 464565.1, -1.328, "NAP", "", "", "", "", "",
+                         ]
 
         # assert if only the columns are read which should be read,
         # assert if the values in the first row of the dataframe are correct
         for idx, column in enumerate(dataframe.columns.values):
             self.assertEqual(column, target_columns[idx])
-            if np.isnan(target_values[idx]):
+            print(column)
+            if isinstance(target_values[idx], str):
+                self.assertTrue(dataframe.values[0][idx], target_values[idx])
+            elif target_values[idx] is None:
+                self.assertIsNone(dataframe.values[0][idx])
+            elif np.isnan(target_values[idx]):
                 self.assertTrue(np.isnan(dataframe.values[0][idx]))
+            elif isinstance(target_values[idx], (int, float)):
+                self.assertAlmostEqual(float(dataframe.values[0][idx]), target_values[idx], places=3)
             else:
-                self.assertAlmostEqual(dataframe.values[0][idx], target_values[idx], places=3)
+                self.assertTrue(False)
 
     def test_read_cpt(self):
         # inputs
@@ -170,7 +190,7 @@ class TestCptTool(unittest.TestCase):
         inpt = {"BRO_data": prop["BRO_data"],
                 "Source_x": float(prop["Source_x"][0]), "Source_y": float(prop["Source_y"][0]),
                 "Radius": float(methods_cpt["radius"])}
-        cpt_BRO = bro.read_bro(inpt)
+        cpt_BRO = bro.read_bro_gpkg_version(inpt)
 
         log_file = log_handler.LogFile(output, 0)
         cpt_BRO['polygons']['2M81ykd']['data'][0]['dataframe'].depth= \
@@ -455,29 +475,22 @@ class TestBroDb(unittest.TestCase):
     """Test creation of index and parsing of database."""
 
     def test_database_read_circle(self):
-        input = {"BRO_data": "../bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
-        cpts = bro.read_bro(input)
+        input = {"BRO_data": "../bro/brocptvolledigeset.gpkg", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
+        cpts = bro.read_bro_gpkg_version(input)
 
-        self.assertEqual(len(cpts["circle"]["data"]), 23)
+        self.assertEqual(len(cpts["circle"]["data"]), 24)
         self.assertEqual(len(list(filter(lambda x: x is None, cpts["circle"]["data"]))), 0)
 
     def test_database_read_polygons(self):
-        input = {"BRO_data": "../bro/brocpt.xml", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
-        cpts = bro.read_bro(input)
+        input = {"BRO_data": "../bro/brocptvolledigeset.gpkg", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
+        cpts = bro.read_bro_gpkg_version(input)
 
         key = sorted(cpts["polygons"].keys())[0]
 
-        self.assertEqual(len(cpts["polygons"][key]["data"]), 23)
+        self.assertEqual(len(cpts["polygons"][key]["data"]), 24)
         self.assertTrue("perc" in cpts["polygons"][key])
         self.assertTrue(isinstance(cpts["polygons"][key]["perc"], float))
         self.assertTrue(100. >= cpts["polygons"][key]["perc"] > 0.)
-
-    def test_zipdatabase_read(self):
-        input = {"BRO_data": "../bro/brocpt.zip", "Source_x": 82900, "Source_y": 443351, "Radius": 100}
-        cpts = bro.read_bro(input)
-
-        self.assertEqual(len(cpts["circle"]["data"]), 23)
-        self.assertEqual(len(list(filter(lambda x: x is None, cpts["circle"]["data"]))), 0)
 
 
 if __name__ == '__main__':  # pragma: no cover

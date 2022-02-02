@@ -11,6 +11,5 @@
   "Source_y": ["443305.31", "443400", "443420"],
   "Receiver_x": ["104883", "104883", "104032"],
   "Receiver_y": ["478457", "474883", "413819"],
-  "BRO_data": "../bro/brocpt.xml",
-  "BRO_data_geopackage": "../bro/brocptvolledigeset.gpkg"
+  "BRO_data": "../bro/brocptvolledigeset.gpkg"
 }
