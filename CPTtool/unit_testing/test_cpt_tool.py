@@ -162,7 +162,7 @@ class TestCptTool(unittest.TestCase):
         # assert if the values in the first row of the dataframe are correct
         for idx, column in enumerate(dataframe.columns.values):
             self.assertEqual(column, target_columns[idx])
-            print(column)
+
             if isinstance(target_values[idx], str):
                 self.assertTrue(dataframe.values[0][idx], target_values[idx])
             elif target_values[idx] is None:
@@ -384,7 +384,6 @@ class TestCptTool(unittest.TestCase):
         with open(output + '\\' + 'results_0.json') as jsonfile:
             jsonresults = json.load(jsonfile)
 
-        print(jsonresults['scenarios'][0]['probability'])
         self.assertEqual(jsonresults['scenarios'][0]['probability'], 0.231)
         self.assertEqual(jsonresults['scenarios'][1]['probability'], 0.769)
 
