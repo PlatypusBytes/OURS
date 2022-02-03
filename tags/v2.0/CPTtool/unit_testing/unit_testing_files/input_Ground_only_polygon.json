@@ -1,0 +1,15 @@
+{  
+   "Name":"een naam",
+   "MaxCalcDist":"60.0",
+   "MaxCalcDepth":"30.0",
+   "MinLayerThickness":"0.5",
+   "SpectrumType":"1",
+   "LowFreq":"1",
+   "HighFreq":"63",
+   "CalcType":"1", 
+   "Source_x":["137671"],
+   "Source_y":["442209"],
+   "Receiver_x":["137680"],
+   "Receiver_y":["442220"],
+   "BRO_data": "../bro/test_cpt_tool/brocptvolledigeset.gpkg"
+}
