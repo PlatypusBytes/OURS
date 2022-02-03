@@ -8,6 +8,8 @@ import numpy as np
 import os
 import sys
 import json
+import warnings
+warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 # import OURS packages
 import robertson
 import inv_dist

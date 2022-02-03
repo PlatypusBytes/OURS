@@ -20,7 +20,7 @@ class TestCptModule(unittest.TestCase):
         d_depth = 1
         d_start = 0
         d_end = 3
-        penetration_length = np.linspace(d_start, d_end, np.ceil((d_end - d_start) / d_depth) + 1, endpoint=True)
+        penetration_length = np.linspace(d_start, d_end, int(np.ceil((d_end - d_start) / d_depth) + 1), endpoint=True)
         d = {'penetrationLength': penetration_length,
              'coneResistance': [1, 2, 3, 4],
              'localFriction': [4, 5, 6, 7],
