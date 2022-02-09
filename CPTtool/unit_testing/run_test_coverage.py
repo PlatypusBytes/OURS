@@ -1,5 +1,6 @@
 import os
 import sys
+os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_bro.py")
 os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_cpt_tool.py")
 os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_cpt_module.py")
 os.system(os.path.join(sys.exec_prefix, r"Scripts/coverage") + " run -a test_inv_dist.py")
