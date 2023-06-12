@@ -1,5 +1,4 @@
-image: continuumio/miniconda3:latest
-
+image: python:3.10.0
 
 pipelines:
   default:
@@ -7,11 +6,9 @@ pipelines:
         - step: # Run tests
             name: Unit tests.
             caches:
-                - conda
                 - pip
             script:
-                - conda env update --file env_cpttool.yml
-                - conda activate ours_environment
+                - pip install .
                 - pytest unit_testing/
         - step: # Create documentation
             name: Integration tests.
@@ -19,11 +16,5 @@ pipelines:
                 - conda
                 - pip
             script:
-                - conda env update --file env_cpttool.yml
-                - conda activate ours_environment
+                - pip install .
                 - pytest integration_test
-
-definitions:
-   caches:
-     conda: ~/.conda/envs/rose
-     codatarballs: /opt/conda/pkgs
