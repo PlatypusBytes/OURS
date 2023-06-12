@@ -11,8 +11,8 @@ import json
 import warnings
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 # import OURS packages
-import robertson
-import inv_dist
+from CPTtool import robertson
+from CPTtool import inv_dist
 
 
 def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
