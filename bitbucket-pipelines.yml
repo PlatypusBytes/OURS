@@ -1,4 +1,4 @@
-image: python:3.10.0
+image: python:3.10
 
 pipelines:
   default:
@@ -13,7 +13,6 @@ pipelines:
         - step: # Create documentation
             name: Integration tests.
             caches:
-                - conda
                 - pip
             script:
                 - pip install .
