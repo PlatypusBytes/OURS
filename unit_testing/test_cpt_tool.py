@@ -457,7 +457,7 @@ class TestGeoMorph(unittest.TestCase):
     """Test reading of the GeoMorph index."""
 
     def test_index_read(self):
-        file_idx = join(join(dirname(__file__), '../CPTtool/bro'), 'geomorph')
+        file_idx = join('bro', 'geomorph')
         gm_index = index.Index(file_idx)  # created by ../shapefiles/gen_geomorph_idx.py
 
         geomorphs_nl = list(gm_index.intersection(gm_index.bounds, objects="raw"))
