@@ -5,21 +5,14 @@ pipelines:
   default:
     - parallel:
         - step: # Run tests
-            name: Unit tests and codecoverage.
+            name: Unit tests.
             caches:
                 - conda
                 - pip
             script:
                 - conda env update --file env_cpttool.yml
                 - conda activate ours_environment
-                - pytest -v --cov=CPTtool --cov-report html:test-reports/coverage unit_testing/
-                - apt-get update && apt-get --yes install zip
-                - zip -r test-reports/coverage.zip test-reports/coverage
-                - pipe: atlassian/bitbucket-upload-file:0.3.1
-                  variables:
-                      BITBUCKET_USERNAME: $BITBUCKET_USERNAME
-                      BITBUCKET_APP_PASSWORD: $BITBUCKET_APP_PASSWORD
-                      FILENAME: "test-reports/coverage.zip"
+                - pytest unit_testing/
         - step: # Create documentation
             name: Integration tests.
             caches:
@@ -28,7 +21,7 @@ pipelines:
             script:
                 - conda env update --file env_cpttool.yml
                 - conda activate ours_environment
-                - pytest integration_testing
+                - pytest integration_test
 
 definitions:
    caches:
