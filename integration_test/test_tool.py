@@ -1,7 +1,5 @@
 import numpy as np
-import sys
-sys.path.append("../")
-import cpt_tool
+from CPTtool import cpt_tool
 import json
 import os
 import unittest
@@ -12,9 +10,13 @@ class FunctionalTests(unittest.TestCase):
     def setUp(self):
 
         # reference results
-        self.data_ref = [r'./results_REF_0.json', r'./results_REF_1.json', r'./results_REF_2.json']
+        self.data_ref = [r'./integration_test/results_REF_0.json',
+                         r'./integration_test/results_REF_1.json',
+                         r'./integration_test/results_REF_2.json']
         # reference results Robertson
-        self.data_ref_rob = [r'./results_REF_rob_0.json', r'./results_REF_rob_1.json', r'./results_REF_rob_2.json']
+        self.data_ref_rob = [r'./integration_test/results_REF_rob_0.json',
+                             r'./integration_test/results_REF_rob_1.json',
+                             r'./integration_test/results_REF_rob_2.json']
 
         # settings
         self.settings = {"minimum_length": 5,  # minimum length of CPT
@@ -40,8 +42,8 @@ class FunctionalTests(unittest.TestCase):
     def test_xml(self):
         # test the xml BRO reader
         # run xml
-        props = cpt_tool.read_json(r'./inputs/input_xml.json')
-        methods = cpt_tool.define_methods(r'./inputs/methods.json')
+        props = cpt_tool.read_json(r'./integration_test/inputs/input_xml.json')
+        methods = cpt_tool.define_methods(r'./integration_test/inputs/methods.json')
         cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
@@ -62,8 +64,8 @@ class FunctionalTests(unittest.TestCase):
     def test_xml_robertson(self):
         # test the xml BRO reader
         # run xml
-        props = cpt_tool.read_json(r'./inputs/input_xml.json')
-        methods = cpt_tool.define_methods(r'./inputs/methods_robertson.json')
+        props = cpt_tool.read_json(r'./integration_test/inputs/input_xml.json')
+        methods = cpt_tool.define_methods(r'./integration_test/inputs/methods_robertson.json')
         cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
@@ -129,13 +131,5 @@ def read_file(file):
     return data
 
 
-if __name__ == '__main__':  # pragma: no cover
-    from teamcity import is_running_under_teamcity
-
-    if is_running_under_teamcity():
-        from teamcity.unittestpy import TeamcityTestRunner
-
-        runner = TeamcityTestRunner()
-    else:
-        runner = unittest.TextTestRunner()
-    unittest.main(testRunner=runner)
+if __name__ == '__main__':
+    unittest.main()

@@ -3,20 +3,14 @@ image: continuumio/miniconda3:latest
 
 pipelines:
   default:
-    - step:
-        name: Install requirements.
-        caches:
-          - conda
-          - pip
-        script: # Modify the commands below to build your repository.
-          - conda env update --file env_cpttool.yml
     - parallel:
         - step: # Run tests
-            name: Run tests and codecoverage.
+            name: Unit tests and codecoverage.
             caches:
                 - conda
                 - pip
             script:
+                - conda env update --file env_cpttool.yml
                 - conda activate ours_environment
                 - pytest -v --cov=CPTtool --cov-report html:test-reports/coverage unit_testing/
                 - apt-get update && apt-get --yes install zip
@@ -27,12 +21,14 @@ pipelines:
                       BITBUCKET_APP_PASSWORD: $BITBUCKET_APP_PASSWORD
                       FILENAME: "test-reports/coverage.zip"
         - step: # Create documentation
-            name: Create documentation.
+            name: Integration tests.
             caches:
                 - conda
                 - pip
             script:
+                - conda env update --file env_cpttool.yml
                 - conda activate ours_environment
+                - pytest integration_testing
 
 definitions:
    caches:
