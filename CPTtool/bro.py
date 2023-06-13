@@ -250,7 +250,8 @@ def read_bro_gpkg_version(parameters):
 
 
 if __name__ == "__main__":
-    input = {"BRO_data": "./bro/brocptvolledigeset.gpkg", "Source_x": 82860, "Source_y": 443400,
+    test_db = join(dirname(__file__), '../bro/test_v2_0_1.gpkg')
+    input = {"BRO_data": test_db, "Source_x": 82860, "Source_y": 443400,
              "Radius": 1200}
     cpts = read_bro_gpkg_version(input)
     print(cpts.keys())
