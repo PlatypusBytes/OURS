@@ -1,5 +1,3 @@
-import sys
-sys.path.append("./CPTtool")
 from CPTtool import cpt_tool
 
 # input json file

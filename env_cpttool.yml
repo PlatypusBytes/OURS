@@ -18,6 +18,6 @@ dependencies:
   - tqdm=4.62.3
   - sphinx=4.4.0
   - sphinxcontrib-bibtex=2.4.1
+  - pytest=7.3.2
   - pip:
-    - teamcity-messages==1.30
     - geopandas==0.10.2

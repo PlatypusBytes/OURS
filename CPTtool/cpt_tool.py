@@ -7,10 +7,10 @@ import json
 import argparse
 import sys
 # import OURS packages
-import bro
-import log_handler
-import tools_utils
-import cpt_module
+from CPTtool import bro
+from CPTtool import log_handler
+from CPTtool import tools_utils
+from CPTtool import cpt_module
 
 
 def define_methods(input_file):

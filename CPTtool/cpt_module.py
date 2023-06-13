@@ -9,9 +9,9 @@ import matplotlib.pylab as plt
 import matplotlib.patches as patches
 from cycler import cycler
 # import OURS packages
-import robertson
-import tools_utils
-import netcdf
+from CPTtool import robertson
+from CPTtool import tools_utils
+from CPTtool import netcdf
 
 
 class CPT:
