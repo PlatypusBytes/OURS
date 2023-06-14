@@ -193,6 +193,8 @@ class CPT:
         # parse friction
         self.friction = local_friction * unit_converter
         self.friction[self.friction <= 0] = 0.
+        # set float
+        self.friction = self.friction.astype(float)
         # parser friction number
         self.friction_nbr = friction_ratio.astype(float)
         self.friction_nbr[self.friction_nbr <= 0] = 0.
