@@ -17,6 +17,7 @@ import pandas as pd
 import pyproj
 from rtree import index
 from shapely.geometry import shape, Point
+import numpy as np
 
 req_columns = ["penetrationLength", "coneResistance", "localFriction", "frictionRatio"]
 columns_gpkg = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
@@ -32,6 +33,18 @@ columns_gpkg = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
                 'frictionRatio', 'id', 'location_x', 'location_y', 'offset_z',
                 'vertical_datum', 'local_reference', 'quality_class',
                 'cpt_standard', 'research_report_date', 'predrilled_z']
+float_columns = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
+                'corrected_cone_resistance',
+                'net_cone_resistance', 'magnetic_field_strength_x', 'magnetic_field_strength_y',
+                'magnetic_field_strength_z',
+                'magnetic_field_strength_total', 'electrical_conductivity', 'inclination_ew',
+                'inclination_ns',
+                'inclination_x', 'inclination_y', 'inclinationResultant',
+                'magnetic_inclination',
+                'magnetic_declination', 'localFriction',
+                'pore_ratio', 'temperature', "porePressureU1", "porePressureU2", "porePressureU3",
+                'frictionRatio', 'predrilled_z']
+
 
 
 def query_equals_according_to_length(keys):
@@ -113,6 +126,17 @@ def construct_query_cone_surface_quotient(cpt_keys):
                 WHERE cone_penetrometer.cone_penetrometer_survey_fk " + query_equals_according_to_length(cpt_keys)
 
 
+def change_to_floats(data):
+    """
+    Function that changes all data to floats
+    :param data: pandas dataframe
+    :return: pandas dataframe
+    """
+    for col in float_columns:
+        data[col] = data[col].astype(float)
+    return data
+
+
 def determine_if_all_data_is_available(data):
     """
     Determine if all data is available in dataframe
@@ -175,6 +199,9 @@ def read_cpt_from_gpkg(polygon, fn):
             cpt_group.sort_values(['penetrationLength', 'depth'], inplace=True)
             temporary_cpt_dict['dataframe'] = cpt_group
             if determine_if_all_data_is_available(temporary_cpt_dict):
+                temporary_cpt_dict['dataframe'] = change_to_floats(temporary_cpt_dict['dataframe'])
+                # replace np.nan with None
+                temporary_cpt_dict['dataframe'] = temporary_cpt_dict['dataframe'].replace({np.nan: None})
                 cpts_results.append(temporary_cpt_dict)
     return cpts_results
 

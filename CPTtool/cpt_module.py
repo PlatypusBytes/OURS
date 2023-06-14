@@ -153,11 +153,11 @@ class CPT:
             return message
 
         # check data consistency: remove doubles depth
-        cpt["dataframe"] = cpt["dataframe"].drop_duplicates(subset='penetrationLength', keep="first")
+        cpt["dataframe"] = cpt["dataframe"].loc[cpt["dataframe"]['penetrationLength'].drop_duplicates(keep="first").index]
 
         # check if there is a pre_drill. if so pad the data
-        depth, cone_resistance, friction_ratio, local_friction, pore_pressure = self.define_pre_drill(cpt,
-                                                                                                      length_of_average_points=minimum_samples)
+        depth, cone_resistance, friction_ratio, local_friction, pore_pressure = \
+            self.define_pre_drill(cpt, length_of_average_points=minimum_samples)
 
         # parse inclination resultant
         if 'inclinationResultant' in cpt['dataframe']:
@@ -194,7 +194,7 @@ class CPT:
         self.friction = local_friction * unit_converter
         self.friction[self.friction <= 0] = 0.
         # parser friction number
-        self.friction_nbr = friction_ratio
+        self.friction_nbr = friction_ratio.astype(float)
         self.friction_nbr[self.friction_nbr <= 0] = 0.
 
         # default water is zero
@@ -501,8 +501,8 @@ class CPT:
         F[F <= 0.1] = 0.1
         Q[Q >= 1000.] = 1000.
         F[F >= 10.] = 10.
-        self.Qtn = Q
-        self.Fr = F
+        self.Qtn = Q.astype(float)
+        self.Fr = F.astype(float)
         self.n = n
 
         return
@@ -713,6 +713,7 @@ class CPT:
         # qt = qc + u2 * (1 - a)
         self.qt = self.tip + self.water * (1. - self.a)
         self.qt[self.qt <= 0] = 0
+        self.qt = self.qt.astype(float)
         return
 
     def filter(self, lithologies=[""], key="G0", value=0):
@@ -818,27 +819,28 @@ class CPT:
         y_label = "Depth [m]"
 
         # set the color list
-        colormap = plt.cm.gist_ncar
-        colors = [colormap(i) for i in np.linspace(0, 0.9, nb_plots)]
-        plt.gca().set_prop_cycle(cycler('color', colors))
-        plt.subplots(1, nb_plots, figsize=(20, 6))
+        #colormap = plt.cm.gist_ncar
+        #colors = [colormap(i) for i in np.linspace(0, 0.9, nb_plots)]
+        #plt.gca().set_prop_cycle(cycler('color', colors))
+        plt.close()  # close all previous figures
+        fig, ax = plt.subplots(1, nb_plots, figsize=(20, 6))
 
         # plot for each y_value
         for i in range(nb_plots):
-            plt.subplot(1, nb_plots, i + 1)
-            plt.plot(x_data[i], y_data, label=l_name[i])
+            #plt.subplot(1, nb_plots, i + 1)
+            ax[i].plot(x_data[i].tolist(), y_data.tolist(), label=l_name[i])
 
             # plt.title(title)
-            plt.xlabel(x_label[i], fontsize=12)
-            plt.ylabel(y_label, fontsize=12)
-            plt.grid()
-            plt.legend(loc=1, prop={'size': 12})
+            ax[i].set_xlabel(x_label[i], fontsize=12)
+            ax[i].set_ylabel(y_label, fontsize=12)
+            ax[i].grid()
+            ax[i].legend(loc=1, prop={'size': 12})
             # invert y axis
-            plt.gca().invert_yaxis()
+            ax[i].invert_yaxis()
 
         plt.tight_layout()
         # save the figure
-        plt.savefig(os.path.join(self.output_folder, self.name) + "_cpt.png")
+        fig.savefig(os.path.join(self.output_folder, self.name) + "_cpt.png")
         plt.close()
         return
 

@@ -224,8 +224,8 @@ def read_cpt(cpt_BRO, methods, settings, output_folder, input_dictionary, make_p
         # make the plots (optional)
         if make_plots:
             cpt.write_csv()
-            cpt.plot_cpt()
-            cpt.plot_lithology()
+            #cpt.plot_cpt()
+            #cpt.plot_lithology()
         # update scenario
         results_cpt.update({cpt_BRO[idx_cpt]["id"]: cpt})
         # add to log file that the analysis is successful

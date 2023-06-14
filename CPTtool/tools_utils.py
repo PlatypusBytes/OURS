@@ -40,6 +40,10 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     F[F <= 0.1] = 0.1
     Q[Q >= 1000.] = 1000.
     F[F >= 10.] = 10.
+    # all values should be of type float
+    Q = Q.astype(float)
+    F = F.astype(float)
+    sigma_eff = sigma_eff.astype(float)
 
     IC = ((3.47 - np.log10(Q)) ** 2. + (np.log10(F) + 1.22) ** 2.) ** 0.5
 
@@ -120,7 +124,7 @@ def interpolation(data_cpt, coordinates, power=1):
     for i, at in enumerate(attributes):
         interp = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power, default_cov=attibutes_cov[i])
         # create interpolation object
-        interp.interpolate(coords, np.array(data_training[i]), depth_points, depth)
+        interp.interpolate(coords, data_training[i], depth_points, depth)
         # predict
         interp.predict(np.array(c_out).reshape(1, 2))
         # assign to result

@@ -7,9 +7,9 @@
    "LowFreq":"1",
    "HighFreq":"63",
    "CalcType":"1",
-   "Source_x":["137671"],
-   "Source_y":["442209"],
-   "Receiver_x":["137680"],
-   "Receiver_y":["442220"],
+   "Source_x":["82900"],
+   "Source_y":["443351"],
+   "Receiver_x":["84000"],
+   "Receiver_y":["444400"],
    "BRO_data": "./bro/test_v2_0_1.gpkg"
 }

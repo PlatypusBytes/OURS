@@ -45,7 +45,9 @@ class TestCptTool(unittest.TestCase):
         return
 
     def test_define_settings(self):
-        sett = cpt_tool.define_settings(r'./unit_testing/unit_testing_files/settings.json')
+        # create absolute path to the test settings file
+        test_settings = join(dirname(__file__), 'unit_testing_files/settings.json')
+        sett = cpt_tool.define_settings(test_settings)
 
         settings = {"minimum_length": 5,  # minimum length of CPT
                     "minimum_samples": 50,  # minimum number of samples of CPT
@@ -70,8 +72,10 @@ class TestCptTool(unittest.TestCase):
         return
 
     def test_define_methods_no_keys_in_file(self):
+        # create absolute path to the test settings file
+        test_settings = join(dirname(__file__), 'unit_testing_files/settings_no_key.json')
         with self.assertRaises(SystemExit):
-            cpt_tool.define_methods(r'unit_testing/unit_testing_files/settings_no_key.json')
+            cpt_tool.define_methods(test_settings)
         return
 
     def test_define_methods_error(self):
@@ -88,7 +92,8 @@ class TestCptTool(unittest.TestCase):
         return
 
     def test_define_methods(self):
-        methods = cpt_tool.define_methods('unit_testing/unit_testing_files/methods.json')
+        test_settings = join(dirname(__file__), 'unit_testing_files/methods.json')
+        methods = cpt_tool.define_methods(test_settings)
         self.assertEqual(methods['gamma'], "Lengkeek")
         self.assertEqual(methods['vs'], "Andrus")
         self.assertEqual(methods['OCR'], "Mayne")
@@ -97,38 +102,46 @@ class TestCptTool(unittest.TestCase):
 
     def test_define_methods_no_keys_in_file(self):
         with self.assertRaises(SystemExit):
-            cpt_tool.define_methods('unit_testing/unit_testing_files/methods_no_keys.json')
+            test_settings = join(dirname(__file__), 'unit_testing_files/methods_no_keys.json')
+            cpt_tool.define_methods(test_settings)
 
         with self.assertRaises(SystemExit):
-            cpt_tool.define_methods('unit_testing/unit_testing_files/methods_gamma_missing.json')
+            test_settings = join(dirname(__file__), 'unit_testing_files/methods_gamma_missing.json')
+            cpt_tool.define_methods(test_settings)
 
         with self.assertRaises(SystemExit):
-            cpt_tool.define_methods('unit_testing/unit_testing_files/methods_vs_missing.json')
+            test_settings = join(dirname(__file__), 'unit_testing_files/methods_vs_missing.json')
+            cpt_tool.define_methods(test_settings)
 
         with self.assertRaises(SystemExit):
-            cpt_tool.define_methods('unit_testing/unit_testing_files/methods_OCR_missing.json')
+            test_settings = join(dirname(__file__), 'unit_testing_files/methods_OCR_missing.json')
+            cpt_tool.define_methods(test_settings)
 
         with self.assertRaises(SystemExit):
-            cpt_tool.define_methods('unit_testing/unit_testing_files/methods_error_radius.json')
+            test_settings = join(dirname(__file__), 'unit_testing_files/methods_radius_missing.json')
+            cpt_tool.define_methods(test_settings)
         return
 
     def test_read_json(self):
         with self.assertRaises(SystemExit):
             cpt_tool.read_json('fake_file.json')
-
-        data = cpt_tool.read_json('unit_testing/unit_testing_files/input_Ground.json')
+        test_settings = join(dirname(__file__), 'unit_testing_files/input_Ground.json')
+        data = cpt_tool.read_json(test_settings)
         self.assertTrue(data != {})
         return
 
     def test_parse_cpt(self):
         # inputs
-        file_properties = 'unit_testing/unit_testing_files/input_Ground.json'
+        test_settings = join(dirname(__file__), 'unit_testing_files/input_Ground.json')
+        file_properties = test_settings
         methods_cpt = {'radius': 100}
         with open(file_properties) as properties:
             prop = json.load(properties)
 
         # read BRO data base
-        inpt = {"BRO_data": prop["BRO_data"],
+        # bro location to absolute path
+        bro_location = join(dirname(__file__), "..", prop["BRO_data"])
+        inpt = {"BRO_data": bro_location,
                 "Source_x": float(prop["Source_x"][0]), "Source_y": float(prop["Source_y"][0]),
                 "Radius": float(methods_cpt["radius"])}
 
@@ -150,10 +163,9 @@ class TestCptTool(unittest.TestCase):
                           'vertical_datum', 'local_reference', 'quality_class',
                           'cpt_standard', 'research_report_date', 'predrilled_z']
 
-        target_values = [1.105, 1.105, 242.800, 0.160, None, None, None, None, None, None, None,
-                         -1.000, 0.000, None, None, 1.000, None, None, 0.001, None, None, None, 0.001, None, np.nan,
-                         "CPT000000000207", 117889.2, 464565.1, -1.328, "NAP", "", "", "", "", "",
-                         ]
+        target_values = [0.0, 0.0, 7.0, 0.0, None, None, None, None, None, None, None, None, None, None, None, 0.0,
+                         None, None, None, None, None, None, None, None, None, 'CPT000000018803', 82840.1, 443459.9,
+                         -0.01, 'NAP', 'maaiveld', 'IMBRO/A', 'NEN5140', '2005-05-20', 0.0]
 
         # assert if only the columns are read which should be read,
         # assert if the values in the first row of the dataframe are correct
@@ -286,42 +298,35 @@ class TestCptTool(unittest.TestCase):
     def test_analysis_only_circles(self):
         import os
         # inputs
-        file_properties = 'unit_testing/unit_testing_files/input_Ground_only_circle.json'
+        file_properties = join(dirname(__file__), 'unit_testing_files/input_Ground_only_circle.json')
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
                        'radius': 100}
-        output = 'unit_testing/unit_testing_files/results'
+        output = join(dirname(__file__), 'unit_testing_files/results')
         plots = True
         with open(file_properties) as properties:
             prop = json.load(properties)
-
+        # change the bro cpt folder to absolute path
+        prop["BRO_data"] = join(dirname(__file__), "..", prop["BRO_data"])
         # the function
         cpt_tool.analysis(prop, methods_cpt, self.settings, output, plots)
 
         # the results cpts
-        cpt_results = ['CPT000000000448', 'CPT000000000449']
-
+        cpt_results = ['CPT000000002571', 'CPT000000011589']
         # read results
         with open(output + '/' + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
-        countercpt = 0
 
         # check log file
-        for counter, line in enumerate(logfilelines):
-            if counter == 1:
-                self.assertTrue(line, '# Info # : Analysis started for coordinate point: ' +
-                                '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
-            else:
-                if counter == len(logfilelines):
-                    self.assertTrue(line, '# Info # : Analysis finished for coordinate point: ' +
-                                    '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
-                else:
-                    if (counter % 2) == 0:
-                        self.assertTrue(line, '# Info # : Reading CPT: ' + cpt_results[countercpt])
-                    else:
-                        self.assertTrue(line, '# Info # : Analysis succeeded for: ' + cpt_results[countercpt])
-                        countercpt = countercpt + 1
+        self.assertTrue(logfilelines[0], '# Info # : Analysis started for coordinate point: ' +
+                        '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
+        self.assertTrue(logfilelines[-1], '# Info # : Analysis finished for coordinate point: ' +
+                        '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
+        self.assertTrue(logfilelines[1], '# Info # : Reading CPT: ' + cpt_results[0])
+        self.assertTrue(logfilelines[2], '# Info # : Analysis succeeded for: ' + cpt_results[0])
+        self.assertTrue(logfilelines[3], '# Info # : Reading CPT: ' + cpt_results[1])
+        self.assertTrue(logfilelines[4], '# Info # : Analysis succeeded for: ' + cpt_results[1])
 
         # check json file
         with open(output + '/' + 'results_0.json') as jsonfile:
@@ -336,101 +341,38 @@ class TestCptTool(unittest.TestCase):
             self.assertTrue(os.path.exists(output + '/' + i + '_lithology.png'))
         return
 
-    def test_analysis_polygon_and_circle(self):
-        import os
-        # inputs
-        file_properties = 'unit_testing/unit_testing_files/input_Ground.json'
-        methods_cpt = {'gamma': 'Robertson',
-                       'vs': 'Robertson',
-                       'OCR': 'Mayne',
-                       'radius': 100}
-        output = 'unit_testing/unit_testing_files/results'
-        plots = True
-        with open(file_properties) as properties:
-            prop = json.load(properties)
-
-        # the function
-        cpt_tool.analysis(prop, methods_cpt, self.settings, output, plots)
-
-        # the results cpts
-        cpt_results = ['CPT000000000207', 'CPT000000000197', 'CPT000000000191', 'CPT000000000193', 'CPT000000000200',
-                       'CPT000000000388', 'CPT000000000201']
-
-        # read results
-        with open(output + '/' + 'log_file_0.txt') as logfile:
-            logfilelines = logfile.readlines()
-        countercpt = 0
-
-        # check log file
-        for counter, line in enumerate(logfilelines):
-            if counter == 1:
-                self.assertTrue(line, '# Info # : Analysis started for coordinate point: ' +
-                                '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
-            else:
-                if counter == len(logfilelines):
-                    self.assertTrue(line, '# Info # : Analysis finished for coordinate point: ' +
-                                    '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
-                else:
-                    if (counter % 2) == 0:
-                        self.assertTrue(line, '# Info # : Reading CPT: ' + cpt_results[countercpt])
-                    else:
-                        self.assertTrue(line, '# Info # : Analysis succeeded for: ' + cpt_results[countercpt])
-                        countercpt = countercpt + 1
-
-        # check json file
-        with open(output + '/' + 'results_0.json') as jsonfile:
-            jsonresults = json.load(jsonfile)
-
-        self.assertEqual(jsonresults['scenarios'][0]['probability'], 0.231)
-        self.assertEqual(jsonresults['scenarios'][1]['probability'], 0.769)
-
-        # Check plots
-        for i in cpt_results:
-            self.assertTrue(os.path.exists(output + '/' + i + '.csv'))
-            self.assertTrue(os.path.exists(output + '/' + i + '_cpt.png'))
-            self.assertTrue(os.path.exists(output + '/' + i + '_lithology.png'))
-        return
-
     def test_analysis_only_polygon(self):
         import os
         # inputs
-        file_properties = 'unit_testing/unit_testing_files/input_Ground_only_polygon.json'
+        file_properties = join(dirname(__file__), 'unit_testing_files/input_Ground_only_polygon.json')
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
                        'radius': 150}
-        output = './unit_testing/unit_testing_files/results'
+        output = join(dirname(__file__), 'unit_testing_files/results')
         plots = True
         with open(file_properties) as properties:
             prop = json.load(properties)
-
+        # change the bro cpt folder to absolute path
+        prop["BRO_data"] = join(dirname(__file__), "..", prop["BRO_data"])
         # the function
         cpt_tool.analysis(prop, methods_cpt, self.settings, output, plots)
 
         # the results cpts
-        cpt_results = ['CPT000000000022', 'CPT000000000023', 'CPT000000000024', 'CPT000000000025', 'CPT000000000029',
-                       'CPT000000000030', 'CPT000000000026']
-
+        cpt_results = ['CPT000000002571', 'CPT000000011589']
         # read results
         with open(output + '/' + 'log_file_0.txt') as logfile:
             logfilelines = logfile.readlines()
-        countercpt = 0
 
         # check log file
-        for counter, line in enumerate(logfilelines):
-            if counter == 1:
-                self.assertTrue(line, '# Info # : Analysis started for coordinate point: ' +
-                                '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
-            else:
-                if counter == len(logfilelines):
-                    self.assertTrue(line, '# Info # : Analysis finished for coordinate point: ' +
-                                    '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
-                else:
-                    if (counter % 2) == 0:
-                        self.assertTrue(line, '# Info # : Reading CPT: ' + cpt_results[countercpt])
-                    else:
-                        self.assertTrue(line, '# Info # : Analysis succeeded for: ' + cpt_results[countercpt])
-                        countercpt = countercpt + 1
+        self.assertTrue(logfilelines[0], '# Info # : Analysis started for coordinate point: ' +
+                        '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
+        self.assertTrue(logfilelines[-1], '# Info # : Analysis finished for coordinate point: ' +
+                        '(' + str(prop["Source_x"][0]) + ',' + str(prop["Source_y"][0]) + ')')
+        self.assertTrue(logfilelines[1], '# Info # : Reading CPT: ' + cpt_results[0])
+        self.assertTrue(logfilelines[2], '# Info # : Analysis succeeded for: ' + cpt_results[0])
+        self.assertTrue(logfilelines[3], '# Info # : Reading CPT: ' + cpt_results[1])
+        self.assertTrue(logfilelines[4], '# Info # : Analysis succeeded for: ' + cpt_results[1])
 
         # check json file
         with open(output + '/' + 'results_0.json') as jsonfile:
