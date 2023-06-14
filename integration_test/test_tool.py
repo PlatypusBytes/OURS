@@ -94,11 +94,11 @@ class FunctionalTests(unittest.TestCase):
             else:
                 if isinstance(expected[key], (int, float)):
                     self.assertAlmostEqual(expected[key], actual[key])
+                elif isinstance(expected[key], list):
+                    self.assertTrue(all(np.isclose(expected[key], actual[key], rtol=1e-10)))
                 elif all(isinstance(n, str) for n in expected[key]):
                     # if elements are string
                     self.assertAlmostEqual(expected[key], actual[key])
-                elif isinstance(expected[key], list):
-                    self.assertTrue(all(np.isclose(expected[key], actual[key], rtol=1e-10)))
                 else:
                     self.assertTrue(all(np.isclose(expected[key], actual[key], rtol=1e-10)))
         return

@@ -302,7 +302,7 @@ class TestCptTool(unittest.TestCase):
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
-                       'radius': 100}
+                       'radius': 26}
         output = join(dirname(__file__), 'unit_testing_files/results')
         plots = True
         with open(file_properties) as properties:
@@ -348,7 +348,7 @@ class TestCptTool(unittest.TestCase):
         methods_cpt = {'gamma': 'Robertson',
                        'vs': 'Robertson',
                        'OCR': 'Mayne',
-                       'radius': 150}
+                       'radius': 26}
         output = join(dirname(__file__), 'unit_testing_files/results')
         plots = True
         with open(file_properties) as properties:
