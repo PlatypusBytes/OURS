@@ -821,16 +821,15 @@ class CPT:
         y_label = "Depth [m]"
 
         # set the color list
-        #colormap = plt.cm.gist_ncar
-        #colors = [colormap(i) for i in np.linspace(0, 0.9, nb_plots)]
-        #plt.gca().set_prop_cycle(cycler('color', colors))
+        colormap = plt.cm.gist_ncar
+        colors = [colormap(i) for i in np.linspace(0, 0.9, nb_plots)]
+        plt.gca().set_prop_cycle(cycler('color', colors))
         plt.close()  # close all previous figures
         fig, ax = plt.subplots(1, nb_plots, figsize=(20, 6))
 
         # plot for each y_value
         for i in range(nb_plots):
-            #plt.subplot(1, nb_plots, i + 1)
-            ax[i].plot(x_data[i].tolist(), y_data.tolist(), label=l_name[i])
+            ax[i].plot(list(x_data[i]), list(y_data), label=l_name[i])
 
             # plt.title(title)
             ax[i].set_xlabel(x_label[i], fontsize=12)
