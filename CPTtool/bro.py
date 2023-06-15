@@ -132,8 +132,7 @@ def change_to_floats(data):
     :param data: pandas dataframe
     :return: pandas dataframe
     """
-    for col in float_columns:
-        data[col] = data[col].astype(float)
+    data[float_columns] = data[float_columns].apply(pd.to_numeric)
     return data
 
 
@@ -201,7 +200,7 @@ def read_cpt_from_gpkg(polygon, fn):
             if determine_if_all_data_is_available(temporary_cpt_dict):
                 temporary_cpt_dict['dataframe'] = change_to_floats(temporary_cpt_dict['dataframe'])
                 # replace np.nan with None
-                temporary_cpt_dict['dataframe'] = temporary_cpt_dict['dataframe'].replace({np.nan: None})
+                #temporary_cpt_dict['dataframe'] = temporary_cpt_dict['dataframe'].replace({np.nan: None})
                 cpts_results.append(temporary_cpt_dict)
     return cpts_results
 
