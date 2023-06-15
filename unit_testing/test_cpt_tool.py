@@ -167,11 +167,14 @@ class TestCptTool(unittest.TestCase):
                          None, None, None, None, None, None, None, None, None, 'CPT000000018803', 82840.1, 443459.9,
                          -0.01, 'NAP', 'maaiveld', 'IMBRO/A', 'NEN5140', '2005-05-20', 0.0]
 
+
+
         # assert if only the columns are read which should be read,
         # assert if the values in the first row of the dataframe are correct
         for idx, column in enumerate(dataframe.columns.values):
             self.assertEqual(column, target_columns[idx])
-
+            # replace all nan values with None in np array
+            dataframe = dataframe.replace({np.nan: None})
             if isinstance(target_values[idx], str):
                 self.assertTrue(dataframe.values[0][idx], target_values[idx])
             elif target_values[idx] is None:

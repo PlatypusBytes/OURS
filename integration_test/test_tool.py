@@ -11,13 +11,13 @@ class FunctionalTests(unittest.TestCase):
     def setUp(self):
 
         # reference results
-        self.data_ref = [r'./integration_test/results_REF_0.json',
-                         r'./integration_test/results_REF_1.json',
-                         r'./integration_test/results_REF_2.json']
+        self.data_ref = ['results_REF_0.json',
+                         'results_REF_1.json',
+                         'results_REF_2.json']
         # reference results Robertson
-        self.data_ref_rob = [r'./integration_test/results_REF_rob_0.json',
-                             r'./integration_test/results_REF_rob_1.json',
-                             r'./integration_test/results_REF_rob_2.json']
+        self.data_ref_rob = ['results_REF_rob_0.json',
+                             'results_REF_rob_1.json',
+                             'results_REF_rob_2.json']
 
         # settings
         self.settings = {"minimum_length": 5,  # minimum length of CPT
@@ -48,14 +48,20 @@ class FunctionalTests(unittest.TestCase):
         props = cpt_tool.read_json(file_props)
         file_methods = join(dirname(__file__), r'../integration_test/inputs/methods.json')
         methods = cpt_tool.define_methods(file_methods)
+        # change the bro cpt folder to absolute path
+        props["BRO_data"] = join(dirname(__file__), "..", props["BRO_data"])
         cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
+
         # for the points of analysis
-        for i, fil in enumerate(self.data_ref):
+        for i, fil in enumerate(self.data_ref_rob):
+            # change folder to absolute path
+            fil = join("D:\ours\integration_test", fil)
             data_ref = read_file(fil)
 
-            # read results
-            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
+            # read results from absolute path
+
+            with open(join(dirname(__file__), r'./results/results_' + str(i) + '.json'), 'r') as f:
                 data = json.load(f)
                 f.close()
 
@@ -68,16 +74,23 @@ class FunctionalTests(unittest.TestCase):
     def test_xml_robertson(self):
         # test the xml BRO reader
         # run xml
-        props = cpt_tool.read_json(r'./integration_test/inputs/input_xml.json')
-        methods = cpt_tool.define_methods(r'./integration_test/inputs/methods_robertson.json')
+        file_props = join(dirname(__file__), r'../integration_test/inputs/input_xml.json')
+        props = cpt_tool.read_json(file_props)
+        file_methods = join(dirname(__file__), r'../integration_test/inputs/methods_robertson.json')
+        methods = cpt_tool.define_methods(file_methods)
+        # change the bro cpt folder to absolute path
+        props["BRO_data"] = join(dirname(__file__), "..", props["BRO_data"])
         cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref_rob):
+            # change folder to absolute path
+            fil = join("D:\ours\integration_test", fil)
             data_ref = read_file(fil)
 
-            # read results
-            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
+            # read results from absolute path
+
+            with open(join(dirname(__file__), r'./results/results_' + str(i) + '.json'), 'r') as f:
                 data = json.load(f)
                 f.close()
 
