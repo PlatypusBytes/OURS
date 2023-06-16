@@ -11,5 +11,5 @@
    "Source_y":["442209"],
    "Receiver_x":["137680"],
    "Receiver_y":["442220"],
-   "BRO_data": "../bro/test_cpt_tool/brocptvolledigeset.gpkg"
+   "BRO_data": "./bro/test_v2_0_1.gpkg"
 }

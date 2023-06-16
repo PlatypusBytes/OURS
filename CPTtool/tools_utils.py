@@ -120,7 +120,7 @@ def interpolation(data_cpt, coordinates, power=1):
     for i, at in enumerate(attributes):
         interp = inv_dist.InverseDistance(nb_points=len(data_cpt), pwr=power, default_cov=attibutes_cov[i])
         # create interpolation object
-        interp.interpolate(coords, np.array(data_training[i]), depth_points, depth)
+        interp.interpolate(coords, data_training[i], depth_points, depth)
         # predict
         interp.predict(np.array(c_out).reshape(1, 2))
         # assign to result

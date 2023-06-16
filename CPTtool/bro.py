@@ -17,6 +17,7 @@ import pandas as pd
 import pyproj
 from rtree import index
 from shapely.geometry import shape, Point
+import numpy as np
 
 req_columns = ["penetrationLength", "coneResistance", "localFriction", "frictionRatio"]
 columns_gpkg = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
@@ -32,6 +33,18 @@ columns_gpkg = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
                 'frictionRatio', 'id', 'location_x', 'location_y', 'offset_z',
                 'vertical_datum', 'local_reference', 'quality_class',
                 'cpt_standard', 'research_report_date', 'predrilled_z']
+float_columns = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
+                'corrected_cone_resistance',
+                'net_cone_resistance', 'magnetic_field_strength_x', 'magnetic_field_strength_y',
+                'magnetic_field_strength_z',
+                'magnetic_field_strength_total', 'electrical_conductivity', 'inclination_ew',
+                'inclination_ns',
+                'inclination_x', 'inclination_y', 'inclinationResultant',
+                'magnetic_inclination',
+                'magnetic_declination', 'localFriction',
+                'pore_ratio', 'temperature', "porePressureU1", "porePressureU2", "porePressureU3",
+                'frictionRatio', 'predrilled_z', 'offset_z']
+
 
 
 def query_equals_according_to_length(keys):
@@ -51,52 +64,58 @@ def query_equals_according_to_length(keys):
 
 def construct_query(cpt_keys):
     """
-    Function that creates query to retrieve all data from cpt_cone_penetration_test_result,
+    Function that creates query to retrieve all data from cone_penetration_test_result,
     cpt_cone_penetrometer_survey and cpt_geotechnical_survey tables
     :param cpt_keys: List of ids of the cpts
     :return: str
     """
-    selected_columns = "SELECT distinct cpt_cone_penetration_test_result.penetration_length,\
-                               cpt_cone_penetration_test_result.depth,\
-                               cpt_cone_penetration_test_result.elapsed_time,\
-                               cpt_cone_penetration_test_result.cone_resistance,\
-                               cpt_cone_penetration_test_result.corrected_cone_resistance,\
-                               cpt_cone_penetration_test_result.net_cone_resistance,\
-                               cpt_cone_penetration_test_result.magnetic_field_strength_x,\
-                               cpt_cone_penetration_test_result.magnetic_field_strength_y,\
-                               cpt_cone_penetration_test_result.magnetic_field_strength_z,\
-                               cpt_cone_penetration_test_result.magnetic_field_strength_total,\
-                               cpt_cone_penetration_test_result.electrical_conductivity,\
-                               cpt_cone_penetration_test_result.inclination_ew,\
-                               cpt_cone_penetration_test_result.inclination_ns,\
-                               cpt_cone_penetration_test_result.inclination_x,\
-                               cpt_cone_penetration_test_result.inclination_y,\
-                               cpt_cone_penetration_test_result.inclination_resultant,\
-                               cpt_cone_penetration_test_result.magnetic_inclination,\
-                               cpt_cone_penetration_test_result.magnetic_declination,\
-                               cpt_cone_penetration_test_result.local_friction,\
-                               cpt_cone_penetration_test_result.pore_ratio,\
-                               cpt_cone_penetration_test_result.temperature,\
-                               cpt_cone_penetration_test_result.pore_pressure_u1,\
-                               cpt_cone_penetration_test_result.pore_pressure_u2,\
-                               cpt_cone_penetration_test_result.pore_pressure_u3,\
-                               cpt_cone_penetration_test_result.friction_ratio,\
-                               cpt_geotechnical_survey.bro_id,\
-                               cpt_geotechnical_survey.x_or_lon,\
-                               cpt_geotechnical_survey.y_or_lat,\
-                               cpt_geotechnical_survey.offset,\
-                               cpt_geotechnical_survey.vertical_datum,\
-                               cpt_geotechnical_survey.local_vert_ref_point,\
-                               cpt_geotechnical_survey.quality_regime,\
-                               cpt_geotechnical_survey.cpt_standard,\
-                               cpt_geotechnical_survey.research_report_date,\
-                               cpt_cone_penetrometer_survey.predrilled_depth \
-                        FROM cpt_geotechnical_survey \
-                            join cpt_cone_penetration_test_result on cpt_cone_penetration_test_result.cone_penetration_test_id = cpt_geotechnical_survey.geotechnical_survey_id \
-                            join cpt_cone_penetrometer_survey on cpt_cone_penetrometer_survey.cone_penetrometer_survey_id = cpt_geotechnical_survey.geotechnical_survey_id "
-    where_clause = f"WHERE cpt_geotechnical_survey.geotechnical_survey_id "
-    in_clause = query_equals_according_to_length(cpt_keys)
-    return selected_columns + where_clause + in_clause
+
+    selected_columns = "SELECT distinct cone_penetration_test_result.penetration_length,\
+                               cone_penetration_test_result.depth,\
+                               cone_penetration_test_result.elapsed_time,\
+                               cone_penetration_test_result.cone_resistance,\
+                               cone_penetration_test_result.corrected_cone_resistance,\
+                               cone_penetration_test_result.net_cone_resistance,\
+                               cone_penetration_test_result.magnetic_field_strength_x,\
+                               cone_penetration_test_result.magnetic_field_strength_y,\
+                               cone_penetration_test_result.magnetic_field_strength_z,\
+                               cone_penetration_test_result.magnetic_field_strength_total,\
+                               cone_penetration_test_result.electrical_conductivity,\
+                               cone_penetration_test_result.inclination_ew,\
+                               cone_penetration_test_result.inclination_ns,\
+                               cone_penetration_test_result.inclination_x,\
+                               cone_penetration_test_result.inclination_y,\
+                               cone_penetration_test_result.inclination_resultant,\
+                               cone_penetration_test_result.magnetic_inclination,\
+                               cone_penetration_test_result.magnetic_declination,\
+                               cone_penetration_test_result.local_friction,\
+                               cone_penetration_test_result.pore_ratio,\
+                               cone_penetration_test_result.temperature,\
+                               cone_penetration_test_result.pore_pressure_u1,\
+                               cone_penetration_test_result.pore_pressure_u2,\
+                               cone_penetration_test_result.pore_pressure_u3,\
+                               cone_penetration_test_result.friction_ratio,\
+                               geotechnical_cpt_survey.bro_id,\
+                               bro_point.x_or_lon,\
+                               bro_point.y_or_lat,\
+                               delivered_vertical_position.offset,\
+                               delivered_vertical_position.vertical_datum,\
+                               delivered_vertical_position.local_vertical_reference_point,\
+                               geotechnical_cpt_survey.quality_regime,\
+                               geotechnical_cpt_survey.cpt_standard,\
+                               geotechnical_cpt_survey.research_report_date,\
+                               trajectory.predrilled_depth \
+               FROM geotechnical_cpt_survey \
+                   join cone_penetration_test_result on cone_penetration_test_result.cone_penetration_test_fk = geotechnical_cpt_survey.geotechnical_cpt_survey_pk \
+                   join delivered_vertical_position on delivered_vertical_position.geotechnical_cpt_survey_fk = geotechnical_cpt_survey.geotechnical_cpt_survey_pk \
+                   join bro_point on bro_point.bro_location_fk = geotechnical_cpt_survey.geotechnical_cpt_survey_pk \
+                   join trajectory on trajectory.cone_penetrometer_survey_fk = geotechnical_cpt_survey.geotechnical_cpt_survey_pk "
+    where_clause = f"WHERE geotechnical_cpt_survey.geotechnical_cpt_survey_pk "
+    if len(cpt_keys) >= 8:
+        in_clause = query_equals_according_to_length(cpt_keys)
+        return selected_columns + where_clause + in_clause
+    else:
+        return [selected_columns + where_clause + f" = {int(i)} " for i in cpt_keys]
 
 
 def construct_query_cone_surface_quotient(cpt_keys):
@@ -106,9 +125,19 @@ def construct_query_cone_surface_quotient(cpt_keys):
     :return: str
     """
     return f"select bro_id, cone_surface_quotient  \
-                FROM cpt_geotechnical_survey \
-                join cpt_cone_penetrometer on cpt_cone_penetrometer.cone_penetrometer_id = cpt_geotechnical_survey.geotechnical_survey_id  \
-                WHERE cpt_cone_penetrometer.cone_penetrometer_id " + query_equals_according_to_length(cpt_keys)
+                FROM geotechnical_cpt_survey \
+                join cone_penetrometer on cone_penetrometer.cone_penetrometer_survey_fk = geotechnical_cpt_survey.geotechnical_cpt_survey_pk  \
+                WHERE cone_penetrometer.cone_penetrometer_survey_fk " + query_equals_according_to_length(cpt_keys)
+
+
+def change_to_floats(data):
+    """
+    Function that changes all data to floats
+    :param data: pandas dataframe
+    :return: pandas dataframe
+    """
+    data[float_columns] = data[float_columns].apply(pd.to_numeric)
+    return data
 
 
 def determine_if_all_data_is_available(data):
@@ -148,13 +177,27 @@ def read_cpt_from_gpkg(polygon, fn):
         conn = sqlite3.connect(fn)
         cursor = conn.cursor()
         # get the keys of the database using the bro_ids found in the intersection
-        query = "SELECT geotechnical_survey_id FROM cpt_geotechnical_survey WHERE cpt_geotechnical_survey.bro_id"
+        query = "SELECT geotechnical_cpt_survey_pk FROM geotechnical_cpt_survey WHERE geotechnical_cpt_survey.bro_id"
         cursor.execute(query + query_equals_according_to_length(bro_ids.bro_id))
         returned_ids = cursor.fetchall()
         returned_ids = [int(id[0]) for id in returned_ids]
         query = construct_query(returned_ids)
-        cursor.execute(query)
-        results = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
+        # check type of query
+        if isinstance(query, list):
+            results = []
+            for q in query:
+                cursor.execute(q)
+                c = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
+                if not(c.empty):
+                    results.append(c)
+            # check if results is not empty
+            if len(results) > 0:
+                results = pd.concat(results)
+            else:
+                return []
+        else:
+            cursor.execute(query)
+            results = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
         cursor.execute(construct_query_cone_surface_quotient(returned_ids))
         cone_surface_quotient = pd.DataFrame(cursor.fetchall(), columns=['id', 'a'])
         column_names_per_cpt = ['id', 'location_x', 'location_y']
@@ -162,7 +205,7 @@ def read_cpt_from_gpkg(polygon, fn):
         cpts_results = []
         for name, group in grouped_results:
             temporary_cpt_dict = dict(zip(column_names_per_cpt, name))
-            temporary_cpt_dict['offset_z'] = list(group['offset_z'].fillna(0))[0]
+            temporary_cpt_dict['offset_z'] = float(list(group['offset_z'].fillna(0))[0])
             temporary_cpt_dict['vertical_datum'] = list(group['vertical_datum'])[0]
             temporary_cpt_dict['local_reference'] = list(group['local_reference'])[0]
             temporary_cpt_dict['quality_class'] = list(group['quality_class'])[0]
@@ -173,6 +216,9 @@ def read_cpt_from_gpkg(polygon, fn):
             cpt_group.sort_values(['penetrationLength', 'depth'], inplace=True)
             temporary_cpt_dict['dataframe'] = cpt_group
             if determine_if_all_data_is_available(temporary_cpt_dict):
+                temporary_cpt_dict['dataframe'] = change_to_floats(temporary_cpt_dict['dataframe'])
+                # replace np.nan with None
+                #temporary_cpt_dict['dataframe'] = temporary_cpt_dict['dataframe'].replace({np.nan: None})
                 cpts_results.append(temporary_cpt_dict)
     return cpts_results
 
@@ -185,7 +231,7 @@ def create_index_if_it_does_not_exist(fn):
     cursor = conn.cursor()
     # get the keys of the database using the bro_ids found in the intersection
     logging.warning("Checking if index exists, if index does not exist it should be created, this may take a while...")
-    cursor.execute("create index if not exists ix_test on cpt_cone_penetration_test_result(cone_penetration_test_id);")
+    cursor.execute("create index if not exists ix_test on cone_penetration_test_result(cone_penetration_test_fk);")
 
 
 def read_bro_gpkg_version(parameters):
@@ -248,7 +294,8 @@ def read_bro_gpkg_version(parameters):
 
 
 if __name__ == "__main__":
-    input = {"BRO_data": "./bro/brocptvolledigeset.gpkg", "Source_x": 82860, "Source_y": 443400,
+    test_db = join(dirname(__file__), '../bro/test_v2_0_1.gpkg')
+    input = {"BRO_data": test_db, "Source_x": 82860, "Source_y": 443400,
              "Radius": 1200}
     cpts = read_bro_gpkg_version(input)
     print(cpts.keys())

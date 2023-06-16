@@ -4,6 +4,7 @@ import json
 import os
 import unittest
 import shutil
+from os.path import join, dirname
 
 
 class FunctionalTests(unittest.TestCase):
@@ -42,9 +43,13 @@ class FunctionalTests(unittest.TestCase):
     def test_xml(self):
         # test the xml BRO reader
         # run xml
-        props = cpt_tool.read_json(r'./integration_test/inputs/input_xml.json')
-        methods = cpt_tool.define_methods(r'./integration_test/inputs/methods.json')
+        # set global paths
+        file_props = join(dirname(__file__), r'../integration_test/inputs/input_xml.json')
+        props = cpt_tool.read_json(file_props)
+        file_methods = join(dirname(__file__), r'../integration_test/inputs/methods.json')
+        methods = cpt_tool.define_methods(file_methods)
         cpt_tool.analysis(props, methods, self.settings, "./results", False)
+
 
         # for the points of analysis
         for i, fil in enumerate(self.data_ref):
@@ -90,6 +95,15 @@ class FunctionalTests(unittest.TestCase):
             else:
                 if isinstance(expected[key], (int, float)):
                     self.assertAlmostEqual(expected[key], actual[key])
+                elif isinstance(expected[key], list):
+                    # check length
+                    self.assertEqual(len(expected[key]), len(actual[key]))
+                    # if elements are string
+                    if all(isinstance(n, str) for n in expected[key]):
+                        for i in range(len(expected[key])):
+                            self.assertTrue(expected[key][i] == actual[key][i])
+                    else:
+                        self.assertTrue(all(np.isclose(expected[key], actual[key], rtol=1e-10)))
                 elif all(isinstance(n, str) for n in expected[key]):
                     # if elements are string
                     self.assertAlmostEqual(expected[key], actual[key])
