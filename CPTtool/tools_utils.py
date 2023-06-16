@@ -40,10 +40,6 @@ def n_iter(n, qt, friction_nb, sigma_eff, sigma_tot, Pa):
     F[F <= 0.1] = 0.1
     Q[Q >= 1000.] = 1000.
     F[F >= 10.] = 10.
-    # all values should be of type float
-    Q = Q.astype(float)
-    F = F.astype(float)
-    sigma_eff = sigma_eff.astype(float)
 
     IC = ((3.47 - np.log10(Q)) ** 2. + (np.log10(F) + 1.22) ** 2.) ** 0.5
 

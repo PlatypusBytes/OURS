@@ -193,8 +193,7 @@ class CPT:
         # parse friction
         self.friction = local_friction * unit_converter
         self.friction[self.friction <= 0] = 0.
-        # set float
-        self.friction = self.friction
+
         # parser friction number
         self.friction_nbr = friction_ratio
         self.friction_nbr[self.friction_nbr <= 0] = 0.
@@ -715,7 +714,6 @@ class CPT:
         # qt = qc + u2 * (1 - a)
         self.qt = self.tip + self.water * (1. - self.a)
         self.qt[self.qt <= 0] = 0
-        self.qt = self.qt
         return
 
     def filter(self, lithologies=[""], key="G0", value=0):

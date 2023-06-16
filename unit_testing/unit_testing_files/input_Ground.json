@@ -7,9 +7,9 @@
    "LowFreq":"1",
    "HighFreq":"63",
    "CalcType":"1",
-   "Source_x":["82900"],
-   "Source_y":["443351"],
-   "Receiver_x":["83000"],
-   "Receiver_y":["443400"],
-   "BRO_data": "./bro/test_v2_0_1.gpkg"
+   "Source_x":["117467"],
+   "Source_y":["464666"],
+   "Receiver_x":["117470"],
+   "Receiver_y":["464670"],
+   "BRO_data": "./bro/test_cpt_tool/test_sub_points_2.gpkg"
 }

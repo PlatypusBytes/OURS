@@ -43,7 +43,7 @@ float_columns = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
                 'magnetic_inclination',
                 'magnetic_declination', 'localFriction',
                 'pore_ratio', 'temperature', "porePressureU1", "porePressureU2", "porePressureU3",
-                'frictionRatio', 'predrilled_z']
+                'frictionRatio', 'predrilled_z', 'offset_z']
 
 
 
@@ -69,6 +69,7 @@ def construct_query(cpt_keys):
     :param cpt_keys: List of ids of the cpts
     :return: str
     """
+
     selected_columns = "SELECT distinct cone_penetration_test_result.penetration_length,\
                                cone_penetration_test_result.depth,\
                                cone_penetration_test_result.elapsed_time,\
@@ -110,8 +111,11 @@ def construct_query(cpt_keys):
                    join bro_point on bro_point.bro_location_fk = geotechnical_cpt_survey.geotechnical_cpt_survey_pk \
                    join trajectory on trajectory.cone_penetrometer_survey_fk = geotechnical_cpt_survey.geotechnical_cpt_survey_pk "
     where_clause = f"WHERE geotechnical_cpt_survey.geotechnical_cpt_survey_pk "
-    in_clause = query_equals_according_to_length(cpt_keys)
-    return selected_columns + where_clause + in_clause
+    if len(cpt_keys) >= 8:
+        in_clause = query_equals_according_to_length(cpt_keys)
+        return selected_columns + where_clause + in_clause
+    else:
+        return [selected_columns + where_clause + f" = {int(i)} " for i in cpt_keys]
 
 
 def construct_query_cone_surface_quotient(cpt_keys):
@@ -178,8 +182,18 @@ def read_cpt_from_gpkg(polygon, fn):
         returned_ids = cursor.fetchall()
         returned_ids = [int(id[0]) for id in returned_ids]
         query = construct_query(returned_ids)
-        cursor.execute(query)
-        results = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
+        # check type of query
+        if isinstance(query, list):
+            results = []
+            for q in query:
+                cursor.execute(q)
+                c = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
+                if not(c.empty):
+                    results.append(c)
+            results = pd.concat(results)
+        else:
+            cursor.execute(query)
+            results = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
         cursor.execute(construct_query_cone_surface_quotient(returned_ids))
         cone_surface_quotient = pd.DataFrame(cursor.fetchall(), columns=['id', 'a'])
         column_names_per_cpt = ['id', 'location_x', 'location_y']
@@ -187,7 +201,7 @@ def read_cpt_from_gpkg(polygon, fn):
         cpts_results = []
         for name, group in grouped_results:
             temporary_cpt_dict = dict(zip(column_names_per_cpt, name))
-            temporary_cpt_dict['offset_z'] = list(group['offset_z'].fillna(0))[0]
+            temporary_cpt_dict['offset_z'] = float(list(group['offset_z'].fillna(0))[0])
             temporary_cpt_dict['vertical_datum'] = list(group['vertical_datum'])[0]
             temporary_cpt_dict['local_reference'] = list(group['local_reference'])[0]
             temporary_cpt_dict['quality_class'] = list(group['quality_class'])[0]
