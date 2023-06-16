@@ -190,7 +190,11 @@ def read_cpt_from_gpkg(polygon, fn):
                 c = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
                 if not(c.empty):
                     results.append(c)
-            results = pd.concat(results)
+            # check if results is not empty
+            if len(results) > 0:
+                results = pd.concat(results)
+            else:
+                return []
         else:
             cursor.execute(query)
             results = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
