@@ -163,9 +163,11 @@ class TestCptTool(unittest.TestCase):
                           'vertical_datum', 'local_reference', 'quality_class',
                           'cpt_standard', 'research_report_date', 'predrilled_z']
 
-        target_values = [0.0, 0.0, 7.0, 0.0, None, None, None, None, None, None, None, None, None, None, None, 0.0,
-                         None, None, None, None, None, None, None, None, None, 'CPT000000018803', 82840.1, 443459.9,
-                         -0.01, 'NAP', 'maaiveld', 'IMBRO/A', 'NEN5140', '2005-05-20', 0.0]
+        target_values = [1.105, 1.105, 242.800, 0.160, None, None, None, None, None, None, None,
+                         -1.000, 0.000, None, None, 1.000, None, None, 0.001, None, None, None, 0.001, None, np.nan,
+                         "CPT000000000207", 117889.2, 464565.1, -1.328, "NAP", "maaiveld", "IMBRO/A", "NEN5140",
+                         "2007-04-25", 1.1,
+                         ]
 
 
 
@@ -179,8 +181,8 @@ class TestCptTool(unittest.TestCase):
                 self.assertTrue(dataframe.values[0][idx], target_values[idx])
             elif target_values[idx] is None:
                 self.assertIsNone(dataframe.values[0][idx])
-            elif np.isnan(target_values[idx]):
-                self.assertTrue(np.isnan(dataframe.values[0][idx]))
+            elif str(target_values[idx]) == 'nan':
+                self.assertTrue(str(target_values[idx]) == 'nan')
             elif isinstance(target_values[idx], (int, float)):
                 self.assertAlmostEqual(float(dataframe.values[0][idx]), target_values[idx], places=3)
             else:
