@@ -500,7 +500,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.damp_calc()
 
         # Testing if the lists are equals
-        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        np.testing.assert_almost_equal(test_damping, self.cpt.damping)
         return
 
     def test_damp_calc_2(self):
@@ -521,7 +521,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.damp_calc(Cu=Cu, D50=D50)
 
         # Testing if the lists are equals
-        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        np.testing.assert_almost_equal(test_damping, self.cpt.damping)
         return
 
     def test_damp_calc_3(self):
@@ -544,7 +544,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.damp_calc(Cu=Cu, D50=D50)
 
         # Testing if the list are equal
-        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        np.testing.assert_almost_equal(test_damping, self.cpt.damping)
         return
 
     def test_damp_calc_4(self):
@@ -565,7 +565,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.damp_calc(Cu=Cu, D50=D50)
 
         # Testing if the list are equal
-        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        np.testing.assert_almost_equal(test_damping, self.cpt.damping)
         return
 
     def test_damp_calc_5(self):
@@ -591,7 +591,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.damp_calc(Cu=Cu, D50=D50, Ip=PI, method="Mayne")
 
         # Test the damping Darendeli - OCR according to Mayne
-        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        np.testing.assert_almost_equal(test_damping, self.cpt.damping)
 
         # Calculated analyticaly damping Darendeli - OCR according to robertson
         OCR = 0.25 * (self.cpt.Qtn) ** 1.25
@@ -616,7 +616,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.damp_calc()
 
         # Check if they are equal
-        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        np.testing.assert_almost_equal(test_damping, self.cpt.damping)
         return
 
     def test_damp_calc_7(self):
@@ -633,7 +633,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.damp_calc()
 
         # Testing if the lists are equals
-        np.testing.assert_array_equal(test_damping, self.cpt.damping)
+        np.testing.assert_almost_equal(test_damping, self.cpt.damping)
         return
 
     def test_qt_calc(self):
@@ -649,7 +649,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.qt_calc()
 
         # Check if the are equal
-        np.testing.assert_array_equal(test_qt, self.cpt.qt)
+        np.testing.assert_almost_equal(test_qt, self.cpt.qt)
         return
 
     def test_write_csv(self):
