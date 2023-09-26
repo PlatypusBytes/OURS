@@ -222,18 +222,6 @@ def read_cpt_from_gpkg(polygon, fn):
                 cpts_results.append(temporary_cpt_dict)
     return cpts_results
 
-
-def create_index_if_it_does_not_exist(fn):
-    """
-    Function that creates index on the geopackage dataframe to improve performance
-    """
-    conn = sqlite3.connect(fn)
-    cursor = conn.cursor()
-    # get the keys of the database using the bro_ids found in the intersection
-    logging.warning("Checking if index exists, if index does not exist it should be created, this may take a while...")
-    cursor.execute("create index if not exists ix_test on cone_penetration_test_result(cone_penetration_test_fk);")
-
-
 def read_bro_gpkg_version(parameters):
     """Main function to read the BRO database.
 
@@ -251,8 +239,6 @@ def read_bro_gpkg_version(parameters):
     if not exists(fn):
         print("Cannot open provided BRO data file: {}".format(fn))
         sys.exit(2)
-
-    create_index_if_it_does_not_exist(fn)
 
     # Polygon grouping method:
     # Find all geomorphological polygons intersecting the circle with midpoint
@@ -296,6 +282,6 @@ def read_bro_gpkg_version(parameters):
 if __name__ == "__main__":
     test_db = join(dirname(__file__), '../bro/test_v2_0_1.gpkg')
     input = {"BRO_data": test_db, "Source_x": 82860, "Source_y": 443400,
-             "Radius": 1200}
+             "Radius": 120}
     cpts = read_bro_gpkg_version(input)
     print(cpts.keys())
