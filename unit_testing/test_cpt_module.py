@@ -278,7 +278,7 @@ class TestCptModule(unittest.TestCase):
         self.cpt.depth = np.arange(0, 2, 0.1)
         self.cpt.gamma = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15]
         self.cpt.depth_to_reference = np.zeros(20)
-        self.pwp = 0
+        self.cpt.pwp = 0
         self.cpt.stress_calc()
 
         # The target list with the desired output

@@ -2,7 +2,6 @@ from os.path import join, dirname
 import unittest
 from CPTtool import bro
 from BroReader import read_BRO
-import math
 import pandas as pd
 import numpy as np
 
