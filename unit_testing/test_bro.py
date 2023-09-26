@@ -1,6 +1,7 @@
 # unit test for the bro
 from os.path import join, dirname
 from rtree import index
+from shapely.geometry import Point
 import unittest
 from CPTtool import bro
 
@@ -17,6 +18,56 @@ class TestGeoMorph(unittest.TestCase):
         self.assertTrue(isinstance(geomorphs_nl[0][0], type("")))
         self.assertTrue(isinstance(geomorphs_nl[0][1], type({})))
         self.assertEqual(len(geomorphs_nl), 74121)
+
+
+
+class TestBufferedRail(unittest.TestCase):
+    """Test reading of the GeoMorph index."""
+
+    def test_index_read(self):
+        file_idx = join('bro', 'buff_track')
+        file_index = index.Index(file_idx)  # created by ../shapefiles/gen_buffer_track_idx.py
+
+        list_points = [[129125.375, 471341],
+                    [128894, 470670],
+                    [127877, 464928],
+                    [131565.523, 471481.448], # False
+                    [88712.725, 451981.087],
+                    [88548, 452886], # False
+                    [93744.64, 460834.3], # False
+                    [82825.863, 455054.337]
+                    ]
+
+        result = []
+        for point in list_points:
+            point = Point(point[0], point[1])  # Create a shapely Point
+            possible_matches = list(file_index.intersection(point.bounds))
+            if len(possible_matches) == 0:
+                result.append(False)
+            else:
+                result.append(True)
+
+        self.assertTrue(result, [True, True, True, False, True, False, False, True])
+
+    def test_function(self):
+        file_idx = join('bro', 'buff_track')
+
+        list_points = [[129125.375, 471341],
+                    [128894, 470670],
+                    [127877, 464928],
+                    [131565.523, 471481.448], # False
+                    [88712.725, 451981.087],
+                    [88548, 452886], # False
+                    [93744.64, 460834.3], # False
+                    [82825.863, 455054.337]
+                    ]
+
+        result = []
+        for point in list_points:
+            point = [point[0], point[1]]  # Create a shapely Point
+            result.append(bro.is_cpt_inside_buffered_track(file_idx, point))
+
+        self.assertTrue(result, [True, True, True, False, True, False, False, True])
 
 
 class TestBroDb(unittest.TestCase):

@@ -17,7 +17,6 @@ import pandas as pd
 import pyproj
 from rtree import index
 from shapely.geometry import shape, Point
-import numpy as np
 
 req_columns = ["penetrationLength", "coneResistance", "localFriction", "frictionRatio"]
 columns_gpkg = ['penetrationLength', 'depth', 'elapsed_time', 'coneResistance',
@@ -144,7 +143,7 @@ def determine_if_all_data_is_available(data):
     """
     Determine if all data is available in dataframe
     :param data: pandas dataframe
-    :return:
+    :return: boolean if all data is available
     """
     avail_columns = data.get("dataframe").columns
     data_excluding_dataframe = {x: data[x] for x in data if x not in {"dataframe", "a"}}
@@ -156,12 +155,29 @@ def determine_if_all_data_is_available(data):
         return False
     return True
 
+def is_cpt_inside_buffered_track(file_track, point):
+    """
+    Check if a CPT in inside the buffered track geometry
 
-def read_cpt_from_gpkg(polygon, fn):
+    :param file_track: rtree index file location
+    :param point: list of x and y coordinates
+    :return: boolean if cpt is inside buffered track
+    """
+    idx = index.Index(file_track, interleaved=True)
+
+    point = Point(point[0], point[1])
+    possible_matches = list(idx.intersection(point.bounds))
+    if len(possible_matches) == 0:
+        return False
+    else:
+        return True
+
+def read_cpt_from_gpkg(polygon, fn, file_track):
     """
     Function that retrieves cpts that intercept a polygon
     :param polygon: shapely polygon
     :param fn: geopackage file location
+    :param file_track: rtree index file location
     :return: list of dictionaries containing all cpt data
     """
     cpts_results = []
@@ -212,6 +228,7 @@ def read_cpt_from_gpkg(polygon, fn):
             temporary_cpt_dict['cpt_standard'] = list(group['cpt_standard'])[0]
             temporary_cpt_dict['predrilled_z'] = list(group['predrilled_z'].fillna(0))[0]
             temporary_cpt_dict['a'] = cone_surface_quotient[cone_surface_quotient['id'] == name[0]]['a'].values[0]
+            temporary_cpt_dict['in_track'] = is_cpt_inside_buffered_track(file_track, [temporary_cpt_dict['location_x'], temporary_cpt_dict['location_y']])
             cpt_group = group.copy(deep=True)
             cpt_group.sort_values(['penetrationLength', 'depth'], inplace=True)
             temporary_cpt_dict['dataframe'] = cpt_group
@@ -246,8 +263,12 @@ def read_bro_gpkg_version(parameters):
     # inside those polygons.
     out["polygons"] = {}
     total_cpts = 0
+    # rtree geomorpholog map
     file_idx = join(dirname(fn), 'geomorph')
     idx_fn = join(dirname(fn), 'geomorph.idx')
+    # rtree buffered track
+    file_track_idx = join(dirname(fn), 'buff_track')
+
     if not exists(idx_fn):
         print("Cannot open provided geomorphological data files (.dat & .idx): {}".format(idx_fn))
         sys.exit(2)
@@ -261,7 +282,7 @@ def read_bro_gpkg_version(parameters):
             poly = poly.buffer(0.01)  # buffering reconstructs the geometry, often fixing invalidity
         if circle.intersects(poly):
             perc = circle.intersection(poly).area / circle.area
-            cpts = read_cpt_from_gpkg(poly, fn)
+            cpts = read_cpt_from_gpkg(poly, fn, file_track_idx)
             total_cpts = total_cpts + len(cpts)
             if gm_code in out["polygons"]:
                 out["polygons"][gm_code]["data"].extend(cpts)
@@ -272,7 +293,7 @@ def read_bro_gpkg_version(parameters):
     # Find CPT indexes in circle
     # create circle as polygon
     circle_polygon = Point(x, y).buffer(r, resolution=32)
-    circle_cpts = read_cpt_from_gpkg(circle_polygon, fn)
+    circle_cpts = read_cpt_from_gpkg(circle_polygon, fn, file_track_idx)
     logging.warning("Found {} CPTs in circle.".format(len(circle_cpts)))
     out["circle"] = {"data": circle_cpts}
 
