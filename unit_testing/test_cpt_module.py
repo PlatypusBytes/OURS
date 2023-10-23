@@ -48,6 +48,104 @@ class TestCptModule(unittest.TestCase):
         # check if corrected depth is calculated correctly
         np.testing.assert_array_almost_equal(corrected_depth, target_depth)
 
+    def test_cpt_in_track_with_predrill_1(self):
+        # make a cpt with the pre_drill option
+        d = {'penetrationLength': [0, 1.5, 2.0, 2.5],
+             'coneResistance': [4, 1, 2, 3],
+             'localFriction': [11, 4, 5, 6],
+             'frictionRatio': [0.11, 0.22, 0.33, 0.44],
+             }
+
+        # set up the upper part of the dictionary
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    'predrilled_z': 1.5,
+                    'a': 0.8,
+                    'in_track': True,
+                    "dataframe": df}
+
+        # Run the function to be checked
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
+
+        # Check the equality with the pre-given lists
+        np.testing.assert_array_equal(self.cpt.tip, [1000, 2000, 3000])
+        np.testing.assert_array_equal(self.cpt.friction, [4000, 5000, 6000])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.22, 0.33, 0.44])
+        np.testing.assert_array_equal(self.cpt.depth, [0, 0.5, 1])
+        np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 0.5, 1]])
+        np.testing.assert_array_equal(self.cpt.water, [0., 0., 0.])
+        np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
+        np.testing.assert_equal(self.cpt.name, "cpt_name")
+        np.testing.assert_equal(self.cpt.a, 0.8)
+
+    def test_cpt_in_track_with_predrill_2(self):
+        # make a cpt with the pre_drill option
+        d = {'penetrationLength': [0, 1.5, 2.0, 2.5],
+             'coneResistance': [4, 1, 2, 3],
+             'localFriction': [11, 4, 5, 6],
+             'frictionRatio': [0.11, 0.22, 0.33, 0.44],
+             }
+
+        # set up the upper part of the dictionary
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    'predrilled_z': 1.4,
+                    'a': 0.8,
+                    'in_track': True,
+                    "dataframe": df}
+
+        # Run the function to be checked
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
+
+        # Check the equality with the pre-given lists
+        np.testing.assert_array_equal(self.cpt.tip, [1000, 2000, 3000])
+        np.testing.assert_array_equal(self.cpt.friction, [4000, 5000, 6000])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.22, 0.33, 0.44])
+        np.testing.assert_array_equal(self.cpt.depth, [0, 0.5, 1])
+        np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 0.5, 1]])
+        np.testing.assert_array_equal(self.cpt.water, [0., 0., 0.])
+        np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
+        np.testing.assert_equal(self.cpt.name, "cpt_name")
+        np.testing.assert_equal(self.cpt.a, 0.8)
+
+    def test_cpt_in_track_with_no_predrill(self):
+        # make a cpt with the pre_drill option
+        d = {'penetrationLength': [0, 1.5, 2.0, 2.5],
+             'coneResistance': [4, 1, 2, 3],
+             'localFriction': [11, 4, 5, 6],
+             'frictionRatio': [0.11, 0.22, 0.33, 0.44],
+             }
+
+        # set up the upper part of the dictionary
+        df = pd.DataFrame(data=d)
+        cpt_data = {"id": "cpt_name",
+                    "location_x": 111,
+                    "location_y": 222,
+                    "offset_z": 0.5,
+                    'predrilled_z': 0,
+                    'a': 0.8,
+                    'in_track': True,
+                    "dataframe": df}
+
+        # Run the function to be checked
+        self.cpt.parse_bro(cpt_data, minimum_length=0.01, minimum_samples=1)
+
+        # Check the equality with the pre-given lists
+        np.testing.assert_array_equal(self.cpt.tip, [4000, 1000, 2000, 3000])
+        np.testing.assert_array_equal(self.cpt.friction, [11000, 4000, 5000, 6000])
+        np.testing.assert_array_equal(self.cpt.friction_nbr, [0.11, 0.22, 0.33, 0.44])
+        np.testing.assert_array_equal(self.cpt.depth, [0, 1.5, 2.0, 2.5])
+        np.testing.assert_array_equal(self.cpt.depth_to_reference, [cpt_data["offset_z"] - i for i in [0, 1.5, 2.0, 2.5]])
+        np.testing.assert_array_equal(self.cpt.water, [0., 0., 0., 0.])
+        np.testing.assert_array_equal(self.cpt.coord, [cpt_data["location_x"], cpt_data["location_y"]])
+        np.testing.assert_equal(self.cpt.name, "cpt_name")
+        np.testing.assert_equal(self.cpt.a, 0.8)
 
     def test__pre_drill_with_predrill(self):
 
