@@ -66,6 +66,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
                     'a': 0.8,
+                    'in_track': False,
                     "dataframe": df}
 
         # Run the function to be checked
@@ -102,6 +103,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
                     'a': 0.73,
+                    'in_track': False,
                     "dataframe": df}
 
         # define the pore pressure array before the predrilling
@@ -143,6 +145,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
                     'a': 0.73,
+                    'in_track': False,
                     "dataframe": df}
 
         # run the fuction
@@ -168,6 +171,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
                     'a': 0.6,
+                    'in_track': False,
                     "dataframe": df}
 
         # run the fuction
@@ -193,6 +197,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
                     'a': 0.5,
+                    'in_track': False,
                     "dataframe": df}
 
         # run the fuction
@@ -218,6 +223,7 @@ class TestCptModule(unittest.TestCase):
                     "offset_z": 0.5,
                     'predrilled_z': 1.5,
                     'a': 0.5,
+                    'in_track': False,
                     "dataframe": df}
 
         # run the fuction
