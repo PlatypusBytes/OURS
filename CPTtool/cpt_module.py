@@ -266,6 +266,8 @@ class CPT:
             if index >= 0:
                 # delete rows from cpt dataframe
                 cpt_BRO["dataframe"] = cpt_BRO["dataframe"].loc[index:]
+                depth = self.get_depth_from_bro(cpt_BRO)
+                depth.sort()
 
         if float(cpt_BRO['predrilled_z']) != 0. and not cpt_BRO['in_track']:
             # if there is pre-dill add the average values to the pre-dill
