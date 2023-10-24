@@ -1,0 +1,15 @@
+{
+  "Name": "test",
+  "MaxCalcDist": "25.0",
+  "MaxCalcDepth": "30.0",
+  "MinLayerThickness": "0.5",
+  "SpectrumType": "1",
+  "LowFreq": "1",
+  "HighFreq": "63",
+  "CalcType": "1",
+  "Source_x": ["85920", "85922"],
+  "Source_y": ["441591", "441586"],
+  "Receiver_x": ["85920", "85922"],
+  "Receiver_y": ["441591", "441586"],
+  "BRO_data": "./bro/test_v2_0_1.gpkg"
+}
