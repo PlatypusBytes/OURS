@@ -14,6 +14,9 @@ class FunctionalTests(unittest.TestCase):
         self.data_ref = [r'./integration_test/results_REF_0.json',
                          r'./integration_test/results_REF_1.json',
                          r'./integration_test/results_REF_2.json']
+        # reference results track
+        self.data_ref_track = [r'./integration_test/results_track_0.json',
+                               r'./integration_test/results_track_1.json']
         # reference results Robertson
         self.data_ref_rob = [r'./integration_test/results_REF_rob_0.json',
                              r'./integration_test/results_REF_rob_1.json',
@@ -38,7 +41,7 @@ class FunctionalTests(unittest.TestCase):
                          "value": 1e6,  # lower value to filter
                          "power": 1,  # power for IDW interpolation
                          }
-        return
+
 
     def test_xml(self):
         # test the xml BRO reader
@@ -50,21 +53,42 @@ class FunctionalTests(unittest.TestCase):
         methods = cpt_tool.define_methods(file_methods)
         cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
-
         # for the points of analysis
-        for i, fil in enumerate(self.data_ref):
+        for i, fil in enumerate(self.data_ref_track):
             data_ref = read_file(fil)
 
             # read results
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
-                f.close()
 
             # compare dics
             for k in range(len(data_ref)):
                 self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
 
-        return
+
+    def test_xml_track(self):
+        # test the xml BRO reader
+        # run xml
+        # set global paths
+        file_props = join(dirname(__file__), r'../integration_test/inputs/input_xml_track.json')
+        props = cpt_tool.read_json(file_props)
+        file_methods = join(dirname(__file__), r'../integration_test/inputs/methods.json')
+        methods = cpt_tool.define_methods(file_methods)
+        methods["radius"] = 1
+        cpt_tool.analysis(props, methods, self.settings, "./results", False)
+
+        # for the points of analysis
+        for i, fil in enumerate(self.data_ref_track):
+            data_ref = read_file(fil)
+
+            # read results
+            with open(r'./results/results_' + str(i) + '.json', 'r') as f:
+                data = json.load(f)
+
+            # compare dics
+            for k in range(len(data_ref)):
+                self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
+
 
     def test_xml_robertson(self):
         # test the xml BRO reader
@@ -80,12 +104,11 @@ class FunctionalTests(unittest.TestCase):
             # read results
             with open(r'./results/results_' + str(i) + '.json', 'r') as f:
                 data = json.load(f)
-                f.close()
 
             # compare dics
             for k in range(len(data_ref)):
                 self.assert_dict_almost_equal(data_ref[k], sort_dicts(data['scenarios'])[k])
-        return
+
 
     def assert_dict_almost_equal(self, expected, actual):
 
@@ -109,13 +132,11 @@ class FunctionalTests(unittest.TestCase):
                     self.assertAlmostEqual(expected[key], actual[key])
                 else:
                     self.assertTrue(all(np.isclose(expected[key], actual[key], rtol=1e-10)))
-        return
 
     def tearDown(self):
         # delete folders
         if os.path.exists('./results'):
             shutil.rmtree('./results')
-        return
 
 
 def sort_dicts(dic_ref):
