@@ -54,7 +54,7 @@ class FunctionalTests(unittest.TestCase):
         cpt_tool.analysis(props, methods, self.settings, "./results", False)
 
         # for the points of analysis
-        for i, fil in enumerate(self.data_ref_track):
+        for i, fil in enumerate(self.data_ref):
             data_ref = read_file(fil)
 
             # read results
