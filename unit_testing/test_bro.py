@@ -3,6 +3,8 @@ from os.path import join, dirname
 from rtree import index
 from shapely.geometry import Point
 import unittest
+import shutil
+import sqlite3
 from CPTtool import bro
 
 
@@ -95,6 +97,35 @@ class TestBroDb(unittest.TestCase):
         self.assertTrue(isinstance(cpts["polygons"][key]["perc"], float))
         self.assertTrue(100. >= cpts["polygons"][key]["perc"] > 0.)
 
+    def test_database_indexes_created(self):
+        # get absolute path to the test database
+        test_db = join(dirname(__file__), '../bro/test_v2_0_2_idx.gpkg')
+        test_db_new = join(dirname(__file__), '../bro/test_v2_0_2_idx_test.gpkg')
+        shutil.copyfile(test_db, test_db_new)
 
-if __name__ == '__main__':
-    unittest.main()
+
+        # check that indexes does not exist
+        check_query = "SELECT name FROM sqlite_master WHERE type='index' AND name='ix_test1'"
+        conn = sqlite3.connect(test_db_new, uri=True)
+        cursor = conn.cursor()
+        cursor.execute(check_query)
+        index_exists = cursor.fetchone() is not None
+        conn.close()
+
+        # check that indexes are created
+        self.assertFalse(index_exists)
+
+        # create indexes
+        bro.create_index_gpkg(test_db_new)
+        check_query = "SELECT name FROM sqlite_master WHERE type='index' AND name='ix_test1'"
+        conn = sqlite3.connect(test_db_new, uri=True)
+        cursor = conn.cursor()
+        cursor.execute(check_query)
+        index_exists = cursor.fetchone() is not None
+        conn.close()
+
+        self.assertTrue(index_exists)
+
+        import os
+        # remove the test database
+        os.remove(test_db_new)

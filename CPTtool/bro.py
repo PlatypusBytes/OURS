@@ -172,14 +172,44 @@ def is_cpt_inside_buffered_track(file_track, point):
     else:
         return True
 
+
+def create_index_gpkg(fn):
+    """
+    Function that creates indexes in the geopackage to accelerate the search
+
+    :param fn: geopackage file location
+    :return: None
+    """
+
+    # create indexes to accelerate the search
+    check_query = "SELECT name FROM sqlite_master WHERE type='index' AND name='ix_test1'"
+    conn = sqlite3.connect(fn)
+    cursor = conn.cursor()
+    cursor.execute(check_query)
+    index_exists = cursor.fetchone() is not None
+    if not index_exists:
+        print("Creating indexes in the geopackage to accelerate the search. This might take a while...")
+        query = ["create index if not exists ix_test1 on geotechnical_cpt_survey(geotechnical_cpt_survey_pk)",
+                 "create index if not exists ix_test2 on cone_penetration_test_result(cone_penetration_test_fk)"]
+        for q in query:
+            cursor.execute(q)
+        conn.commit()
+        conn.close()
+
+
 def read_cpt_from_gpkg(polygon, fn, file_track):
     """
     Function that retrieves cpts that intercept a polygon
+
     :param polygon: shapely polygon
     :param fn: geopackage file location
     :param file_track: rtree index file location
     :return: list of dictionaries containing all cpt data
     """
+
+    # create indexes in the geopackage to accelerate the search
+    create_index_gpkg(fn)
+
     cpts_results = []
     # transform the polygon from epsg:28992 to epsg:4258
     rd_p = pyproj.CRS('epsg:28992')
@@ -214,6 +244,7 @@ def read_cpt_from_gpkg(polygon, fn, file_track):
         else:
             cursor.execute(query)
             results = pd.DataFrame(cursor.fetchall(), columns=columns_gpkg)
+
         cursor.execute(construct_query_cone_surface_quotient(returned_ids))
         cone_surface_quotient = pd.DataFrame(cursor.fetchall(), columns=['id', 'a'])
         column_names_per_cpt = ['id', 'location_x', 'location_y']
@@ -237,6 +268,8 @@ def read_cpt_from_gpkg(polygon, fn, file_track):
                 # replace np.nan with None
                 #temporary_cpt_dict['dataframe'] = temporary_cpt_dict['dataframe'].replace({np.nan: None})
                 cpts_results.append(temporary_cpt_dict)
+
+        conn.close()
     return cpts_results
 
 def read_bro_gpkg_version(parameters):
