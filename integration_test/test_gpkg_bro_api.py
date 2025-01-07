@@ -16,8 +16,9 @@ class TestBroDb(unittest.TestCase):
         cpts = bro.read_bro_gpkg_version(input)
 
         # data bro_data.pickle was created with
-        ##  from BroReader import read_BRO
-        ##  c = read_BRO.read_cpts([input["Source_x"], input["Source_y"]], input["Radius"] * 0.001, interpret_cpt=False)
+        ## from BroReader import read_BRO
+        ## c = read_BRO.read_cpts([input["Source_x"], input["Source_y"]], input["Radius"] * 0.001, interpret_cpt=False)
+        ## c[0]['plot_settings'] = None
         ## with open("data_bro.pickle", "wb") as f:
         ##     pickle.dump(c, f)
 
