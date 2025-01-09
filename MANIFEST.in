@@ -1,3 +1,3 @@
 include CPTtool/shapefiles/*
-include bro/test_cpt_tool/*
-include bro/*
+exclude bro/*
+exclude bro/test_cpt_tool/*
