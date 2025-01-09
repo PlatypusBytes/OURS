@@ -9,7 +9,7 @@ import os
 import sys
 import json
 import warnings
-warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
+warnings.filterwarnings("ignore", category=np.exceptions.VisibleDeprecationWarning)
 # import OURS packages
 from CPTtool import robertson
 from CPTtool import inv_dist
